@@ -11,18 +11,17 @@ class SM64HackLocation(Location):
         self.event = code is None
 
 
-def location_names() -> List[str]:
+def location_names(data = Data()) -> List[str]:
     output: List[str] = []
-    for course, data in Data.locations.items():
+    for course, info in data.locations.items():
         
         if(course == "Other"):
             for itemId in range(5):
-                if data["Stars"][itemId]["exists"]:
+                if info["Stars"][itemId]["exists"]:
                     output.append(sm64hack_items[itemId])
-                    sm64hack_items[itemId]
             continue
         for star in range(7): #generates locations for each star in the level
-            if data["Stars"][star]["exists"]:
+            if info["Stars"][star]["exists"]:
                 output.append(f"{course} Star {star + 1}")
     
 

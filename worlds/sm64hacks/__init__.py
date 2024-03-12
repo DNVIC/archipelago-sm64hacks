@@ -20,16 +20,25 @@ class SM64HackWorld(World):
     options: SM64HackOptions
     settings: ClassVar[SM64HackSettings]
     topology_present = True
+    data: Data
 
     base_id = 40693
 
-    Data.import_json()
 
     item_name_to_id = {name: id for
                        id, name in enumerate(sm64hack_items, base_id)}
 
     location_name_to_id = {name: id for
                        id, name in enumerate(location_names(), base_id)}
+
+    def __init__(self,multiworld, player: int):
+        super().__init__(multiworld, player)
+        self.data = Data()
+        print(id(self.data))
+        
+    def generate_early(self):
+        self.data.import_json(self.options.json_file.value)
+
 
     def create_item(self, item: str) -> SM64HackItem:
         if item == "Star":
@@ -42,6 +51,9 @@ class SM64HackWorld(World):
         return SM64HackItem(event, ItemClassification.progression, None, self.player)
 
     def create_items(self) -> None:
+        
+        
+        
         # Add items to the Multiworld.
         # If there are two of the same item, the item has to be twice in the pool.
         # Which items are added to the pool may depend on player settings,
@@ -60,18 +72,18 @@ class SM64HackWorld(World):
         #        self.multiworld.itempool.append(item)
         
         #add stars
-        self.multiworld.itempool += [self.create_item("Star") for _ in range(star_count())]
+        self.multiworld.itempool += [self.create_item("Star") for _ in range(star_count(self.data))]
         if self.options.progressive_keys:
             for Key in range(2):
-                if Data.locations["Other"]["Stars"][Key]["exists"]:
+                if self.data.locations["Other"]["Stars"][Key]["exists"]:
                     self.multiworld.itempool += [self.create_item("Progressive Key")]
         else:
             for Key in range(2):
-                if Data.locations["Other"]["Stars"][Key]["exists"]:
+                if self.data.locations["Other"]["Stars"][Key]["exists"]:
                     self.multiworld.itempool += [self.create_item(sm64hack_items[Key])]
         
         for item in range(2,5):
-            if Data.locations["Other"]["Stars"][item]["exists"]:
+            if self.data.locations["Other"]["Stars"][item]["exists"]:
                 self.multiworld.itempool += [self.create_item(sm64hack_items[item])]
         #print("TEST" + str(len(self.multiworld.itempool)))
 
@@ -81,7 +93,7 @@ class SM64HackWorld(World):
         menu_region = Region("Menu", self.player, self.multiworld)
         self.multiworld.regions.append(menu_region)
 
-        for course, data in Data.locations.items():
+        for course, data in self.data.locations.items():
             course_region = Region(course, self.player, self.multiworld)
             
             if course != "Other":
@@ -94,12 +106,11 @@ class SM64HackWorld(World):
                     dict(filter(lambda location: location[0] in sm64hack_items, self.location_name_to_id.items())),
                     SM64HackLocation
                 )
-            
-            if course == "Course 15": #add Victory in bowser 3, even if it isn't in bowser 3.
                 course_region.add_locations(
                     dict({"Victory Location": None}),
                     SM64HackLocation
                 )
+                
             self.multiworld.regions.append(course_region)
             star_requirement = data.get("StarRequirement")
             if(not star_requirement):
@@ -114,7 +125,7 @@ class SM64HackWorld(World):
             star_requirement = requirement["StarRequirement"]
             if not star_requirement:
                 star_requirement = 0
-            if state.has("Star", self.player, star_requirement):
+            if state.has("Star", self.player, int(star_requirement)):
                 course_requirements = requirement["Requirements"]
                 if(not course_requirements):
                     return True
@@ -139,15 +150,33 @@ class SM64HackWorld(World):
     
     def set_rules(self) -> None:
         print(len(self.multiworld.regions.location_cache[1]))
-        for course in Data.locations:
+        for course in self.data.locations:
             if course == "Other":
                 for item in range(5):
-                    star_requirement = Data.locations[course]["Stars"][item].get("StarRequirement")
+                    if(not self.data.locations[course]["Stars"][item].get("exists")):
+                        add_rule(self.multiworld.get_location(sm64hack_items[item], self.player), lambda state: False) #prevents nonexistant stars from having items
+                        print(sm64hack_items[item])
+                        continue
+                    star_requirement = self.data.locations[course]["Stars"][item].get("StarRequirement")
                     if(star_requirement):
                         add_rule(self.multiworld.get_location(sm64hack_items[item], self.player),
                         lambda state, star_requirement = int(star_requirement): state.has("Star", self.player, star_requirement))
+                    star_conditional_requirements = self.data.locations[course]["Stars"][item].get("ConditionalRequirements")
+                    if star_conditional_requirements:
+                        add_rule(self.multiworld.get_location(sm64hack_items[item], self.player), 
+                        lambda state, star_conditional_requirements = star_conditional_requirements: self.check_conditional_requirements(state, star_conditional_requirements))
+                
+                
+                star_requirement = self.data.locations[course]["Stars"][6].get("StarRequirement")
+                star_conditional_requirements = self.data.locations[course]["Stars"][6].get("ConditionalRequirements")
+                if star_conditional_requirements:
+                    add_rule(self.multiworld.get_location("Victory Location", self.player), 
+                    lambda state, star_conditional_requirements = star_conditional_requirements: self.check_conditional_requirements(state, star_conditional_requirements))
+                if(star_requirement):
+                    add_rule(self.multiworld.get_location("Victory Location", self.player),
+                    lambda state, star_requirement = int(star_requirement): state.has("Star", self.player, star_requirement))
                 continue
-            course_requirements = Data.locations[course].get("Requirements")
+            course_requirements = self.data.locations[course].get("Requirements")
             if course_requirements:
                 if(self.options.progressive_keys):
                     for requirement in course_requirements:
@@ -160,18 +189,22 @@ class SM64HackWorld(World):
                 else:
                     add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
                     lambda state, course_requirements = course_requirements: state.has_all(course_requirements, self.player))
-            course_conditional_requirements = Data.locations[course].get("ConditionalRequirements")
+            course_conditional_requirements = self.data.locations[course].get("ConditionalRequirements")
             if course_conditional_requirements:
                 add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
                 lambda state, course_conditional_requirements = course_conditional_requirements: self.check_conditional_requirements(state, course_conditional_requirements))
                 
 
             for star in range(7):
-                star_requirement = Data.locations[course]["Stars"][star].get("StarRequirement")
+                if(not self.data.locations[course]["Stars"][star].get("exists")):
+                    add_rule(self.multiworld.get_location(f"{course} Star {star + 1}", self.player),
+                    lambda state: False) #prevents nonexistant stars from having items
+                    continue
+                star_requirement = self.data.locations[course]["Stars"][star].get("StarRequirement")
                 if(star_requirement):
                     add_rule(self.multiworld.get_location(f"{course} Star {star + 1}", self.player),
                     lambda state, star_requirement = int(star_requirement): state.has("Star", self.player, star_requirement))
-                other_requirements = Data.locations[course]["Stars"][star].get("Requirements")
+                other_requirements = self.data.locations[course]["Stars"][star].get("Requirements")
                 if(other_requirements):
                     for requirement in other_requirements:
                         if requirement == "Key 1" and self.options.progressive_keys:
@@ -183,9 +216,9 @@ class SM64HackWorld(World):
                         else:
                             add_rule(self.multiworld.get_location(f"{course} Star {star + 1}", self.player),
                             lambda state, requirement = requirement: state.has(requirement, self.player))
-                star_conditional_requirements = Data.locations[course]["Stars"][star].get("ConditionalRequirements")
+                star_conditional_requirements = self.data.locations[course]["Stars"][star].get("ConditionalRequirements")
                 if star_conditional_requirements:
-                    add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
+                    add_rule(self.multiworld.get_location(f"{course} Star {star + 1}", self.player), 
                     lambda state, star_conditional_requirements = star_conditional_requirements: self.check_conditional_requirements(state, star_conditional_requirements))
                 
     
