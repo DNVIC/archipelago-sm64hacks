@@ -18,7 +18,7 @@ def has_requirements_for_level_access(state: CollectionState, level_name: str, p
         return state.has(level_name, player)
 
     # Must have enough stars to purchase level
-    star_count = state.item_count("Star", player) + state.item_count("Bonus Star", player)
+    star_count = state.count("Star", player) + state.count("Bonus Star", player)
     if star_count < required_star_count:
         return False
 
@@ -35,17 +35,13 @@ def has_requirements_for_level_star(
         state: CollectionState, level: Overcooked2GenericLevel, stars: int, player: int) -> bool:
     assert 0 <= stars <= 3
 
-    # First ensure that previous stars are obtainable
-    if stars > 1:
-        if not has_requirements_for_level_star(state, level, stars-1, player):
-            return False
-
-    # Second, ensure that global requirements are met
+    # First, ensure that global requirements for this many stars are met.
+    # Lower numbers of stars are implied meetable if this level is meetable.
     if not meets_requirements(state, "*", stars, player):
         return False
 
-    # Finally, return success only if this level's requirements are met
-    return meets_requirements(state, level.shortname, stars, player)
+    # Then return success only if this level's requirements are met at all stars up through this one
+    return all(meets_requirements(state, level.shortname, s, player) for s in range(1, stars + 1))
 
 
 def meets_requirements(state: CollectionState, name: str, stars: int, player: int):
@@ -64,7 +60,7 @@ def meets_requirements(state: CollectionState, name: str, stars: int, player: in
 
     total: float = 0.0
     for (item_name, weight) in additive_reqs:
-        for _ in range(0, state.item_count(item_name, player)):
+        for _ in range(0, state.count(item_name, player)):
             total += weight
             if total >= 0.99:  # be nice to rounding errors :)
                 return True
@@ -421,6 +417,7 @@ level_logic = {
             },
         ),
         (  # 3-star
+            # Necessarily implies 2-star
             [  # Exclusive
                 "Progressive Dash",
                 "Spare Plate",

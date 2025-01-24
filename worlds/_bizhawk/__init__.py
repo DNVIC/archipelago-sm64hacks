@@ -9,10 +9,12 @@ import asyncio
 import base64
 import enum
 import json
-import typing
+import sys
+from typing import Any, Sequence
 
 
-BIZHAWK_SOCKET_PORT = 43055
+BIZHAWK_SOCKET_PORT_RANGE_START = 43055
+BIZHAWK_SOCKET_PORT_RANGE_SIZE = 5
 
 
 class ConnectionStatus(enum.IntEnum):
@@ -42,14 +44,16 @@ class SyncError(Exception):
 
 
 class BizHawkContext:
-    streams: typing.Optional[typing.Tuple[asyncio.StreamReader, asyncio.StreamWriter]]
+    streams: tuple[asyncio.StreamReader, asyncio.StreamWriter] | None
     connection_status: ConnectionStatus
     _lock: asyncio.Lock
+    _port: int | None
 
     def __init__(self) -> None:
         self.streams = None
         self.connection_status = ConnectionStatus.NOT_CONNECTED
         self._lock = asyncio.Lock()
+        self._port = None
 
     async def _send_message(self, message: str):
         async with self._lock:
@@ -86,15 +90,24 @@ class BizHawkContext:
 
 
 async def connect(ctx: BizHawkContext) -> bool:
-    """Attempts to establish a connection with the connector script. Returns True if successful."""
-    try:
-        ctx.streams = await asyncio.open_connection("localhost", BIZHAWK_SOCKET_PORT)
-        ctx.connection_status = ConnectionStatus.TENTATIVE
-        return True
-    except (TimeoutError, ConnectionRefusedError):
-        ctx.streams = None
-        ctx.connection_status = ConnectionStatus.NOT_CONNECTED
-        return False
+    """Attempts to establish a connection with a connector script. Returns True if successful."""
+    rotation_steps = 0 if ctx._port is None else ctx._port - BIZHAWK_SOCKET_PORT_RANGE_START
+    ports = [*range(BIZHAWK_SOCKET_PORT_RANGE_START, BIZHAWK_SOCKET_PORT_RANGE_START + BIZHAWK_SOCKET_PORT_RANGE_SIZE)]
+    ports = ports[rotation_steps:] + ports[:rotation_steps]
+
+    for port in ports:
+        try:
+            ctx.streams = await asyncio.open_connection("127.0.0.1", port)
+            ctx.connection_status = ConnectionStatus.TENTATIVE
+            ctx._port = port
+            return True
+        except (TimeoutError, ConnectionRefusedError):
+            continue
+
+    # No ports worked
+    ctx.streams = None
+    ctx.connection_status = ConnectionStatus.NOT_CONNECTED
+    return False
 
 
 def disconnect(ctx: BizHawkContext) -> None:
@@ -109,11 +122,24 @@ async def get_script_version(ctx: BizHawkContext) -> int:
     return int(await ctx._send_message("VERSION"))
 
 
-async def send_requests(ctx: BizHawkContext, req_list: typing.List[typing.Dict[str, typing.Any]]) -> typing.List[typing.Dict[str, typing.Any]]:
+async def send_requests(ctx: BizHawkContext, req_list: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Sends a list of requests to the BizHawk connector and returns their responses.
 
     It's likely you want to use the wrapper functions instead of this."""
-    return json.loads(await ctx._send_message(json.dumps(req_list)))
+    responses = json.loads(await ctx._send_message(json.dumps(req_list)))
+    errors: list[ConnectorError] = []
+
+    for response in responses:
+        if response["type"] == "ERROR":
+            errors.append(ConnectorError(response["err"]))
+
+    if errors:
+        if sys.version_info >= (3, 11, 0):
+            raise ExceptionGroup("Connector script returned errors", errors)  # noqa
+        else:
+            raise errors[0]
+
+    return responses
 
 
 async def ping(ctx: BizHawkContext) -> None:
@@ -125,11 +151,21 @@ async def ping(ctx: BizHawkContext) -> None:
 
 
 async def get_hash(ctx: BizHawkContext) -> str:
-    """Gets the system name for the currently loaded ROM"""
+    """Gets the hash value of the currently loaded ROM"""
     res = (await send_requests(ctx, [{"type": "HASH"}]))[0]
 
     if res["type"] != "HASH_RESPONSE":
         raise SyncError(f"Expected response of type HASH_RESPONSE but got {res['type']}")
+
+    return res["value"]
+
+
+async def get_memory_size(ctx: BizHawkContext, domain: str) -> int:
+    """Gets the size in bytes of the specified memory domain"""
+    res = (await send_requests(ctx, [{"type": "MEMORY_SIZE", "domain": domain}]))[0]
+
+    if res["type"] != "MEMORY_SIZE_RESPONSE":
+        raise SyncError(f"Expected response of type MEMORY_SIZE_RESPONSE but got {res['type']}")
 
     return res["value"]
 
@@ -144,7 +180,7 @@ async def get_system(ctx: BizHawkContext) -> str:
     return res["value"]
 
 
-async def get_cores(ctx: BizHawkContext) -> typing.Dict[str, str]:
+async def get_cores(ctx: BizHawkContext) -> dict[str, str]:
     """Gets the preferred cores for systems with multiple cores. Only systems with multiple available cores have
     entries."""
     res = (await send_requests(ctx, [{"type": "PREFERRED_CORES"}]))[0]
@@ -197,8 +233,8 @@ async def set_message_interval(ctx: BizHawkContext, value: float) -> None:
         raise SyncError(f"Expected response of type SET_MESSAGE_INTERVAL_RESPONSE but got {res['type']}")
 
 
-async def guarded_read(ctx: BizHawkContext, read_list: typing.List[typing.Tuple[int, int, str]],
-                       guard_list: typing.List[typing.Tuple[int, typing.Iterable[int], str]]) -> typing.Optional[typing.List[bytes]]:
+async def guarded_read(ctx: BizHawkContext, read_list: Sequence[tuple[int, int, str]],
+                       guard_list: Sequence[tuple[int, Sequence[int], str]]) -> list[bytes] | None:
     """Reads an array of bytes at 1 or more addresses if and only if every byte in guard_list matches its expected
     value.
 
@@ -226,21 +262,21 @@ async def guarded_read(ctx: BizHawkContext, read_list: typing.List[typing.Tuple[
         "domain": domain
     } for address, size, domain in read_list])
 
-    ret: typing.List[bytes] = []
+    ret: list[bytes] = []
     for item in res:
         if item["type"] == "GUARD_RESPONSE":
             if not item["value"]:
                 return None
         else:
             if item["type"] != "READ_RESPONSE":
-                raise SyncError(f"Expected response of type READ_RESPONSE or GUARD_RESPONSE but got {res['type']}")
+                raise SyncError(f"Expected response of type READ_RESPONSE or GUARD_RESPONSE but got {item['type']}")
 
             ret.append(base64.b64decode(item["value"]))
 
     return ret
 
 
-async def read(ctx: BizHawkContext, read_list: typing.List[typing.Tuple[int, int, str]]) -> typing.List[bytes]:
+async def read(ctx: BizHawkContext, read_list: Sequence[tuple[int, int, str]]) -> list[bytes]:
     """Reads data at 1 or more addresses.
 
     Items in `read_list` should be organized `(address, size, domain)` where
@@ -252,8 +288,8 @@ async def read(ctx: BizHawkContext, read_list: typing.List[typing.Tuple[int, int
     return await guarded_read(ctx, read_list, [])
 
 
-async def guarded_write(ctx: BizHawkContext, write_list: typing.List[typing.Tuple[int, typing.Iterable[int], str]],
-                        guard_list: typing.List[typing.Tuple[int, typing.Iterable[int], str]]) -> bool:
+async def guarded_write(ctx: BizHawkContext, write_list: Sequence[tuple[int, Sequence[int], str]],
+                        guard_list: Sequence[tuple[int, Sequence[int], str]]) -> bool:
     """Writes data to 1 or more addresses if and only if every byte in guard_list matches its expected value.
 
     Items in `write_list` should be organized `(address, value, domain)` where
@@ -285,12 +321,12 @@ async def guarded_write(ctx: BizHawkContext, write_list: typing.List[typing.Tupl
                 return False
         else:
             if item["type"] != "WRITE_RESPONSE":
-                raise SyncError(f"Expected response of type WRITE_RESPONSE or GUARD_RESPONSE but got {res['type']}")
+                raise SyncError(f"Expected response of type WRITE_RESPONSE or GUARD_RESPONSE but got {item['type']}")
 
     return True
 
 
-async def write(ctx: BizHawkContext, write_list: typing.List[typing.Tuple[int, typing.Iterable[int], str]]) -> None:
+async def write(ctx: BizHawkContext, write_list: Sequence[tuple[int, Sequence[int], str]]) -> None:
     """Writes data to 1 or more addresses.
 
     Items in write_list should be organized `(address, value, domain)` where

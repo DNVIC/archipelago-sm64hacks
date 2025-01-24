@@ -11,14 +11,14 @@ class TestBase(unittest.TestCase):
             multiworld = setup_solo_multiworld(world_type)
             locations = Counter(location.name for location in multiworld.get_locations())
             if locations:
-                self.assertLessEqual(locations.most_common(1)[0][1], 1,
-                                     f"{world_type.game} has duplicate of location name {locations.most_common(1)}")
+                self.assertEqual(locations.most_common(1)[0][1], 1,
+                                 f"{world_type.game} has duplicate of location name {locations.most_common(1)}")
 
             locations = Counter(location.address for location in multiworld.get_locations()
                                 if type(location.address) is int)
             if locations:
-                self.assertLessEqual(locations.most_common(1)[0][1], 1,
-                                     f"{world_type.game} has duplicate of location ID {locations.most_common(1)}")
+                self.assertEqual(locations.most_common(1)[0][1], 1,
+                                 f"{world_type.game} has duplicate of location ID {locations.most_common(1)}")
 
     def test_locations_in_datapackage(self):
         """Tests that created locations not filled before fill starts exist in the datapackage."""
@@ -40,6 +40,12 @@ class TestBase(unittest.TestCase):
                 location_count = len(multiworld.get_locations())
 
                 call_all(multiworld, "set_rules")
+                self.assertEqual(region_count, len(multiworld.get_regions()),
+                                 f"{game_name} modified region count during rule creation")
+                self.assertEqual(location_count, len(multiworld.get_locations()),
+                                 f"{game_name} modified locations count during rule creation")
+
+                call_all(multiworld, "connect_entrances")
                 self.assertEqual(region_count, len(multiworld.get_regions()),
                                  f"{game_name} modified region count during rule creation")
                 self.assertEqual(location_count, len(multiworld.get_locations()),
