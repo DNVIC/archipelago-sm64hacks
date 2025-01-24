@@ -20,9 +20,9 @@ def location_names(data = Data()) -> List[str]:
                 if info["Stars"][itemId]["exists"]:
                     output.append(sm64hack_items[itemId])
             continue
-        for star in range(7): #generates locations for each star in the level
-            if info["Stars"][star]["exists"]:
-                output.append(f"{course} Star {star + 1}")
+        for star in range(7): #generates locations for each possible star in each level
+            output.append(f"{course} Star {star + 1}")
+        output.append(f"{course} Cannon")
     
 
     return output

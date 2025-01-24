@@ -2,7 +2,41 @@ from typing import List
 import json
 
 
-sm64hack_items: List[str] = ["Key 1", "Key 2", "Wing Cap", "Vanish Cap", "Metal Cap", "Star", "Progressive Key"] 
+sm64hack_items: List[str] = [
+    "Key 1", 
+    "Key 2", 
+    "Wing Cap", 
+    "Vanish Cap", 
+    "Metal Cap", 
+    "Star", 
+    "Progressive Key", 
+    "Course 1 Cannon",
+    "Course 2 Cannon",
+    "Course 3 Cannon",
+    "Course 4 Cannon",
+    "Course 5 Cannon",
+    "Course 6 Cannon",
+    "Course 7 Cannon",
+    "Course 8 Cannon",
+    "Course 9 Cannon",
+    "Course 10 Cannon",
+    "Course 11 Cannon",
+    "Course 12 Cannon",
+    "Course 13 Cannon",
+    "Course 14 Cannon",
+    "Course 15 Cannon",
+    "Bowser 1 Cannon",
+    "Bowser 2 Cannon",
+    "Bowser 3 Cannon",
+    "Slide Cannon",
+    "Secret 1 Cannon",
+    "Secret 2 Cannon",
+    "Secret 3 Cannon",
+    "Metal Cap Cannon",
+    "Wing Cap Cannon",
+    "Vanish Cap Cannon",
+    "Overworld Cannon"
+    ] 
 
 c1 = [{"exists": True}, {"exists": True}, {"exists": True}, {"exists": True}, {"exists": True}, {"exists": True, "Requirements": ["Wing Cap"]}, {"exists": True, "Requirements": ["Vanish Cap"]}]
 c2 = [{"exists": True}, {"exists": True}, {"exists": True}, {"exists": True}, {"exists": True}, {"exists": True, "Requirements": ["Wing Cap"]}, {"exists": True, "Requirements": ["Vanish Cap"]}]
