@@ -1,6 +1,6 @@
 My little archipelago world for (most) Super Mario 64 Romhacks. Shuffles keys, stars, caps, and cannons throughout the worlds
 
-How to use this world:
+## How to use this world:
 
 First, create a json file using this website, using a .jsml file. You can get a .jsml file for a hack by loading up a hack in PJ64/Mupen64/Retroarch, opening [stardisplay](https://github.com/aglab2/SM64StarDisplay) (or [the stardisplay client](https://github.com/DNVIC/Archipelago-StarDisplay))
 
