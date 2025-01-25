@@ -4,7 +4,7 @@ How to use this world:
 To do later
 
 ## Anticipated Questions
-Q: Why does this exist?
+Q: Why does this exist? Why not just use the regular randomizer?
 
 A: I wanted to add sm64 romhacks to archipelago, since the "normal" world only supports vanilla sm64 (and even then, it's the PC port, while I prefer playing stuff via emulator)
 
@@ -37,6 +37,7 @@ A: Feel free to pitch ideas to me, but reminder that this world is meant to be g
 * SheepSquared - Testing
 * KingToad74EE - Testing
 * Agyroth - Testing
+* A bunch of archipelago worlds I ended up referencing when making this.
 
 Below this is the main archipelago readme, felt like i should keep it since this repo has basically their whole code, but its unchanged so dont read it if you only care about repo-specific things
 
