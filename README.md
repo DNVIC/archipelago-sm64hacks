@@ -1,3 +1,47 @@
+My little archipelago world for (most) Super Mario 64 Romhacks. Shuffles keys, stars, caps, and cannons throughout the worlds
+
+How to use this world:
+To do later
+
+## Anticipated Questions
+Q: Why does this exist? Why not just use the regular randomizer?
+
+A: I wanted to add sm64 romhacks to archipelago, since the "normal" world only supports vanilla sm64 (and even then, it's the PC port, while I prefer playing stuff via emulator)
+
+Q: You said (most) romhacks, what hacks aren't supported?
+
+A: Basically any decomp hack will probably not be supported since this uses MIPS assembly code to change certain parts of the game to read from File 2 (easiest way to implement it, sm64's code is a mess), and when you recompile a rom from source and edit basically anything, the compiler will shift all of these pointers the assembly code relies upon, which causes the assembly code to fail completely. 
+
+Q: Why doesn't this use BizHawk, and instead this weird thing called "star display"?
+
+A: Laziness, and practicality. On the part of laziness, all of the memory reading and writing is already implemented into the base code of stardisplay, which is useful since it means giving items to and from the game is super easy since all the hard work is done for me. On the part of practicality, no one in the SM64 romhack community uses BizHawk (for various reasons), and a bunch of hacks use the More Objects Patch which afaik breaks on all the graphics plugins in BizHawk. Whereas StarDisplay supports a bunch of emulators, basically all the main ones people in the community use. 
+
+Q: Why aren't objects randomized?
+
+A: The current "best" object randomizer for SM64 hacks is like 6 years old and super janky. If you want an object randomizer, put your rom through [this](https://github.com/aGlitch/Mario-64-Randomizer) after you apply the ASM patch. I'm planning on making a better one as part of this project, but it's not done yet.
+
+Q: Can you randomize X?
+
+A: Feel free to pitch ideas to me, but reminder that this world is meant to be generalized to most hacks. A lot of stuff either requires significant amounts of custom code (difficult to do without potentially infringing on already-existing custom code in current hacks), or is difficult to implement in a system that allows it to work for more than one hack.
+
+## Future ideas (in order of greatest to least priority)
+* Better object and music shuffler
+* Custom items for specific hacks (Badges in sr7/7.5/8, sm64oot, probably others im not thinking of)
+* Client with Mac/Linux support (StarDisplay does not currently support Mac/Linux) (could probably fork the relevant parts of stardisplay and recompile as a purely console application)
+* Ideas I have for dynamic locations that could be interesting
+* Some sort of way to know what items you're sending to other people in-game
+* Presets for major/important hacks (probably every megapack hack)
+
+## Credits
+* aglab2 - Making StarDisplay (the main program that the client is built off of)
+* Shin3 - Helping a lot with the ASM code
+* SheepSquared - Testing
+* KingToad74EE - Testing
+* Agyroth - Testing
+* A bunch of archipelago worlds I ended up referencing when making this.
+
+Below this is the main archipelago readme, felt like i should keep it since this repo has basically their whole code, but its unchanged so dont read it if you only care about repo-specific things
+
 # [Archipelago](https://archipelago.gg) ![Discord Shield](https://discordapp.com/api/guilds/731205301247803413/widget.png?style=shield) | [Install](https://github.com/ArchipelagoMW/Archipelago/releases)
 
 Archipelago provides a generic framework for developing multiworld capability for game randomizers. In all cases,
