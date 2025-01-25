@@ -23,11 +23,11 @@ A: Feel free to pitch ideas to me, but reminder that this world is meant to be g
 * Presets for major/important hacks (probably every megapack hack)
 
 ## Credits
-aglab2 - Making StarDisplay (the main program that the client is built off of)
-Shin3 - Helping a lot with the ASM code
-SheepSquared - Testing
-KingToad74EE - Testing
-Agyroth - Testing
+* aglab2 - Making StarDisplay (the main program that the client is built off of)
+* Shin3 - Helping a lot with the ASM code
+* SheepSquared - Testing
+* KingToad74EE - Testing
+* Agyroth - Testing
 
 Below this is the main archipelago readme, felt like i should keep it since this repo has basically their whole code, but its unchanged so dont read it if you only care about repo-specific things
 
