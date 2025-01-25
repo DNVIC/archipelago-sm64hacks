@@ -25,6 +25,7 @@ Q: Can you randomize X?
 A: Feel free to pitch ideas to me, but reminder that this world is meant to be generalized to most hacks. A lot of stuff either requires significant amounts of custom code (difficult to do without potentially infringing on already-existing custom code in current hacks), or is difficult to implement in a system that allows it to work for more than one hack.
 
 ## Future ideas (in approximate order of greatest to least priority)
+* Support for hacks with 8 stars per level
 * Better object and music shuffler
 * Custom items for specific hacks (Badges in sr7/7.5/8, sm64oot, probably others im not thinking of)
 * Client with Mac/Linux support (StarDisplay does not currently support Mac/Linux) (could probably fork the relevant parts of stardisplay and recompile as a purely console application)
