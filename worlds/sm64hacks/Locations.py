@@ -17,12 +17,29 @@ def location_names(data = Data()) -> List[str]:
         
         if(course == "Other"):
             for itemId in range(5):
-                if info["Stars"][itemId]["exists"]:
-                    output.append(sm64hack_items[itemId])
+                output.append(sm64hack_items[itemId])
             continue
         for star in range(7): #generates locations for each possible star in each level
             output.append(f"{course} Star {star + 1}")
         output.append(f"{course} Cannon")
+    
+
+    return output
+
+def location_names_that_exist (data = Data()) -> List[str]:
+    output: List[str] = []
+    for course, info in data.locations.items():
+        
+        if(course == "Other"):
+            for itemId in range(5):
+                if info["Stars"][itemId].get("exists"):
+                    output.append(sm64hack_items[itemId])
+            continue
+        for star in range(7): #generates locations for each possible star in each level
+            if info["Stars"][star].get("exists"):
+                output.append(f"{course} Star {star + 1}")
+        if(info["Cannon"].get("exists")):
+            output.append(f"{course} Cannon")
     
 
     return output

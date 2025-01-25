@@ -4,7 +4,7 @@ from worlds.generic.Rules import add_rule
 from typing import Union, Tuple, List, Dict, Set, ClassVar
 from .Options import SM64HackOptions
 from .Items import SM64HackItem, star_count
-from .Locations import SM64HackLocation, location_names
+from .Locations import SM64HackLocation, location_names, location_names_that_exist
 from .Data import sm64hack_items, Data
 from BaseClasses import Region, Location, Entrance, Item, ItemClassification
 
@@ -13,6 +13,8 @@ class SM64HackSettings(settings.Group):
     #class RomFile(settings.HackRomPath):
     #    """Insert help text for host.yaml here"""
     #rom_file: RomFile = RomFile("SM64Hack.z64")
+
+
 
 class SM64HackWorld(World):
     game = "SM64 Romhack"
@@ -30,6 +32,7 @@ class SM64HackWorld(World):
 
     location_name_to_id = {name: id for
                        id, name in enumerate(location_names(), base_id)}
+    
 
     def __init__(self,multiworld, player: int):
         super().__init__(multiworld, player)
@@ -43,6 +46,8 @@ class SM64HackWorld(World):
     def create_item(self, item: str) -> SM64HackItem:
         if item == "Star":
             classification = ItemClassification.progression_skip_balancing
+        elif item == "Location does not exist":
+            classification = ItemClassification.filler
         else:
             classification = ItemClassification.progression
         return SM64HackItem(item, classification, self.item_name_to_id[item], self.player)
@@ -95,23 +100,26 @@ class SM64HackWorld(World):
                 self.multiworld.itempool += [self.create_item(sm64hack_items[item])]
         #print("TEST" + str(len(self.multiworld.itempool)))
 
-        
 
     def create_regions(self) -> None:
         menu_region = Region("Menu", self.player, self.multiworld)
         self.multiworld.regions.append(menu_region)
+        existing_location_names = location_names_that_exist(self.data)
+        location_names_that_exist_to_id = dict(filter(lambda location: location[0] in existing_location_names, self.location_name_to_id.items()))
+        print(location_names_that_exist_to_id)
 
         for course, data in self.data.locations.items():
             course_region = Region(course, self.player, self.multiworld)
-            
+            print(course)
             if course != "Other":
+                
                 course_region.add_locations(
-                    dict(filter(lambda location: location[0].startswith(course + ' '), self.location_name_to_id.items())),
+                    dict(filter(lambda location: location[0].startswith(course + ' '), location_names_that_exist_to_id.items())),
                     SM64HackLocation
                 )
             else:
                 course_region.add_locations(
-                    dict(filter(lambda location: location[0] in sm64hack_items, self.location_name_to_id.items())),
+                    dict(filter(lambda location: location[0] in sm64hack_items[:5], location_names_that_exist_to_id.items())),
                     SM64HackLocation
                 )
                 course_region.add_locations(
@@ -158,11 +166,12 @@ class SM64HackWorld(World):
     
     def set_rules(self) -> None:
         print(len(self.multiworld.regions.location_cache[1]))
+        for location in self.multiworld.regions.location_cache[1]:
+            print(location)
         for course in self.data.locations:
             if course == "Other":
                 for item in range(5):
                     if(not self.data.locations[course]["Stars"][item].get("exists")):
-                        add_rule(self.multiworld.get_location(sm64hack_items[item], self.player), lambda state: False) #prevents nonexistant stars from having items
                         print(sm64hack_items[item])
                         continue
                     star_requirement = self.data.locations[course]["Stars"][item].get("StarRequirement")
@@ -202,10 +211,7 @@ class SM64HackWorld(World):
                 add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
                 lambda state, course_conditional_requirements = course_conditional_requirements: self.check_conditional_requirements(state, course_conditional_requirements))
             
-            if(not self.data.locations[course]["Cannon"].get("exists")):
-                add_rule(self.multiworld.get_location(f"{course} Cannon", self.player),
-                lambda state: False)
-            else:
+            if(self.data.locations[course]["Cannon"].get("exists")):
                 star_requirement = self.data.locations[course]["Cannon"].get("StarRequirement")
                 if(star_requirement):
                     add_rule(self.multiworld.get_location(f"{course} Cannon", self.player),
@@ -229,8 +235,6 @@ class SM64HackWorld(World):
                     
             for star in range(7):
                 if(not self.data.locations[course]["Stars"][star].get("exists")):
-                    add_rule(self.multiworld.get_location(f"{course} Star {star + 1}", self.player),
-                    lambda state: False) #prevents nonexistant stars from having items
                     continue
                 star_requirement = self.data.locations[course]["Stars"][star].get("StarRequirement")
                 if(star_requirement):
