@@ -2,7 +2,7 @@ My little archipelago world for (most) Super Mario 64 Romhacks. Currently shuffl
 
 ## How to use this world:
 
-Video guide [here](https://youtu.be/ScKRoSG02nI), text guide below, use whichever you prefer.
+Video guide [here](https://youtu.be/ScKRoSG02nI), text guide below, use whichever you prefer. (though it's pretty complicated, the video guide is more thorough)
 
 First, create a json file using [this website](http://dnvic.com/ArchipelagoGenerator/index.html), using a .jsml file. You can get a .jsml file for a hack by loading up a hack in PJ64/Mupen64/Retroarch, opening [stardisplay](https://github.com/aglab2/SM64StarDisplay) (or [the stardisplay client](https://github.com/DNVIC/Archipelago-StarDisplay))
 
