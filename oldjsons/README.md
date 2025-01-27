@@ -1,0 +1,1 @@
+These are some old json files for sm64 hacks which don't have cannons enabled since cannon randomization was not a feature back when these JSON files were made. You can still import them into the website and add the cannons there, but you might need to change some stuff around.

@@ -37,7 +37,6 @@ class SM64HackWorld(World):
     def __init__(self,multiworld, player: int):
         super().__init__(multiworld, player)
         self.data = Data()
-        print(id(self.data))
         
     def generate_early(self):
         self.data.import_json(self.options.json_file.value)
@@ -46,8 +45,6 @@ class SM64HackWorld(World):
     def create_item(self, item: str) -> SM64HackItem:
         if item == "Star":
             classification = ItemClassification.progression_skip_balancing
-        elif item == "Location does not exist":
-            classification = ItemClassification.filler
         else:
             classification = ItemClassification.progression
         return SM64HackItem(item, classification, self.item_name_to_id[item], self.player)
@@ -106,11 +103,9 @@ class SM64HackWorld(World):
         self.multiworld.regions.append(menu_region)
         existing_location_names = location_names_that_exist(self.data)
         location_names_that_exist_to_id = dict(filter(lambda location: location[0] in existing_location_names, self.location_name_to_id.items()))
-        print(location_names_that_exist_to_id)
 
         for course, data in self.data.locations.items():
             course_region = Region(course, self.player, self.multiworld)
-            print(course)
             if course != "Other":
                 
                 course_region.add_locations(
@@ -165,19 +160,27 @@ class SM64HackWorld(World):
         return False
     
     def set_rules(self) -> None:
-        print(len(self.multiworld.regions.location_cache[1]))
-        for location in self.multiworld.regions.location_cache[1]:
-            print(location)
         for course in self.data.locations:
             if course == "Other":
                 for item in range(5):
                     if(not self.data.locations[course]["Stars"][item].get("exists")):
-                        print(sm64hack_items[item])
                         continue
                     star_requirement = self.data.locations[course]["Stars"][item].get("StarRequirement")
                     if(star_requirement):
                         add_rule(self.multiworld.get_location(sm64hack_items[item], self.player),
                         lambda state, star_requirement = int(star_requirement): state.has("Star", self.player, star_requirement))
+                    other_requirements = self.data.locations[course]["Stars"][item].get("Requirements")
+                    if(self.options.progressive_keys):
+                        for requirement in other_requirements:
+                            if(requirement.startswith("Key")):
+                                add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
+                                lambda state, requirement = requirement: state.has("Progressive Key", self.player, int(requirement[-1])))
+                            else:
+                                add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
+                                lambda state, requirement = requirement: state.has(requirement, self.player))
+                    else:
+                        add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
+                        lambda state, course_requirements = other_requirements: state.has_all(course_requirements, self.player))
                     star_conditional_requirements = self.data.locations[course]["Stars"][item].get("ConditionalRequirements")
                     if star_conditional_requirements:
                         add_rule(self.multiworld.get_location(sm64hack_items[item], self.player), 
@@ -186,6 +189,18 @@ class SM64HackWorld(World):
                 
                 star_requirement = self.data.locations[course]["Stars"][6].get("StarRequirement")
                 star_conditional_requirements = self.data.locations[course]["Stars"][6].get("ConditionalRequirements")
+                other_requirements = self.data.locations[course]["Stars"][6].get("Requirements")
+                if(self.options.progressive_keys):
+                    for requirement in other_requirements:
+                        if(requirement.startswith("Key")):
+                            add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
+                            lambda state, requirement = requirement: state.has("Progressive Key", self.player, int(requirement[-1])))
+                        else:
+                            add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
+                            lambda state, requirement = requirement: state.has(requirement, self.player))
+                else:
+                    add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
+                    lambda state, course_requirements = other_requirements: state.has_all(course_requirements, self.player))
                 if star_conditional_requirements:
                     add_rule(self.multiworld.get_location("Victory Location", self.player), 
                     lambda state, star_conditional_requirements = star_conditional_requirements: self.check_conditional_requirements(state, star_conditional_requirements))
