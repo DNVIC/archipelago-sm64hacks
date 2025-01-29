@@ -8,8 +8,8 @@ from .Locations import SM64HackLocation, location_names, location_names_that_exi
 from .Data import sm64hack_items, Data
 from BaseClasses import Region, Location, Entrance, Item, ItemClassification
 
-class SM64HackSettings(settings.Group):
-    pass
+#class SM64HackSettings(settings.Group):
+#    pass
     #class RomFile(settings.HackRomPath):
     #    """Insert help text for host.yaml here"""
     #rom_file: RomFile = RomFile("SM64Hack.z64")
@@ -20,7 +20,7 @@ class SM64HackWorld(World):
     game = "SM64 Romhack"
     options_dataclass = SM64HackOptions
     options: SM64HackOptions
-    settings: ClassVar[SM64HackSettings]
+#    settings: ClassVar[SM64HackSettings]
     topology_present = True
     data: Data
 
