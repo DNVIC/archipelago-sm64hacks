@@ -1,7 +1,27 @@
-My little archipelago world for (most) Super Mario 64 Romhacks. Shuffles keys, stars, caps, and cannons throughout the worlds
+My little archipelago world for (most) Super Mario 64 Romhacks. Currently shuffles keys, stars, caps, and cannons throughout the worlds
 
-How to use this world:
-To do later
+## How to use this world:
+
+Video guide [here](https://youtu.be/ScKRoSG02nI), text guide below, use whichever you prefer. (though it's pretty complicated, the video guide is more thorough)
+
+First, create a json file using [this website](http://dnvic.com/ArchipelagoGenerator/index.html), using a .jsml file. You can get a .jsml file for a hack by loading up a hack in PJ64/Mupen64/Retroarch, opening [stardisplay](https://github.com/aglab2/SM64StarDisplay) (or [the stardisplay client](https://github.com/DNVIC/Archipelago-StarDisplay))
+You can also get premade json files [here](https://github.com/DNVIC/sm64hack-archipelago-jsons)
+
+Then, get the .jsml file from the layout folder located where the stardisplay .exe is.
+
+Input the jsml file into the website, and fill out the requirements for everything in the hack, by clicking on the stars, cannons, caps/keys, or courses. Most hacks only really have star and key requirements, and maybe per-star cap requirements, but some hacks have more complicated requirements. If a cannon exists, select it, hit the exists checkbox, add requirements, and hit save. Same with keys/caps. Conditional requirements are a bit more confusing, but are necessary if for example you can get to a level with either the vanish cap or key 2. You'd create one conditional requirement for the vanish cap, and one for key 2, and that'll make it so only one is required.
+
+Click on the victory text at the bottom, and put whatever is required to achieve "Victory" in the hack. As it is, this will not be automatically be achieved in the rando when you get it, since its impossible to know what constitutes victory for an arbitrary hack, but its still important since the rando makes sure that victory is possible.
+
+Export the .json file, and put it in the same folder as the archipelago .exe (or generate.py)
+
+Copy the template.yaml, change json_file to be the json file you just made (and if you want keys to be progressive, enable that as well), and place it in the worlds folder.
+
+Once your world is generated, open the hack you want to play, and delete/move file 2 (this is important)
+
+Use [this](https://github.com/DavidSM64/SimpleArmipsGui/releases/tag/1.3.2) program to apply starcount.asm to the rom file (preferably copy it beforehand, since this will modify the original rom file)
+
+Open the rom in PJ64/Mupen/Retroarch, open [the stardisplay client](https://github.com/DNVIC/Archipelago-StarDisplay), right click -> archipelago, log in, and you should be ready to go! 
 
 ## Anticipated Questions
 Q: Why does this exist? Why not just use the regular randomizer?
@@ -10,7 +30,9 @@ A: I wanted to add sm64 romhacks to archipelago, since the "normal" world only s
 
 Q: You said (most) romhacks, what hacks aren't supported?
 
-A: Basically any decomp hack will probably not be supported since this uses MIPS assembly code to change certain parts of the game to read from File 2 (easiest way to implement it, sm64's code is a mess), and when you recompile a rom from source and edit basically anything, the compiler will shift all of these pointers the assembly code relies upon, which causes the assembly code to fail completely. 
+A: Basically any decomp hack will probably not ever be supported since this uses MIPS assembly code to change certain parts of the game to read from File 2 (easiest way to implement it, sm64's code is a mess), and when you recompile a rom from source and edit basically anything, the compiler will shift all of these pointers the assembly code relies upon, which causes the assembly code to fail completely. 
+
+Any binary hack with 8 stars per level is not currently supported, nor is Decades Later or Star Revenge 6.25. I want both to work at some point, but that some point might be a bit away depending on how lazy I am (8 stars per level should be relatively simple, but decades later/6.25 won't be so simple, and both would require special code to support them in particular)
 
 Q: Why doesn't this use BizHawk, and instead this weird thing called "star display"?
 
@@ -24,7 +46,8 @@ Q: Can you randomize X?
 
 A: Feel free to pitch ideas to me, but reminder that this world is meant to be generalized to most hacks. A lot of stuff either requires significant amounts of custom code (difficult to do without potentially infringing on already-existing custom code in current hacks), or is difficult to implement in a system that allows it to work for more than one hack.
 
-## Future ideas (in order of greatest to least priority)
+## Future ideas (in approximate order of greatest to least priority)
+* Support for hacks with 8 stars per level
 * Better object and music shuffler
 * Custom items for specific hacks (Badges in sr7/7.5/8, sm64oot, probably others im not thinking of)
 * Client with Mac/Linux support (StarDisplay does not currently support Mac/Linux) (could probably fork the relevant parts of stardisplay and recompile as a purely console application)
