@@ -19,7 +19,7 @@ def location_names(data = Data()) -> List[str]:
             for itemId in range(5):
                 output.append(sm64hack_items[itemId])
             continue
-        for star in range(7): #generates locations for each possible star in each level
+        for star in range(8): #generates locations for each possible star in each level
             output.append(f"{course} Star {star + 1}")
         output.append(f"{course} Cannon")
     
@@ -35,9 +35,13 @@ def location_names_that_exist (data = Data()) -> List[str]:
                 if info["Stars"][itemId].get("exists"):
                     output.append(sm64hack_items[itemId])
             continue
-        for star in range(7): #generates locations for each possible star in each level
-            if info["Stars"][star].get("exists"):
-                output.append(f"{course} Star {star + 1}")
+        for star in range(8): #generates locations for each possible star in each level
+            try:
+                if info["Stars"][star].get("exists"):
+                    print(f"{course} Star {star + 1}")
+                    output.append(f"{course} Star {star + 1}")
+            except IndexError:
+                data.locations[course]["Stars"].append({"exists": False}) #so i dont need to do this try except block later
         if(info["Cannon"].get("exists")):
             output.append(f"{course} Cannon")
     

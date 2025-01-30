@@ -80,7 +80,7 @@ class SM64HackWorld(World):
                 continue
             if(self.data.locations[course]["Cannon"]["exists"]):
                 self.multiworld.itempool += [self.create_item(f"{course} Cannon")]
-            for i in range(7):
+            for i in range(8):
                 if self.data.locations[course]["Stars"][i]["exists"]:
                     self.multiworld.itempool += [self.create_item("Star")]
         if self.options.progressive_keys:
@@ -190,7 +190,7 @@ class SM64HackWorld(World):
                 star_requirement = self.data.locations[course]["Stars"][6].get("StarRequirement")
                 star_conditional_requirements = self.data.locations[course]["Stars"][6].get("ConditionalRequirements")
                 other_requirements = self.data.locations[course]["Stars"][6].get("Requirements")
-                if(self.options.progressive_keys):
+                if(self.options.progressive_keys and other_requirements is not None):
                     for requirement in other_requirements:
                         if(requirement.startswith("Key")):
                             add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
@@ -198,7 +198,7 @@ class SM64HackWorld(World):
                         else:
                             add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
                             lambda state, requirement = requirement: state.has(requirement, self.player))
-                else:
+                elif other_requirements is not None:
                     add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
                     lambda state, course_requirements = other_requirements: state.has_all(course_requirements, self.player))
                 if star_conditional_requirements:
@@ -248,7 +248,7 @@ class SM64HackWorld(World):
                     add_rule(self.multiworld.get_location(f"{course} Cannon", self.player), 
                     lambda state, star_conditional_requirements = star_conditional_requirements: self.check_conditional_requirements(state, star_conditional_requirements))
                     
-            for star in range(7):
+            for star in range(8):
                 if(not self.data.locations[course]["Stars"][star].get("exists")):
                     continue
                 star_requirement = self.data.locations[course]["Stars"][star].get("StarRequirement")
