@@ -1,7 +1,7 @@
 import settings
 from worlds.AutoWorld import World
 from worlds.generic.Rules import add_rule
-from typing import Union, Tuple, List, Dict, Set, ClassVar
+from typing import Union, Tuple, List, Dict, Set, ClassVar, Mapping, Any
 from .Options import SM64HackOptions
 from .Items import SM64HackItem, star_count
 from .Locations import SM64HackLocation, location_names, location_names_that_exist
@@ -33,6 +33,7 @@ class SM64HackWorld(World):
     location_name_to_id = {name: id for
                        id, name in enumerate(location_names(), base_id)}
     
+    required_client_version: Tuple[int, int, int] = (0, 2, 0)
 
     def __init__(self,multiworld, player: int):
         super().__init__(multiworld, player)
@@ -276,3 +277,9 @@ class SM64HackWorld(World):
     def generate_basic(self) -> None:
         self.multiworld.get_location("Victory Location", self.player).place_locked_item(self.create_event("Victory"))
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
+
+    def fill_slot_data(self) -> Mapping[str, Any]:
+        return {
+            "Cannons": "cannons" in self.data.locations["Other"]["Settings"],
+            "DeathLink": self.options.death_link.value == True # == True so it turns it into a boolean value
+        }

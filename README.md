@@ -19,8 +19,6 @@ Copy the template.yaml, change json_file to be the json file you just made (and 
 
 Once your world is generated, open the hack you want to play, and delete/move file 2 (this is important)
 
-Use [this](https://github.com/DavidSM64/SimpleArmipsGui/releases/tag/1.3.2) program to apply starcount.asm to the rom file (preferably copy it beforehand, since this will modify the original rom file)
-
 Open the rom in PJ64/Mupen/Retroarch, open [the stardisplay client](https://github.com/DNVIC/Archipelago-StarDisplay), right click -> archipelago, log in, and you should be ready to go! 
 
 ## Anticipated Questions
@@ -47,7 +45,6 @@ Q: Can you randomize X?
 A: Feel free to pitch ideas to me, but reminder that this world is meant to be generalized to most hacks. A lot of stuff either requires significant amounts of custom code (difficult to do without potentially infringing on already-existing custom code in current hacks), or is difficult to implement in a system that allows it to work for more than one hack.
 
 ## Future ideas (in approximate order of greatest to least priority)
-* Support for hacks with 8 stars per level
 * Better object and music shuffler
 * Custom items for specific hacks (Badges in sr7/7.5/8, sm64oot, probably others im not thinking of)
 * Client with Mac/Linux support (StarDisplay does not currently support Mac/Linux) (could probably fork the relevant parts of stardisplay and recompile as a purely console application)

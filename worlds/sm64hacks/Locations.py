@@ -38,7 +38,7 @@ def location_names_that_exist (data = Data()) -> List[str]:
         for star in range(8): #generates locations for each possible star in each level
             try:
                 if info["Stars"][star].get("exists"):
-                    print(f"{course} Star {star + 1}")
+                    #print(f"{course} Star {star + 1}")
                     output.append(f"{course} Star {star + 1}")
             except IndexError:
                 data.locations[course]["Stars"].append({"exists": False}) #so i dont need to do this try except block later
