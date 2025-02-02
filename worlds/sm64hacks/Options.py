@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from Options import Toggle, Range, Choice, FreeText, PerGameCommonOptions
+from Options import Toggle, Range, Choice, FreeText, PerGameCommonOptions, DeathLink
 
 
 class ProgressiveKeys(Toggle):
@@ -17,5 +17,6 @@ class JsonFile(FreeText):
 @dataclass
 class SM64HackOptions(PerGameCommonOptions):
     progressive_keys: ProgressiveKeys
+    death_link: DeathLink
     json_file: JsonFile
 

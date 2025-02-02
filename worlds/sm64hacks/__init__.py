@@ -1,7 +1,7 @@
 import settings
 from worlds.AutoWorld import World
 from worlds.generic.Rules import add_rule
-from typing import Union, Tuple, List, Dict, Set, ClassVar
+from typing import Union, Tuple, List, Dict, Set, ClassVar, Mapping, Any
 from .Options import SM64HackOptions
 from .Items import SM64HackItem, star_count
 from .Locations import SM64HackLocation, location_names, location_names_that_exist
@@ -33,6 +33,7 @@ class SM64HackWorld(World):
     location_name_to_id = {name: id for
                        id, name in enumerate(location_names(), base_id)}
     
+    required_client_version: Tuple[int, int, int] = (0, 2, 0)
 
     def __init__(self,multiworld, player: int):
         super().__init__(multiworld, player)
@@ -80,7 +81,7 @@ class SM64HackWorld(World):
                 continue
             if(self.data.locations[course]["Cannon"]["exists"]):
                 self.multiworld.itempool += [self.create_item(f"{course} Cannon")]
-            for i in range(7):
+            for i in range(8):
                 if self.data.locations[course]["Stars"][i]["exists"]:
                     self.multiworld.itempool += [self.create_item("Star")]
         if self.options.progressive_keys:
@@ -190,7 +191,7 @@ class SM64HackWorld(World):
                 star_requirement = self.data.locations[course]["Stars"][6].get("StarRequirement")
                 star_conditional_requirements = self.data.locations[course]["Stars"][6].get("ConditionalRequirements")
                 other_requirements = self.data.locations[course]["Stars"][6].get("Requirements")
-                if(self.options.progressive_keys):
+                if(self.options.progressive_keys and other_requirements is not None):
                     for requirement in other_requirements:
                         if(requirement.startswith("Key")):
                             add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
@@ -198,7 +199,7 @@ class SM64HackWorld(World):
                         else:
                             add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
                             lambda state, requirement = requirement: state.has(requirement, self.player))
-                else:
+                elif other_requirements is not None:
                     add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
                     lambda state, course_requirements = other_requirements: state.has_all(course_requirements, self.player))
                 if star_conditional_requirements:
@@ -248,7 +249,7 @@ class SM64HackWorld(World):
                     add_rule(self.multiworld.get_location(f"{course} Cannon", self.player), 
                     lambda state, star_conditional_requirements = star_conditional_requirements: self.check_conditional_requirements(state, star_conditional_requirements))
                     
-            for star in range(7):
+            for star in range(8):
                 if(not self.data.locations[course]["Stars"][star].get("exists")):
                     continue
                 star_requirement = self.data.locations[course]["Stars"][star].get("StarRequirement")
@@ -276,3 +277,9 @@ class SM64HackWorld(World):
     def generate_basic(self) -> None:
         self.multiworld.get_location("Victory Location", self.player).place_locked_item(self.create_event("Victory"))
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
+
+    def fill_slot_data(self) -> Mapping[str, Any]:
+        return {
+            "Cannons": "cannons" in self.data.locations["Other"]["Settings"],
+            "DeathLink": self.options.death_link.value == True # == True so it turns it into a boolean value
+        }
