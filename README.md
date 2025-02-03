@@ -54,7 +54,7 @@ A: Feel free to pitch ideas to me, but reminder that this world is meant to be g
 
 ## Credits
 * aglab2 - Making StarDisplay (the main program that the client is built off of)
-* Shin3 - Helping a lot with the ASM code
+* ShiN3 - Helping a lot with the ASM code (which doesn't exist anymore as it's now edited in RAM in the stardisplay client)
 * SheepSquared - Testing
 * KingToad74EE - Testing
 * Agyroth - Testing
