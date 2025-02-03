@@ -200,7 +200,7 @@ class SM64HackWorld(World):
                             add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
                             lambda state, requirement = requirement: state.has(requirement, self.player))
                 elif other_requirements is not None:
-                    add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player), 
+                    add_rule(self.multiworld.get_location("Victory Location", self.player), 
                     lambda state, course_requirements = other_requirements: state.has_all(course_requirements, self.player))
                 if star_conditional_requirements:
                     add_rule(self.multiworld.get_location("Victory Location", self.player), 
