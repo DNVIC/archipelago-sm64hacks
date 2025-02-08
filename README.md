@@ -30,7 +30,8 @@ Q: You said (most) romhacks, what hacks aren't supported?
 
 A: Basically any decomp hack will probably not ever be supported since this uses MIPS assembly code to change certain parts of the game to read from File 2 (easiest way to implement it, sm64's code is a mess), and when you recompile a rom from source and edit basically anything, the compiler will shift all of these pointers the assembly code relies upon, which causes the assembly code to fail completely. 
 
-Any binary hack with 8 stars per level is not currently supported, nor is Decades Later or Star Revenge 6.25. I want both to work at some point, but that some point might be a bit away depending on how lazy I am (8 stars per level should be relatively simple, but decades later/6.25 won't be so simple, and both would require special code to support them in particular)
+Some more complicated binary hacks/hacks with a lot of stars, like Star Revenge 6.25 and Decades Later are not currently supported. Eventually, the goal is to get these hacks supported though.
+In the far future, it might be possible to create little C library for decomp hacks, which if the hack is compiled with the library, the hack will be archipelago-compatible. Though that requires the hack to have its source code released, and it's a bit too much work for me for now.
 
 Q: Why doesn't this use BizHawk, and instead this weird thing called "star display"?
 
