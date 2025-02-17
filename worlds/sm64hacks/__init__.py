@@ -6,6 +6,7 @@ from .Options import SM64HackOptions
 from .Items import SM64HackItem, star_count
 from .Locations import SM64HackLocation, location_names, location_names_that_exist
 from .Data import sm64hack_items, Data
+from .client import SM64HackClient
 from BaseClasses import Region, Location, Entrance, Item, ItemClassification
 
 #class SM64HackSettings(settings.Group):
