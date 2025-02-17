@@ -4,7 +4,7 @@ My little archipelago world for (most) Super Mario 64 Romhacks. Currently shuffl
 
 Video guide [here](https://youtu.be/ScKRoSG02nI), text guide below, use whichever you prefer. (though it's pretty complicated, the video guide is more thorough)
 
-First, create a json file using [this website](http://dnvic.com/ArchipelagoGenerator/index.html), using a .jsml file. You can get a .jsml file for a hack by loading up a hack in PJ64/Mupen64/Retroarch, opening [stardisplay](https://github.com/aglab2/SM64StarDisplay) (or [the stardisplay client](https://github.com/DNVIC/Archipelago-StarDisplay)), and finding the layout folder in the same folder the exe file is in.
+First, create a json file using [this website](http://dnvic.com/ArchipelagoGenerator/index.html), using a .jsml file. You can get a .jsml file for a hack by loading up a hack in PJ64/Mupen64/Retroarch, opening [stardisplay](https://github.com/aglab2/SM64StarDisplay), and finding the layout folder in the same folder the exe file is in.
 You can also get premade json files [here](https://github.com/DNVIC/sm64hack-archipelago-jsons)
 
 Then, get the .jsml file from the layout folder located where the stardisplay .exe is.
@@ -17,9 +17,9 @@ Export the .json file, and put it in the same folder as the archipelago .exe (or
 
 Copy the template.yaml, change json_file to be the json file you just made (and if you want keys to be progressive, enable that as well), and place it in the worlds folder.
 
-Once your world is generated, open the hack you want to play, and delete/move file 2 (this is important)
+Once your world is generated, open the hack you want to play, and delete/move files A and B (this is important)
 
-Open the rom in PJ64/Mupen/Retroarch, open [the stardisplay client](https://github.com/DNVIC/Archipelago-StarDisplay), right click -> archipelago, log in, and you should be ready to go! 
+Open the rom in [Luna's Project64](https://github.com/Luna-Project64), and open the generic bizhawk client (DO NOT use BizHawk, despite the name. It might work on BizHawk, but I haven't tested it and I am not providing any support to BizHawk users.) Go to Debugger -> Scripts (enable debugger if it isn't enabled), download the two .js files from the releases page, put them in the scripts folder (the scripts folder is in the folder that opens when you hit the ... button in the bottom left), run the 'connector_pj64_generic.js', and you should be ready to go! 
 
 ## Anticipated Questions
 Q: Why does this exist? Why not just use the regular randomizer?
@@ -33,9 +33,9 @@ A: Basically any decomp hack will probably not ever be supported since this uses
 Some more complicated binary hacks/hacks with a lot of stars, like Star Revenge 6.25 and Decades Later are not currently supported. Eventually, the goal is to get these hacks supported though.
 In the far future, it might be possible to create little C library for decomp hacks, which if the hack is compiled with the library, the hack will be archipelago-compatible. Though that requires the hack to have its source code released, and it's a bit too much work for me for now.
 
-Q: Why doesn't this use BizHawk, and instead this weird thing called "star display"?
+Q: Why don't you support BizHawk even though this uses the "bizhawk client"?
 
-A: Laziness, and practicality. On the part of laziness, all of the memory reading and writing is already implemented into the base code of stardisplay, which is useful since it means giving items to and from the game is super easy since all the hard work is done for me. On the part of practicality, no one in the SM64 romhack community uses BizHawk (for various reasons), and a bunch of hacks use the More Objects Patch which afaik breaks on all the graphics plugins in BizHawk. Whereas StarDisplay supports a bunch of emulators, basically all the main ones people in the community use. 
+A: BizHawk is a crappy emulator for SM64 hacks, it is not good at all for them, it will break in certain hacks. Whereas Luna's Project64 was literally made specifically for SM64 hacks. If you *really* want to use bizhawk, I have no way of stopping you. I will not provide support however, as I have no way of knowing whether or not it's a problem with my code, or just a problem with BizHawk
 
 Q: Why aren't objects randomized?
 
@@ -59,6 +59,8 @@ A: Feel free to pitch ideas to me, but reminder that this world is meant to be g
 * SheepSquared - Testing
 * KingToad74EE - Testing
 * Agyroth - Testing
+* HeralayanSalty - Making a good bit of the bizhawk client connector script
+* Everyone who submitted JSON files for the github repo
 * A bunch of archipelago worlds I ended up referencing when making this.
 
 Below this is the main archipelago readme, felt like i should keep it since this repo has basically their whole code, but its unchanged so dont read it if you only care about repo-specific things
