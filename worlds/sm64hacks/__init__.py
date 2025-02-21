@@ -172,7 +172,8 @@ class SM64HackWorld(World):
                         add_rule(self.multiworld.get_location(sm64hack_items[item], self.player),
                         lambda state, star_requirement = int(star_requirement): state.has("Star", self.player, star_requirement))
                     other_requirements = self.data.locations[course]["Stars"][item].get("Requirements")
-                    if(self.options.progressive_keys):
+                    
+                    if(self.options.progressive_keys and other_requirements):
                         for requirement in other_requirements:
                             if(requirement.startswith("Key")):
                                 add_rule(self.multiworld.get_location(sm64hack_items[item], self.player), 
@@ -180,7 +181,7 @@ class SM64HackWorld(World):
                             else:
                                 add_rule(self.multiworld.get_location(sm64hack_items[item], self.player), 
                                 lambda state, requirement = requirement: state.has(requirement, self.player))
-                    else:
+                    elif other_requirements:
                         add_rule(self.multiworld.get_location(sm64hack_items[item], self.player), 
                         lambda state, course_requirements = other_requirements: state.has_all(course_requirements, self.player))
                     star_conditional_requirements = self.data.locations[course]["Stars"][item].get("ConditionalRequirements")
@@ -195,10 +196,10 @@ class SM64HackWorld(World):
                 if(self.options.progressive_keys and other_requirements is not None):
                     for requirement in other_requirements:
                         if(requirement.startswith("Key")):
-                            add_rule(self.multiworld.get_location(sm64hack_items[item], self.player), 
+                            add_rule(self.multiworld.get_location("Victory Location", self.player), 
                             lambda state, requirement = requirement: state.has("Progressive Key", self.player, int(requirement[-1])))
                         else:
-                            add_rule(self.multiworld.get_location(sm64hack_items[item], self.player), 
+                            add_rule(self.multiworld.get_location("Victory Location", self.player), 
                             lambda state, requirement = requirement: state.has(requirement, self.player))
                 elif other_requirements is not None:
                     add_rule(self.multiworld.get_location("Victory Location", self.player), 
