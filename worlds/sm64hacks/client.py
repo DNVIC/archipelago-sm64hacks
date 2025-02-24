@@ -287,7 +287,7 @@ class SM64HackClient(BizHawkClient):
                     (cannonAPPtr, bytes.fromhex("240E0002"), "RDRAM"),
                     (capAPPtr, bytes.fromhex("080A9BF7"), "RDRAM"),
                     (keyAPPtr1, bytes.fromhex("00000000"), "RDRAM"),
-                    (keyAPPtr1, bytes.fromhex("00000000"), "RDRAM"),
+                    (keyAPPtr2, bytes.fromhex("00000000"), "RDRAM"),
                     (toad1APPtr, bytes.fromhex("0809DA70"), "RDRAM"),
                     (toad2APPtr, bytes.fromhex("0809DA7D"), "RDRAM"),
                     (toad3APPtr, bytes.fromhex("0809DA8A"), "RDRAM")
