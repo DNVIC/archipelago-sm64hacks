@@ -1,3 +1,5 @@
+# NOTE: Use and discussion of this apworld (unfortunately) is not allowed anymore in the main archipelago server. Please join [this one](https://discord.gg/Nu4X9gmGDR) instead, if you want help, or just want to share a json file
+
 My little archipelago world for (most) Super Mario 64 Romhacks. Currently shuffles keys, stars, caps, and cannons throughout the worlds
 
 ## How to use this world:
