@@ -3,7 +3,7 @@ from worlds.AutoWorld import World
 from worlds.generic.Rules import add_rule
 from typing import Union, Tuple, List, Dict, Set, ClassVar, Mapping, Any
 from .Options import SM64HackOptions
-from .Items import SM64HackItem, star_count
+from .Items import SM64HackItem, item_is_important
 from .Locations import SM64HackLocation, location_names, location_names_that_exist
 from .Data import sm64hack_items, Data
 from .client import SM64HackClient
@@ -48,7 +48,8 @@ class SM64HackWorld(World):
         if item == "Star":
             classification = ItemClassification.progression_skip_balancing
         else:
-            classification = ItemClassification.progression
+            classification = ItemClassification.progression if item_is_important(item, self.data) else ItemClassification.filler #technically these arent filler items but they are logically useless so they're in the filler category
+            print(item, classification)
         return SM64HackItem(item, classification, self.item_name_to_id[item], self.player)
 
     def create_event(self, event: str):
