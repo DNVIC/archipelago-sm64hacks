@@ -8,7 +8,7 @@ sm64hack_items: List[str] = [
     "Wing Cap", 
     "Vanish Cap", 
     "Metal Cap", 
-    "Star", 
+    "Power Star", 
     "Progressive Key", 
     "Course 1 Cannon",
     "Course 2 Cannon",
@@ -35,8 +35,20 @@ sm64hack_items: List[str] = [
     "Metal Cap Cannon",
     "Wing Cap Cannon",
     "Vanish Cap Cannon",
-    "Overworld Cannon"
-    ] 
+    "Overworld Cannon",
+    "Progressive Stomp Badge",
+    "Wall Badge",
+    "Triple Jump Badge",
+    "Lava Badge"
+] 
+
+badges: List[str] = [
+    "Super Badge",
+    "Ultra Badge",
+    "Wall Badge",
+    "Triple Jump Badge",
+    "Lava Badge"
+]
 
 c1 = [{"exists": True}, {"exists": True}, {"exists": True}, {"exists": True}, {"exists": True}, {"exists": True, "Requirements": ["Wing Cap"]}, {"exists": True, "Requirements": ["Vanish Cap"]}]
 c2 = [{"exists": True}, {"exists": True}, {"exists": True}, {"exists": True}, {"exists": True}, {"exists": True, "Requirements": ["Wing Cap"]}, {"exists": True, "Requirements": ["Vanish Cap"]}]

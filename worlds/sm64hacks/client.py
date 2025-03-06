@@ -61,8 +61,10 @@ class SM64HackClient(BizHawkClient):
         }
         self.death_timestamp = 0
         self.last_death_link = None
+        self.level = None
+        self.area = None
+        self.level_start_time = None
 
-    
 
     
     async def validate_rom(self, ctx: "BizHawkClientContext") -> bool:
@@ -99,7 +101,7 @@ class SM64HackClient(BizHawkClient):
     async def check_death(self, read, ctx):
         if(int.from_bytes(read[4]) == 0):
             return 0
-        gread = await bizhawk.guarded_read(ctx.bizhawk_ctx, [(int.from_bytes(read[6])-0x80000000, 0x4, "RDRAM")], [(marioFloorPtr, read[6], "RDRAM")])
+        gread = await bizhawk.guarded_read(ctx.bizhawk_ctx, [(int.from_bytes(read[6]) & 0x7FFFFFFF, 0x4, "RDRAM")], [(marioFloorPtr, read[6], "RDRAM")])
         if(gread is None):
             return 0
         
@@ -108,10 +110,6 @@ class SM64HackClient(BizHawkClient):
         ypos = unpack('>f', read[7])[0]
         floorheight = unpack('>f', read[8])[0]
         floor = gread[0]
-        if(list(floor)[1] == 0x0A and ypos - floorheight < 2048):
-            return 8 #death barrier
-        if(list(floor)[1] == 0x38 and ypos - floorheight < 2048):
-            return 9 #wind
         
         match action:
             case "00001302":
@@ -135,6 +133,11 @@ class SM64HackClient(BizHawkClient):
             case "00021313":
                 return 6 #electrocution
         
+        if(list(floor)[1] == 0x0A and ypos - floorheight < 2048):
+            return 8 #death barrier
+        if(list(floor)[1] == 0x38 and ypos - floorheight < 2048):
+            return 9 #wind
+        
         if(hp[0] == 0x00):
             if(action == "00020338"):
                 return 0 #wait for electrocution
@@ -144,14 +147,34 @@ class SM64HackClient(BizHawkClient):
         
         return 0
 
+    async def get_level_badges(self, addresses, level, ctx):
+        level_badges = []
+        reads = []
+        for address in addresses:
+            reads.append((address + 0x74, 0x4, "RDRAM"))  #0, active flag
+            reads.append((address + 0x20C, 0x4, "RDRAM")) #1, beh data
+            reads.append((address + 0x147, 0x1, "RDRAM")) #2, bparam2
+        
+        gread = await bizhawk.guarded_read(ctx.bizhawk_ctx, reads, [(levelPtr, bytearray([level]), "RDRAM")])
+        if gread is None:
+            return ["Super Badge", "Ultra Badge", "Wall Badge", "Triple Badge", "Lava Badge"]
+        for i in range(len(addresses)):
+            active = int.from_bytes(gread[i * 3])
+            if active != 0:
+                behavior = gread[1 + i * 3]
+                if behavior.hex().upper() == "800F06A8":
+                    bparam = int.from_bytes(gread[2 + i * 3])
+                    level_badges.append(badge_dict[bparam])
 
+
+        return level_badges
 
     async def game_watcher(self, ctx: "BizHawkClientContext") -> None:
         from CommonClient import logger
         try:
             if ctx.server is None or ctx.server.socket.closed or ctx.slot_data is None:
                 return
-            read = await bizhawk.read(ctx.bizhawk_ctx, [
+            reads = [
                 (filesPtr[0], 0x70, "RDRAM"),         #0
                 (filesPtr[1], 0x70, "RDRAM"),         #1
                 (hpPtr, 0x2, "RDRAM"),                #2
@@ -162,16 +185,32 @@ class SM64HackClient(BizHawkClient):
                 (marioYPosPtr, 0x4, "RDRAM"),         #7
                 (marioFloorHeightPtr, 0x4, "RDRAM"),  #8
                 (igtPtr, 0x4, "RDRAM"),               #9
-                (0x2E0, 0x1, "RDRAM")                 #10, blank memory unless you run the victory.js script
-                ])
+                (0x2E0, 0x1, "RDRAM"),                 #10, blank memory unless you run the victory.js script
+                ]
+            
+            if(ctx.slot_data["Badges"]):
+                    reads.append((levelPtr, 0x1, "RDRAM"))#11
+                    reads.append((0x20, 0x14, "ROM")) #12, EEPROM name
+                    reads.append((areaPtr, 0x1, "RDRAM"))
+
+
+            read = await bizhawk.read(ctx.bizhawk_ctx, reads)
             if(int.from_bytes(read[9]) < 30):
                 return #game isnt initialized yet so things might be fucky
+            
+            file1data = list(read[0])
+            writes = []
+            if self.file1Stars is not None:
+                if(file1data[5] != self.file1Stars[5]) and ctx.slot_data["Badges"]:
+                    file1data[5] = self.file1Stars[5] #prevent badges from changing the flags, so they can be received correctly.
+                    writes.append((filesPtr[0] + 0x5, bytearray(file1data[5:6]),"RDRAM"))
+
+
             file2data = list(read[1])
             file2flag = False
-            writes = []
-            if(self.file1Stars != list(read[0])):
+            if(self.file1Stars != file1data):
                 locs = []
-                self.file1Stars = list(read[0])
+                self.file1Stars = file1data
                 for i in range(len(self.file1Stars)):
                     if i in courseIndex:
                         for j in range(8):
@@ -207,10 +246,11 @@ class SM64HackClient(BizHawkClient):
                 self.received_items = len(ctx.items_received)
                 stars = 0
                 keyCounter = 0
+                badgeCounter = 0
                 for item in ctx.items_received:
                     item_name = sm64hack_items[item.item - self.base_id]
                     match item_name:
-                        case "Star":
+                        case "Power Star":
                             stars += 1
                         case "Progressive Key":
                             if keyCounter == 1:
@@ -229,6 +269,18 @@ class SM64HackClient(BizHawkClient):
                             self.flags[2] = True
                         case "Wing Cap":
                             self.flags[4] = True
+                        case "Progressive Stomp Badge":
+                            if badgeCounter == 0:
+                                self.file1Stars[5] |= 16
+                                badgeCounter = 1
+                            else:
+                                self.file1Stars[5] |= 32
+                        case "Wall Badge":
+                            self.file1Stars[5] |= 8
+                        case "Triple Jump Badge":
+                            self.file1Stars[5] |= 128
+                        case "Lava Badge":    
+                            self.file1Stars[5] |= 64
                         case _:
                             if("Cannon" in item_name):
                                 course = item_name[:-7]
@@ -293,6 +345,67 @@ class SM64HackClient(BizHawkClient):
                     (toad3APPtr, bytes.fromhex("0809DA8A"), "RDRAM")
                 ])
             
+            # badges
+            if ctx.slot_data["Badges"] and int.from_bytes(read[4]) != 0 and (int.from_bytes(read[11]) != self.level or int.from_bytes(read[13]) != self.area):
+               self.level = int.from_bytes(read[11])
+               self.area = int.from_bytes(read[13])
+               self.level_start_time = int.from_bytes(read[9])
+            elif(ctx.slot_data["Badges"] and int.from_bytes(read[4]) != 0 and (int.from_bytes(read[9]) - self.level_start_time) > 150):
+                hack_name = read[12].decode("ascii")
+                level = self.level
+                badges_to_send = []
+                match hack_name: #bit of a hack but itll work. tried to go through every object in the level for compatibility but that broke everything
+                    case "STAR REVENGE 7      ":
+                        match level:
+                            case 0x07:
+                                b = await self.get_level_badges((0x34B628,), level, ctx)
+                                badges_to_send = [x for x in ["Super Badge"] if x not in b]
+                            case 0x08:
+                                b = await self.get_level_badges((0x3538C8,), level, ctx)
+                                badges_to_send = [x for x in ["Wall Badge"] if x not in b]
+                            case 0xA:
+                                b = await self.get_level_badges((0x349288,), level, ctx)
+                                badges_to_send = [x for x in ["Lava Badge"] if x not in b]
+                            case 0xB:
+                                b = await self.get_level_badges((0x34FB08,), level, ctx)
+                                badges_to_send = [x for x in ["Ultra Badge"] if x not in b]
+                            case 0x24:
+                                b = await self.get_level_badges((0x34ECC8,), level, ctx)
+                                badges_to_send = [x for x in ["Triple Jump Badge"] if x not in b]
+
+                    case "STAR REVENGE 7.5KR  ":
+                        match level:
+                            case 0x11:
+                                b = await self.get_level_badges((0x3473A8,), level, ctx)
+                                badges_to_send = [x for x in ["Super Badge"] if x not in b]
+                            case 0x13:
+                                b = await self.get_level_badges((0x34B3C8, 0x343F68), level, ctx)
+                                badges_to_send = [x for x in ["Wall Badge", "Triple Jump Badge"] if x not in b]
+                            case 0xA:
+                                b = await self.get_level_badges((0x348B68,), level, ctx)
+                                badges_to_send = [x for x in ["Lava Badge"] if x not in b]
+                            case 0xB:
+                                b = await self.get_level_badges((0x34E808,), level, ctx)
+                                badges_to_send = [x for x in ["Ultra Badge"] if x not in b]
+                    case "STAR REVENGE 8 SOH  ":
+                        match level:
+                            case 0x14:
+                                if self.area == 1: #area 2 is boss fight
+                                    b = await self.get_level_badges((0x34C468,), level, ctx)
+                                    badges_to_send = [x for x in ["Super Badge"] if x not in b]
+                            case 0x1A:
+                                b = await self.get_level_badges((0x342548,), level, ctx)
+                                badges_to_send = [x for x in ["Ultra Badge"] if x not in b]
+                locs = []
+                for badge in badges_to_send:
+                    locs.append(self.location_name_to_id[badge])
+
+                if locs != []:
+                    await ctx.send_msgs([{"cmd": "LocationChecks", "locations": locs}])
+            
+
+
+
             # deathlink
             if(ctx.slot_data.get("DeathLink") and int(time()) > (self.death_timestamp + 15)):
                 if "DeathLink" not in ctx.tags:

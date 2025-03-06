@@ -24,6 +24,11 @@ starsCountPtr = 0x33B21B
 
 marioObjectPtr = 0x361158
 
+objectListPtr = 0x33D488
+objectListSize = 240
+levelPtr = 0x32DDF9
+areaPtr = 0x33B24A
+
 courseIndex = {
     8:  "Overworld",
     12: "Course 1" ,
@@ -66,3 +71,11 @@ causeStrings = [
     "The wind wasn't enough to save slot.",
     "slot died."
 ]
+
+badge_dict = {
+    0x80: "Triple Jump Badge",
+    0x40: "Lava Badge",
+    0x20: "Ultra Badge",
+    0x10: "Super Badge",
+    0x08: "Wall Badge"
+}
