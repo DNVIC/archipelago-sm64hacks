@@ -189,9 +189,9 @@ class SM64HackClient(BizHawkClient):
                 ]
             
             if(ctx.slot_data["Badges"]):
-                    reads.append((levelPtr, 0x1, "RDRAM"))#11
-                    reads.append((0x20, 0x14, "ROM")) #12, EEPROM name
-                    reads.append((areaPtr, 0x1, "RDRAM"))
+                reads.append((levelPtr, 0x1, "RDRAM"))#11
+                reads.append((0x20, 0x14, "ROM")) #12, EEPROM name
+                reads.append((areaPtr, 0x1, "RDRAM"))
 
 
             read = await bizhawk.read(ctx.bizhawk_ctx, reads)
@@ -212,6 +212,7 @@ class SM64HackClient(BizHawkClient):
                 locs = []
                 self.file1Stars = file1data
                 for i in range(len(self.file1Stars)):
+                    
                     if i in courseIndex:
                         for j in range(8):
                             bit = self.file1Stars[i] >> j & 0b00000001
@@ -228,7 +229,9 @@ class SM64HackClient(BizHawkClient):
                                     locs.append(self.location_name_to_id[location_name])
                     elif i == 37:
                         if(self.file1Stars[i] >> 7 & 0x1 and ctx.slot_data["Cannons"]):
-                            locs.append(courseIndex[36] + " Cannon")
+                            location_name = courseIndex[36] + " Cannon"
+                            if(self.location_name_to_id[location_name] in ctx.server_locations):
+                                locs.append(self.location_name_to_id[location_name])
                     elif i == 11:
                         for j in range(1,6):
                             bit = self.file1Stars[i] >> j & 0x1
@@ -306,7 +309,7 @@ class SM64HackClient(BizHawkClient):
                         else:
                             file2data[i] = ((2 ** stars) - 1) + (128 if self.cannons[i] else 0)
                             stars = 0
-                    file2data[37] = file2data[37] & 128 if self.cannons[37] else 0
+                    file2data[37] = file2data[37] | 128 if self.cannons[37] else 0
                 else:
                     if stars > 8:
                         file2data[8] = 255
@@ -347,9 +350,9 @@ class SM64HackClient(BizHawkClient):
             
             # badges
             if ctx.slot_data["Badges"] and int.from_bytes(read[4]) != 0 and (int.from_bytes(read[11]) != self.level or int.from_bytes(read[13]) != self.area):
-               self.level = int.from_bytes(read[11])
-               self.area = int.from_bytes(read[13])
-               self.level_start_time = int.from_bytes(read[9])
+                self.level = int.from_bytes(read[11])
+                self.area = int.from_bytes(read[13])
+                self.level_start_time = int.from_bytes(read[9])
             elif(ctx.slot_data["Badges"] and int.from_bytes(read[4]) != 0 and (int.from_bytes(read[9]) - self.level_start_time) > 150):
                 hack_name = read[12].decode("ascii")
                 level = self.level
