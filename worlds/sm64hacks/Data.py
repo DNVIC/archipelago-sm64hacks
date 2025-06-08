@@ -1,8 +1,15 @@
-from typing import List
+from typing import List, Tuple
+from pathlib import Path
+from importlib import resources
+from importlib.resources.abc import Traversable
+import pkgutil
+import Utils
 import json
+import re
+import os
 
 
-sm64hack_items: List[str] = [
+sm64hack_items: Tuple[str] = (
     "Key 1", 
     "Key 2", 
     "Wing Cap", 
@@ -39,16 +46,38 @@ sm64hack_items: List[str] = [
     "Progressive Stomp Badge",
     "Wall Badge",
     "Triple Jump Badge",
-    "Lava Badge"
-] 
+    "Lava Badge",
+    "Overworld Cannon Star",
+    "Bowser 2 Cannon Star",
+    "Yellow Switch",
+    "Black Switch",
+    "Coin",
+    "Green Demon Trap",
+    "Mario Choir",
+    "Heave-Ho Trap",
+    "Squish Trap"
+)
 
-badges: List[str] = [
+traps: Tuple[str] = (
+    "Green Demon Trap",
+    "Mario Choir",
+    "Heave-Ho Trap",
+    "Squish Trap"
+)
+
+badges: Tuple[str] = (
     "Super Badge",
     "Ultra Badge",
     "Wall Badge",
     "Triple Jump Badge",
     "Lava Badge"
-]
+)
+
+star_like: Tuple[str] = (
+    "Power Star",
+    "Overworld Cannon Star",
+    "Bowser 2 Cannon Star"
+)
 
 c1 = [{"exists": True}, {"exists": True}, {"exists": True}, {"exists": True}, {"exists": True}, {"exists": True, "Requirements": ["Wing Cap"]}, {"exists": True, "Requirements": ["Vanish Cap"]}]
 c2 = [{"exists": True}, {"exists": True}, {"exists": True}, {"exists": True}, {"exists": True}, {"exists": True, "Requirements": ["Wing Cap"]}, {"exists": True, "Requirements": ["Vanish Cap"]}]
@@ -83,6 +112,26 @@ ow = [{"exists": True}, {"exists": True}, {"exists": True, "StarRequirement":15}
 
 other = [{"exists": True}, {"exists": True}, {"exists": True}, {"exists": True}, {"exists": True, "StarRequirement":50}]
 
+
+sr6_25_locations = ( #special = hack-specific
+    "Yellow Switch",
+    "Bowser Fight Reds",
+    "Star 210",
+    "Toursome Trouble RT Star 1",
+    "Toursome Trouble RT Star 2",
+    "Toursome Trouble RT Star 3",
+    "Toursome Trouble RT Star 4",
+    "Toursome Trouble RT Star 5",
+    "Toursome Trouble RT Star 6",
+)
+
+def find_json_files(directory: Traversable):
+    if directory.is_file() and directory.endswith("json"):
+        return directory
+    if directory.is_dir():
+        ret = []
+
+    print("gay", list(directory.iterdir()))
 
 
 class Data:
@@ -119,9 +168,34 @@ class Data:
         #respectively
     }
 
-    def import_json(self, file):
-        with open(file) as infile:
-            self.locations = json.load(infile)
+
+    def import_json(self, file_name):
+        json_dir = os.path.join(Utils.home_path(), "sm64hack_jsons")
+        os.makedirs(json_dir, exist_ok=True)
+        json_file = list(Path(json_dir).rglob(file_name)) #external takes priority over internal
+        local_file = True
+        if json_file == []:
+            json_file = list(resources.files(__package__).joinpath("jsons").rglob(file_name))
+            local_file = False
+        if len(json_file) > 1:
+            raise ValueError("Multiple JSON files with the same name detected")
+        if len(json_file) == 0:
+            raise FileNotFoundError(f"JSON file {file_name} does not exist")
+        json_file = json_file[0]
+        print(json_file)
+        if(local_file):
+            with open(json_file, 'r') as infile:
+                filetext = infile.read()
+                self.maxstarcount = max(int(i) for i in re.findall("\"StarRequirement\": *\"(\\d+)\"", filetext))
+                self.locations = json.loads(filetext)
+        else:
+            json_file = str(json_file).replace("\\", "/") #extremely janky but it works
+            print(json_file, resources.files(__package__))
+            json_file = os.path.relpath(json_file, start=str(resources.files(__package__)).replace("\\", "/"))
+            file = pkgutil.get_data(__name__, json_file).decode()
+            filetext = file
+            self.maxstarcount = max(int(i) for i in re.findall("\"StarRequirement\": *\"(\\d+)\"", filetext))
+            self.locations = json.loads(filetext)
 
 
 

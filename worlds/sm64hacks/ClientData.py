@@ -19,6 +19,7 @@ marioActionPtr = 0x33B17C
 marioFloorPtr = 0x33B1D8
 marioYPosPtr = 0x33B1B0
 marioFloorHeightPtr = 0x33B1E0
+marioSquishPtr = 0x33B224
 
 starsCountPtr = 0x33B21B
 
@@ -28,6 +29,49 @@ objectListPtr = 0x33D488
 objectListSize = 240
 levelPtr = 0x32DDF9
 areaPtr = 0x33B24A
+
+trapPatchPtr = 0x29D4B8
+choirPatchPtr = 0x27FF00
+choirHookPtr = 0x3191E0
+starPatchPtr = 0x279C88
+
+bank13RamStartPtr = 0x33B400 + 4 * 0x13
+
+coinPtr = 0x33B218
+
+level_index = { #sm64's internal level ids are different than the ones used in save data
+    16:8, #overworld
+    6:8,
+    26:8,
+    9:12, #course 1-15
+    24:13,
+    12:14,
+    5:15,
+    4:16,
+    7:17,
+    22:18,
+    8:19,
+    23:20,
+    10:21,
+    11:22,
+    36:23,
+    13:24,
+    14:25,
+    15:26,
+    17:27, #bowser 1/fight
+    30:27,
+    19:28, #bowser 2/fight
+    33:28,
+    21:29, #bowser 3/fight
+    34:29,
+    27:30, #slide
+    28:31, #metal cap
+    29:32, #wing cap
+    18:33, #vanish cap
+    31:34, #secrets 1-3
+    20:35,
+    25:36
+}
 
 courseIndex = {
     8:  "Overworld",

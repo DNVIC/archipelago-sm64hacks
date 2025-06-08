@@ -12,8 +12,8 @@
             },
             {
                 "exists": true,
-                "StarRequirement": "0",
-                "Requirements": ["Super Badge"],
+                "StarRequirement": "15",
+                "Requirements": [],
                 "ConditionalRequirements": []
             },
             {
@@ -34,6 +34,9 @@
         ],
         "Cannon": {
             "exists": false
+        },
+        "Troll Star": {
+            "exists": false
         }
     },
     "Course 2": {
@@ -52,8 +55,8 @@
             },
             {
                 "exists": true,
-                "StarRequirement": "0",
-                "Requirements": ["Super Badge"],
+                "StarRequirement": "15",
+                "Requirements": [],
                 "ConditionalRequirements": []
             },
             {
@@ -67,6 +70,9 @@
             }
         ],
         "Cannon": {
+            "exists": false
+        },
+        "Troll Star": {
             "exists": false
         }
     },
@@ -86,9 +92,10 @@
             },
             {
                 "exists": true,
-                "StarRequirement": "0",
+                "StarRequirement": "60",
                 "Requirements": [
-                    "Ultra Badge"
+                    "Key 2",
+                    "Vanish Cap"
                 ],
                 "ConditionalRequirements": []
             },
@@ -100,6 +107,9 @@
             }
         ],
         "Cannon": {
+            "exists": false
+        },
+        "Troll Star": {
             "exists": false
         }
     },
@@ -119,26 +129,30 @@
             },
             {
                 "exists": true,
-                "StarRequirement": "0",
-                "Requirements": ["Super Badge"],
+                "StarRequirement": "15",
+                "Requirements": [],
                 "ConditionalRequirements": []
             },
             {
                 "exists": true,
-                "StarRequirement": "0",
+                "StarRequirement": "60",
                 "Requirements": [
-                    "Ultra Badge"
+                    "Key 2",
+                    "Vanish Cap"
                 ],
                 "ConditionalRequirements": []
             },
             {
                 "exists": true,
-                "StarRequirement": "0",
-                "Requirements": ["Super Badge"],
+                "StarRequirement": "15",
+                "Requirements": [],
                 "ConditionalRequirements": []
             }
         ],
         "Cannon": {
+            "exists": false
+        },
+        "Troll Star": {
             "exists": false
         }
     },
@@ -168,15 +182,15 @@
         ],
         "Cannon": {
             "exists": false
+        },
+        "Troll Star": {
+            "exists": false
         }
     },
     "Course 6": {
         "Stars": [
             {
-                "exists": true,
-                "Requirements": [
-                    "Super Badge"
-                ]
+                "exists": true
             },
             {
                 "exists": true
@@ -189,26 +203,27 @@
             },
             {
                 "exists": true,
-                "StarRequirement": "0",
+                "StarRequirement": "60",
                 "Requirements": [
-                    "Ultra Badge"
+                    "Key 2",
+                    "Vanish Cap"
                 ],
                 "ConditionalRequirements": []
             },
             {
-                "exists": true,
-                "Requirements": [
-                    "Super Badge"
-                ]
+                "exists": true
             },
             {
                 "exists": true
             }
         ],
-        "StarRequirement": "0",
-        "Requirements": ["Super Badge"],
+        "StarRequirement": "15",
+        "Requirements": [],
         "ConditionalRequirements": [],
         "Cannon": {
+            "exists": false
+        },
+        "Troll Star": {
             "exists": false
         }
     },
@@ -232,8 +247,8 @@
                 "Requirements": [],
                 "ConditionalRequirements": [
                     {
-                        "StarRequirement": "0",
-                        "Requirements": ["Super Badge"]
+                        "StarRequirement": "15",
+                        "Requirements": []
                     },
                     {
                         "StarRequirement": "",
@@ -269,14 +284,8 @@
             "Requirements": [],
             "ConditionalRequirements": [
                 {
-                    "StarRequirement": "0",
-                    "Requirements": ["Super Badge"]
-                },
-                {
-                    "StarRequirement": "",
-                    "Requirements": [
-                        "Key 1"
-                    ]
+                    "StarRequirement": "15",
+                    "Requirements": []
                 },
                 {
                     "StarRequirement": "",
@@ -288,7 +297,10 @@
         },
         "StarRequirement": "0",
         "Requirements": [],
-        "ConditionalRequirements": []
+        "ConditionalRequirements": [],
+        "Troll Star": {
+            "exists": false
+        }
     },
     "Course 8": {
         "Stars": [
@@ -335,6 +347,12 @@
             "StarRequirement": "0",
             "Requirements": [],
             "ConditionalRequirements": []
+        },
+        "Troll Star": {
+            "exists": true,
+            "StarRequirement": "0",
+            "Requirements": [],
+            "ConditionalRequirements": []
         }
     },
     "Course 9": {
@@ -358,9 +376,10 @@
             },
             {
                 "exists": true,
-                "StarRequirement": "0",
+                "StarRequirement": "60",
                 "Requirements": [
-                    "Ultra Badge"
+                    "Key 2",
+                    "Vanish Cap"
                 ],
                 "ConditionalRequirements": []
             },
@@ -385,6 +404,9 @@
             "StarRequirement": "0",
             "Requirements": [],
             "ConditionalRequirements": []
+        },
+        "Troll Star": {
+            "exists": false
         }
     },
     "Course 10": {
@@ -414,9 +436,10 @@
             },
             {
                 "exists": true,
-                "StarRequirement": "0",
+                "StarRequirement": "60",
                 "Requirements": [
-                    "Ultra Badge"
+                    "Key 2",
+                    "Vanish Cap"
                 ],
                 "ConditionalRequirements": []
             },
@@ -441,6 +464,12 @@
             }
         ],
         "Cannon": {
+            "exists": false,
+            "StarRequirement": "0",
+            "Requirements": [],
+            "ConditionalRequirements": []
+        },
+        "Troll Star": {
             "exists": false
         }
     },
@@ -486,6 +515,12 @@
         ],
         "Cannon": {
             "exists": false
+        },
+        "Troll Star": {
+            "exists": true,
+            "StarRequirement": "0",
+            "Requirements": [],
+            "ConditionalRequirements": []
         }
     },
     "Course 12": {
@@ -520,9 +555,10 @@
             },
             {
                 "exists": true,
-                "StarRequirement": "0",
+                "StarRequirement": "60",
                 "Requirements": [
-                    "Ultra Badge"
+                    "Key 2",
+                    "Vanish Cap"
                 ],
                 "ConditionalRequirements": []
             },
@@ -537,6 +573,12 @@
         "ConditionalRequirements": [],
         "Cannon": {
             "exists": true,
+            "StarRequirement": "0",
+            "Requirements": [],
+            "ConditionalRequirements": []
+        },
+        "Troll Star": {
+            "exists": false,
             "StarRequirement": "0",
             "Requirements": [],
             "ConditionalRequirements": []
@@ -583,6 +625,12 @@
         "ConditionalRequirements": [],
         "Cannon": {
             "exists": false
+        },
+        "Troll Star": {
+            "exists": true,
+            "StarRequirement": "0",
+            "Requirements": [],
+            "ConditionalRequirements": []
         }
     },
     "Course 14": {
@@ -620,7 +668,7 @@
             {
                 "exists": true,
                 "StarRequirement": "0",
-                "Requirements": ["Ultra Badge"],
+                "Requirements": [],
                 "ConditionalRequirements": []
             },
             {
@@ -638,6 +686,9 @@
             "StarRequirement": "0",
             "Requirements": [],
             "ConditionalRequirements": []
+        },
+        "Troll Star": {
+            "exists": false
         }
     },
     "Course 15": {
@@ -666,10 +717,14 @@
         ],
         "StarRequirement": "75",
         "Requirements": [
-            "Ultra Badge"
+            "Key 2",
+            "Vanish Cap"
         ],
         "ConditionalRequirements": [],
         "Cannon": {
+            "exists": false
+        },
+        "Troll Star": {
             "exists": false
         }
     },
@@ -697,10 +752,13 @@
                 "exists": false
             }
         ],
-        "StarRequirement": "",
-        "Requirements": ["Super Badge"],
+        "StarRequirement": "15",
+        "Requirements": [],
         "ConditionalRequirements": [],
         "Cannon": {
+            "exists": false
+        },
+        "Troll Star": {
             "exists": false
         }
     },
@@ -751,6 +809,9 @@
             "StarRequirement": "0",
             "Requirements": [],
             "ConditionalRequirements": []
+        },
+        "Troll Star": {
+            "exists": false
         }
     },
     "Bowser 3": {
@@ -785,6 +846,9 @@
         "ConditionalRequirements": [],
         "Cannon": {
             "exists": false
+        },
+        "Troll Star": {
+            "exists": false
         }
     },
     "Slide": {
@@ -815,6 +879,9 @@
         "Requirements": [],
         "ConditionalRequirements": [],
         "Cannon": {
+            "exists": false
+        },
+        "Troll Star": {
             "exists": false
         }
     },
@@ -849,6 +916,9 @@
         "ConditionalRequirements": [],
         "Cannon": {
             "exists": false
+        },
+        "Troll Star": {
+            "exists": false
         }
     },
     "Secret 2": {
@@ -874,7 +944,7 @@
             {
                 "exists": true,
                 "StarRequirement": "0",
-                "Requirements": ["Super Badge"],
+                "Requirements": [],
                 "ConditionalRequirements": []
             },
             {
@@ -885,6 +955,9 @@
         "Requirements": [],
         "ConditionalRequirements": [],
         "Cannon": {
+            "exists": false
+        },
+        "Troll Star": {
             "exists": false
         }
     },
@@ -913,6 +986,9 @@
             }
         ],
         "Cannon": {
+            "exists": false
+        },
+        "Troll Star": {
             "exists": false
         }
     },
@@ -946,6 +1022,9 @@
         ],
         "ConditionalRequirements": [],
         "Cannon": {
+            "exists": false
+        },
+        "Troll Star": {
             "exists": false
         }
     },
@@ -985,6 +1064,9 @@
             }
         ],
         "Cannon": {
+            "exists": false
+        },
+        "Troll Star": {
             "exists": false
         }
     },
@@ -1027,6 +1109,9 @@
         "ConditionalRequirements": [],
         "Cannon": {
             "exists": false
+        },
+        "Troll Star": {
+            "exists": false
         }
     },
     "Overworld": {
@@ -1038,7 +1123,8 @@
                 "exists": true,
                 "StarRequirement": "75",
                 "Requirements": [
-                    "Ultra Badge"
+                    "Key 2",
+                    "Vanish Cap"
                 ],
                 "ConditionalRequirements": []
             },
@@ -1064,8 +1150,7 @@
                 "StarRequirement": "60",
                 "Requirements": [
                     "Key 2",
-                    "Vanish Cap",
-                    "Ultra Badge"
+                    "Vanish Cap"
                 ],
                 "ConditionalRequirements": []
             }
@@ -1077,20 +1162,25 @@
                 "Key 2"
             ],
             "ConditionalRequirements": []
+        },
+        "Troll Star": {
+            "exists": false
         }
     },
     "Other": {
         "Stars": [
             {
                 "exists": true,
-                "StarRequirement": "0",
-                "Requirements": ["Super Badge"],
+                "StarRequirement": "15",
+                "Requirements": [],
                 "ConditionalRequirements": []
             },
             {
                 "exists": true,
                 "StarRequirement": "0",
-                "Requirements": [],
+                "Requirements": [
+                    "Wing Cap"
+                ],
                 "ConditionalRequirements": [
                     {
                         "StarRequirement": "",
@@ -1136,37 +1226,20 @@
                 "exists": true,
                 "StarRequirement": "75",
                 "Requirements": [
-                    "Ultra Badge"
-                ],
-                "ConditionalRequirements": []
-            },
-            {
-                "exists": true,
-                "StarRequirement": "15"
-            },
-            {
-                "exists": true,
-                "StarRequirement": "60",
-                "Requirements": [
                     "Key 2",
                     "Vanish Cap"
-                ]
-            },
-            {
-                "exists": false
-            },
-            {
-                "exists": false
-            },
-            {
-                "exists": false
+                ],
+                "ConditionalRequirements": []
             }
         ],
-        "Settings": [
-            "cannons",
-            "sr7"
-        ],
+        "Settings": {
+            "cannons": true,
+            "prog_key": 0
+        },
         "Cannon": {
+            "exists": false
+        },
+        "Troll Star": {
             "exists": false
         }
     }

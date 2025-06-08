@@ -1,0 +1,3 @@
+[submodule "worlds/sm64hacks/jsons"]
+	path = worlds/sm64hacks/jsons
+	url = https://github.com/dnvic/sm64hack-archipelago-jsons
