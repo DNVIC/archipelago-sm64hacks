@@ -1,6 +1,6 @@
 from BaseClasses import Location
 from typing import List
-from .Data import sm64hack_items, Data
+from .Data import sm64hack_items, Data, badges, sr6_25_locations
 
 class SM64HackLocation(Location):
     game = "SM64 Romhack"
@@ -18,15 +18,19 @@ def location_names(data = Data()) -> List[str]:
         if(course == "Other"):
             for itemId in range(5):
                 output.append(sm64hack_items[itemId])
+                output.append(badges[itemId])
             continue
         for star in range(8): #generates locations for each possible star in each level
             output.append(f"{course} Star {star + 1}")
         output.append(f"{course} Cannon")
+        output.append(f"{course} Troll Star")
     
+    output.append("Black Switch") #star revenge 3.5
+    output.extend(sr6_25_locations)
 
     return output
 
-def location_names_that_exist (data = Data()) -> List[str]:
+def location_names_that_exist(data: Data, troll_stars: int) -> List[str]:
     output: List[str] = []
     for course, info in data.locations.items():
         
@@ -34,6 +38,10 @@ def location_names_that_exist (data = Data()) -> List[str]:
             for itemId in range(5):
                 if info["Stars"][itemId].get("exists"):
                     output.append(sm64hack_items[itemId])
+            if "sr7" in data.locations["Other"]["Settings"]:
+                for itemId in range(5):
+                    if(info["Stars"][itemId + 7].get("exists")):
+                        output.append(badges[itemId])
             continue
         for star in range(8): #generates locations for each possible star in each level
             try:
@@ -44,6 +52,15 @@ def location_names_that_exist (data = Data()) -> List[str]:
                 data.locations[course]["Stars"].append({"exists": False}) #so i dont need to do this try except block later
         if(info["Cannon"].get("exists")):
             output.append(f"{course} Cannon")
+        if info.get("Troll Star") is None:
+            info["Troll Star"] = {"exists": False}
+        if(info["Troll Star"].get("exists") and troll_stars > 0):
+            output.append(f"{course} Troll Star")
+        
+    if "sr3.5" in data.locations["Other"]["Settings"]:
+        output.append("Black Switch")
+    if "sr6.25" in data.locations["Other"]["Settings"]:
+        output.extend(sr6_25_locations)
     
 
     return output

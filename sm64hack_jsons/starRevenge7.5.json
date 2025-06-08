@@ -1,0 +1,1319 @@
+{
+    "Course 1": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Wall Badge"
+                ]
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Wing Cap"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Vanish Cap",
+                    "Super Badge"
+                ],
+                "ConditionalRequirements": []
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        }
+    },
+    "Course 2": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Wing Cap",
+                    "Wall Badge"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Vanish Cap"
+                ],
+                "ConditionalRequirements": []
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        }
+    },
+    "Course 3": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "ConditionalRequirements": [
+                    {
+                        "Requirements": [
+                            "Super Badge"
+                        ]
+                    },
+                    {
+                        "Requirements": [
+                            "Wall Badge"
+                        ]
+                    }
+                ]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Metal Cap",
+                    "Super Badge"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Wing Cap"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Vanish Cap",
+                    "Super Badge"
+                ],
+                "ConditionalRequirements": []
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        }
+    },
+    "Course 4": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Wall Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Wing Cap"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Vanish Cap"
+                ],
+                "ConditionalRequirements": []
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": "0",
+        "Requirements": [],
+        "ConditionalRequirements": [
+            {
+                "StarRequirement": "10",
+                "Requirements": []
+            },
+            {
+                "StarRequirement": "0",
+                "Requirements": ["Wall Badge"]
+            }
+        ]
+    },
+    "Course 5": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Wing Cap",
+                    "Wall Badge"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Vanish Cap",
+                    "Wall Badge"
+                ],
+                "ConditionalRequirements": []
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": "0",
+        "Requirements": [],
+        "ConditionalRequirements": [
+            {
+                "StarRequirement": "10",
+                "Requirements": []
+            },
+            {
+                "StarRequirement": "0",
+                "Requirements": ["Wall Badge"]
+            }
+        ]
+    },
+    "Course 6": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Wing Cap",
+                    "Ultra Badge",
+                    "Wall Badge"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Vanish Cap",
+                    "Ultra Badge"
+                ],
+                "ConditionalRequirements": []
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": "0",
+        "Requirements": [],
+        "ConditionalRequirements": []
+    },
+    "Course 7": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Ultra Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "ConditionalRequirements": [
+                    {
+                        "Requirements": [
+                            "Wall Badge"
+                        ]
+                    },
+                    {
+                        "Requirements": [
+                            "Triple Jump Badge"
+                        ]
+                    }
+                ]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Wing Cap"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Vanish Cap"
+                ],
+                "ConditionalRequirements": []
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": "0",
+        "Requirements": ["Super Badge"],
+        "ConditionalRequirements": []
+    },
+    "Course 8": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Course 8 Cannon"
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Super Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Super Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Wall Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Wing Cap"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Vanish Cap",
+                    "Wall Badge"
+                ],
+                "ConditionalRequirements": []
+            }
+        ],
+        "Cannon": {
+            "exists": true
+        },
+        "StarRequirement": "0",
+        "Requirements": ["Super Badge"],
+        "ConditionalRequirements": []
+    },
+    "Course 9": {
+        "Stars": [
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Metal Cap"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Metal Cap"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Metal Cap"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Course 9 Cannon",
+                    "Ultra Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Wing Cap"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Vanish Cap",
+                    "Metal Cap"
+                ],
+                "ConditionalRequirements": []
+            }
+        ],
+        "Cannon": {
+            "exists": true
+        },
+        "StarRequirement": "0",
+        "Requirements": ["Super Badge", "Wall Badge"],
+        "ConditionalRequirements": []
+    },
+    "Course 10": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "Requirements":[
+                    "Course 10 Cannon",
+                    "Super Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements":[
+                    "Wall Badge",
+                    "Ultra Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements":[
+                    "Super Badge",
+                    "Triple Jump Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements":[
+                    "Ultra Badge",
+                    "Triple Jump Badge",
+                    "Course 10 Cannon"
+                ]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Wing Cap",
+                    "Super Badge",
+                    "Course 10 Cannon"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Vanish Cap",
+                    "Wall Badge"
+                ],
+                "ConditionalRequirements": []
+            }
+        ],
+        "Cannon": {
+            "exists": true
+        },
+        "StarRequirement": "0",
+        "Requirements": [],
+        "ConditionalRequirements": []
+    },
+    "Course 11": {
+        "Stars": [
+            {
+                "exists": true,
+                "Requirements": [
+                    "Super Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Super Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Ultra Badge",
+                    "Triple Jump Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Ultra Badge",
+                    "Triple Jump Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Triple Jump Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Wing Cap",
+                    "Ultra Badge",
+                    "Triple Jump Badge"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Vanish Cap",
+                    "Triple Jump Badge"
+                ],
+                "ConditionalRequirements": []
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": "40",
+        "Requirements": [],
+        "ConditionalRequirements": []
+    },
+    "Course 12": {
+        "Stars": [
+            {
+                "exists": true,
+                "ConditionalRequirements": [
+                    {
+                        "Requirements": [
+                            "Triple Jump Badge",
+                            "Wall Badge"
+                        ]
+                    },
+                    {
+                        "Requirements": [
+                            "Ultra Badge"
+                        ]
+                    }
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements": ["Wall Badge"],
+                "ConditionalRequirements": [
+                    {
+                        "Requirements": [
+                            "Triple Jump Badge"
+                        ]
+                    },
+                    {
+                        "Requirements": [
+                            "Ultra Badge"
+                        ]
+                    }
+                ]
+            },
+            {
+                "exists": true,
+                "ConditionalRequirements": [
+                    {
+                        "Requirements": [
+                            "Triple Jump Badge",
+                            "Wall Badge"
+                        ]
+                    },
+                    {
+                        "Requirements": [
+                            "Ultra Badge"
+                        ]
+                    }
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Triple Jump Badge",
+                    "Wall Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Triple Jump Badge",
+                    "Wall Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Wing Cap"
+                ],
+                "ConditionalRequirements": [
+                    {
+                        "Requirements": [
+                            "Triple Jump Badge",
+                            "Wall Badge"
+                        ]
+                    },
+                    {
+                        "Requirements": [
+                            "Ultra Badge"
+                        ]
+                    }
+                ]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Vanish Cap",
+                    "Triple Jump Badge",
+                    "Wall Badge"
+                ],
+                "ConditionalRequirements": []
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": "0",
+        "Requirements": [],
+        "ConditionalRequirements": [
+            {
+                "StarRequirement": "40",
+                "Requirements": ["Ultra Badge"]
+            },
+            {
+                "StarRequirement": "50",
+                "Requirements": ["Super Badge"]
+            }
+        ]
+    },
+    "Course 13": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Wing Cap"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Vanish Cap"
+                ],
+                "ConditionalRequirements": []
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": "40",
+        "Requirements": ["Triple Jump Badge", "Wall Badge"],
+        "ConditionalRequirements": []
+    },
+    "Course 14": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Wall Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Wall Badge",
+                    "Ultra Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Wall Badge",
+                    "Ultra Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "Requirements": [
+                    "Ultra Badge"
+                ]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Wing Cap"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Vanish Cap",
+                    "Ultra Badge"
+                ],
+                "ConditionalRequirements": []
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": "75",
+        "Requirements": [
+            "Metal Cap"
+        ],
+        "ConditionalRequirements": []
+    },
+    "Course 15": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Wing Cap"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [
+                    "Vanish Cap"
+                ],
+                "ConditionalRequirements": []
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": "100",
+        "Requirements": [],
+        "ConditionalRequirements": []
+    },
+    "Bowser 1": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": "20",
+        "Requirements": [],
+        "ConditionalRequirements": []
+    },
+    "Bowser 2": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": ["Wall Badge"],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": "33",
+        "Requirements": ["Super Badge"],
+        "ConditionalRequirements": []
+    },
+    "Bowser 3": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": 80,
+        "Requirements": ["Ultra Badge", "Wall Badge", "Metal Cap"]
+    },
+    "Slide": {
+        "Stars": [
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": "100",
+        "Requirements": [],
+        "ConditionalRequirements": []
+    },
+    "Secret 1": {
+        "Stars": [
+            {
+                "exists": false
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": 80,
+        "Requirements": ["Ultra Badge", "Wall Badge", "Metal Cap"],
+        "ConditionalRequirements": []
+    },
+    "Secret 2": {
+        "Stars": [
+            {
+                "exists": true,
+                "Requirements":["Wall Badge", "Ultra Badge"]
+            },
+            {
+                "exists": true,
+                "Requirements":["Wall Badge"]
+            },
+            {
+                "exists": true,
+                "Requirements":["Wall Badge", "Ultra Badge"]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": "80",
+        "Requirements": ["Metal Cap"],
+        "ConditionalRequirements": []
+    },
+    "Secret 3": {
+        "Stars": [
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        }
+    },
+    "Metal Cap": {
+        "Stars": [
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": "0",
+        "Requirements": [],
+        "ConditionalRequirements": [
+            {
+                "StarRequirement": "50",
+                "Requirements": ["Super Badge"]
+            },
+            {
+                "StarRequirement": "0",
+                "Requirements": ["Wall Badge"]
+            }
+        ]
+    },
+    "Wing Cap": {
+        "Stars": [
+            {
+                "exists": true,
+                "Requirements": ["Ultra Badge"]
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        },
+        "StarRequirement": "0",
+        "Requirements": ["Super Badge"],
+        "ConditionalRequirements": [
+            {
+                "StarRequirement": "10",
+                "Requirements": []
+            },
+            {
+                "StarRequirement": "0",
+                "Requirements": ["Wall Badge"]
+            }
+        ]
+    },
+    "Vanish Cap": {
+        "Stars": [
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": false
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        }
+    },
+    "Overworld": {
+        "Stars": [
+            {
+                "exists": true,
+                "StarRequirement": "50",
+                "Requirements": ["Super Badge"],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "50",
+                "Requirements": ["Super Badge", "Wall Badge"],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "35",
+                "Requirements": ["Wall Badge"],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "15",
+                "Requirements": [],
+                "ConditionalRequirements": [
+                    {
+                        "StarRequirement": "0",
+                        "Requirements": ["Triple Jump Badge"]
+                    },
+                    {
+                        "StarRequirement": "0",
+                        "Requirements": ["Wall Badge"]
+                    }
+                ]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "50",
+                "Requirements": [],
+                "ConditionalRequirements": [
+                    {
+                        "StarRequirement": "0",
+                        "Requirements": ["Triple Jump Badge"]
+                    },
+                    {
+                        "StarRequirement": "0",
+                        "Requirements": ["Wall Badge"]
+                    }
+                ]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": ["Super Badge", "Wall Badge"],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": [],
+                "ConditionalRequirements": [
+                    {
+                        "StarRequirement": "10",
+                        "Requirements": []
+                    },
+                    {
+                        "StarRequirement": "",
+                        "Requirements": ["Wall Badge"]
+                    }
+                ]
+            }
+        ],
+        "Cannon": {
+            "exists": false
+        }
+    },
+    "Other": {
+        "Stars": [
+            {
+                "exists": true,
+                "StarRequirement": "20",
+                "Requirements": [],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "33",
+                "Requirements": ["Super Badge"],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "55",
+                "Requirements": [],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "25",
+                "Requirements": [],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "50",
+                "Requirements": ["Super Badge"],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": false
+            },
+            {
+                "exists": true,
+                "StarRequirement": "80",
+                "Requirements": [
+                    "Metal Cap",
+                    "Ultra Badge",
+                    "Wall Badge"
+                ],
+                "ConditionalRequirements": []
+            },
+            {
+                "exists": true,
+                "StarRequirement": "20",
+                "Requirements": ["Key 1"]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "40",
+                "Requirements": ["Super Badge"]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "33",
+                "Requirements": ["Super Badge", "Key 2"]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "33",
+                "Requirements": ["Ultra Badge", "Key 2", "Wall Badge"]
+            },
+            {
+                "exists": true,
+                "StarRequirement": "0",
+                "Requirements": ["Super Badge", "Triple Jump Badge"]
+            }
+        ],
+        "Settings": [
+            "cannons",
+            "sr7"
+        ]
+    }
+}
