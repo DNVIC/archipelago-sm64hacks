@@ -276,15 +276,16 @@ class SM64HackWorld(World):
                     star_data = self.data.locations[course]["Stars"][item]
                     if(star_data.get("exists")):
                         add_rule(self.multiworld.get_location(sm64hack_items[item], self.player),
-                            lambda state, star_data=star_data: self.can_access_location(state, star_data))
+                            lambda state, star_data=self.data.locations[course]["Stars"][item]: self.can_access_location(state, star_data))
                     
                 
                 if("sr7" in self.data.locations["Other"]["Settings"]):
                     for item in range(5):
                         stardata = self.data.locations[course]["Stars"][item + 7]
                         if(stardata.get("exists")):
+                            print(self.multiworld.get_location(badges[item], self.player))
                             add_rule(self.multiworld.get_location(badges[item], self.player),
-                                lambda state, star_data=star_data: self.can_access_location(state, star_data))
+                                lambda state, star_data=self.data.locations[course]["Stars"][item + 7]: self.can_access_location(state, star_data))
                 
                 if("sr6.25" in self.data.locations["Other"]["Settings"]):
                     add_rule(self.multiworld.get_location("Yellow Switch", self.player),
@@ -296,37 +297,37 @@ class SM64HackWorld(World):
 
                 star_data = self.data.locations[course]["Stars"][6]
                 add_rule(self.multiworld.get_location("Victory Location", self.player),
-                    lambda state, star_data=star_data: self.can_access_location(state, star_data))
+                    lambda state, star_data=self.data.locations[course]["Stars"][6]: self.can_access_location(state, star_data))
                 continue
             if course == "Extra":
                 for star in range(8):
                     star_data = self.data.locations[course]["Stars"][star]
                     if(star_data.get("exists")):
                         add_rule(self.multiworld.get_location(sr6_25_locations[star + 1], self.player),
-                            lambda state, course=course, star=star, star_data=star_data: self.can_access_location(state, star_data, True, course, star))
+                            lambda state, course=course, star=star, star_data=self.data.locations[course]["Stars"][star]: self.can_access_location(state, star_data, True, course, star))
                 continue
                     
                 
             
             course_data = self.data.locations[course]
             add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player),
-                lambda state, course_data=course_data: self.can_access_location(state, course_data))
+                lambda state, course_data=self.data.locations[course]: self.can_access_location(state, course_data))
             
             star_data = self.data.locations[course]["Cannon"]
             if(star_data.get("exists")):
                 add_rule(self.multiworld.get_location(f"{course} Cannon", self.player),
-                    lambda state, star_data=star_data: self.can_access_location(state, star_data))
+                    lambda state, star_data=self.data.locations[course]["Cannon"]: self.can_access_location(state, star_data))
                     
             star_data = self.data.locations[course]["Troll Star"]
             if(star_data.get("exists")):
                 add_rule(self.multiworld.get_location(f"{course} Troll Star", self.player),
-                    lambda state, star_data=star_data: self.can_access_location(state, star_data))
+                    lambda state, star_data=self.data.locations[course]["Troll Star"]: self.can_access_location(state, star_data))
 
             for star in range(8):
                 star_data = self.data.locations[course]["Stars"][star]
                 if(star_data.get("exists")):
                     add_rule(self.multiworld.get_location(f"{course} Star {star + 1}", self.player),
-                        lambda state, course=course, star=star, star_data=star_data: self.can_access_location(state, star_data, True, course, star))
+                        lambda state, course=course, star=star, star_data=self.data.locations[course]["Stars"][star]: self.can_access_location(state, star_data, True, course, star))
                 
     
     def generate_basic(self) -> None:

@@ -190,6 +190,7 @@ class SM64HackClient(BizHawkClient):
         #flag for if unimportant items have been received can't be stored in savedata both because it'd fuck with the async traps 
         #and more importantly because there is no "safe" savedata to store the most recent index in, due to there not being much savedata in sm64, 
         #and as a result the unused portions are very likely to be used by some hackers.
+        print("tetttt", self.sent_get_requests, ctx.stored_data)
         if f"sm64hack_junk_{ctx.team}_{ctx.slot}_{index}" not in self.sent_get_requests: #need to let it loop through to receive the results of this
             await ctx.send_msgs([{
                 "cmd": "Get",
@@ -197,7 +198,9 @@ class SM64HackClient(BizHawkClient):
             }])
             self.sent_get_requests.append(f"sm64hack_junk_{ctx.team}_{ctx.slot}_{index}")
             self.receive_items = True
-        elif not ctx.stored_data[f"sm64hack_junk_{ctx.team}_{ctx.slot}_{index}"] and index not in self.traps_received_this_game:
+        elif f"sm64hack_junk_{ctx.team}_{ctx.slot}_{index}" not in ctx.stored_data.keys():
+            self.receive_items = True #australia ping
+        elif not ctx.stored_data.get(f"sm64hack_junk_{ctx.team}_{ctx.slot}_{index}") and index not in self.traps_received_this_game:
             self.traps_received_this_game.append(index)
             if self.loops > 4 or name == "Coin":
                 await ctx.send_msgs([{
@@ -275,6 +278,41 @@ class SM64HackClient(BizHawkClient):
             read = await bizhawk.read(ctx.bizhawk_ctx, reads)
             if(int.from_bytes(read[9]) < 60):
                 return #game isnt initialized yet so things might be fucky
+            
+            if(list(read[10])[0] == 69 and not ctx.finished_game): #this and patch are before mario exists check because they should be active even if mario doesn't exist
+                ctx.finished_game = True                           #because victory is usually on stuff like end screen where mario doesn't exist
+                await ctx.send_msgs([{                             #and patch is on file select usually
+                    "cmd": "StatusUpdate",
+                    "status": ClientStatus.CLIENT_GOAL
+                }])
+
+            
+            resettest = read[3]
+            if(resettest.hex() != "24040001"):
+                logger.info("Reminder: Save and load a savestate so that traps can take effect")
+                trap_patch = pkgutil.get_data(__name__, "asm/trap_patch") #patches are external files for ease of editing them
+                choir_patch = pkgutil.get_data(__name__, "asm/choir_patch")
+                star_patch = pkgutil.get_data(__name__, "asm/star_patch")
+                #print(hex(len(patch) + patchPtr))
+                writes.extend([
+                    (starCountAPPtr1, bytes.fromhex("24040001"), "RDRAM"),
+                    (starCountAPPtr2, bytes.fromhex("24040001"), "RDRAM"),
+                    (flagAPPtr, bytes.fromhex("24180002"), "RDRAM"),
+                    (cannonAPPtr, bytes.fromhex("240E0002"), "RDRAM"),
+                    (capAPPtr, bytes.fromhex("080A9BF7"), "RDRAM"),
+                    (keyAPPtr1, bytes.fromhex("00000000"), "RDRAM"),
+                    (keyAPPtr2, bytes.fromhex("00000000"), "RDRAM"),
+                    (toad1APPtr, bytes.fromhex("0809DA70"), "RDRAM"),
+                    (toad2APPtr, bytes.fromhex("0809DA7D"), "RDRAM"),
+                    (toad3APPtr, bytes.fromhex("0809DA8A"), "RDRAM"),
+                    (trapPatchPtr, trap_patch, "RDRAM"),
+                    (choirPatchPtr, choir_patch, "RDRAM"),
+                    (choirHookPtr, bytes.fromhex("0C09FFC0"), "RDRAM"),
+                    (starPatchPtr, star_patch, "RDRAM")
+                ])
+
+            if int.from_bytes(read[4]) == 0: #mario doesn't exist yet
+                return
             if self.loops == 0:
                 self.eeprom = read[12].decode("ascii")
             if self.eeprom != read[12].decode("ascii"): #rom changed
@@ -310,7 +348,7 @@ class SM64HackClient(BizHawkClient):
                                     level = int.from_bytes(read[11])
                                     if(level_index[level] == i):
                                         location_name = f"{courseIndex[i]} Troll Star"
-                                    elif level_index[level] + 1 == i or (i == 8 and level_index[level] == 12):
+                                    elif level_index[level] + 1 == i or (i == 12 and level_index[level] == 8):
                                         if(i == 12):
                                             location_name = courseIndex[8] + " Cannon"
                                         else:
@@ -345,7 +383,6 @@ class SM64HackClient(BizHawkClient):
                 file2data = self.set_file_2_flags(self.file1Stars, file2data, ctx)
                 file2flag = True
             
-            print(int.from_bytes(read[17]))
             if int.from_bytes(read[17]) > 7 and int.from_bytes(read[17]) < 255: #only star id 7 gives the previous level's cannon, 8+ do not and so i need to do some asm to store the id in a readable memory location
                 level = int.from_bytes(read[11])
                 location_name = f"{courseIndex[level_index[level]]} Troll Star"
@@ -474,29 +511,6 @@ class SM64HackClient(BizHawkClient):
 
             if(file2flag == True):
                 writes.append((filesPtr[1], bytearray(file2data), "RDRAM"))
-            resettest = read[3]
-            if(resettest.hex() != "24040001"):
-                logger.info("Reminder: Save and load a savestate so that traps can take effect")
-                trap_patch = pkgutil.get_data(__name__, "asm/trap_patch") #patches are external files for ease of editing them
-                choir_patch = pkgutil.get_data(__name__, "asm/choir_patch")
-                star_patch = pkgutil.get_data(__name__, "asm/star_patch")
-                #print(hex(len(patch) + patchPtr))
-                writes.extend([
-                    (starCountAPPtr1, bytes.fromhex("24040001"), "RDRAM"),
-                    (starCountAPPtr2, bytes.fromhex("24040001"), "RDRAM"),
-                    (flagAPPtr, bytes.fromhex("24180002"), "RDRAM"),
-                    (cannonAPPtr, bytes.fromhex("240E0002"), "RDRAM"),
-                    (capAPPtr, bytes.fromhex("080A9BF7"), "RDRAM"),
-                    (keyAPPtr1, bytes.fromhex("00000000"), "RDRAM"),
-                    (keyAPPtr2, bytes.fromhex("00000000"), "RDRAM"),
-                    (toad1APPtr, bytes.fromhex("0809DA70"), "RDRAM"),
-                    (toad2APPtr, bytes.fromhex("0809DA7D"), "RDRAM"),
-                    (toad3APPtr, bytes.fromhex("0809DA8A"), "RDRAM"),
-                    (trapPatchPtr, trap_patch, "RDRAM"),
-                    (choirPatchPtr, choir_patch, "RDRAM"),
-                    (choirHookPtr, bytes.fromhex("0C09FFC0"), "RDRAM"),
-                    (starPatchPtr, star_patch, "RDRAM")
-                ])
             
             #greendemon
             if read[14].hex().upper().startswith('80'):
@@ -554,7 +568,7 @@ class SM64HackClient(BizHawkClient):
                 self.area = int.from_bytes(read[13])
                 self.level_start_time = int.from_bytes(read[9])
             elif(ctx.slot_data["Badges"] and int.from_bytes(read[4]) != 0 and (int.from_bytes(read[9]) - self.level_start_time) > 150):
-                hack_name = read[12].decode("ascii")
+                hack_name = self.eeprom
                 level = self.level
                 badges_to_send = []
                 match hack_name: #bit of a hack but itll work. tried to go through every object in the level for compatibility but that broke everything
@@ -595,6 +609,15 @@ class SM64HackClient(BizHawkClient):
                             case 0x14:
                                 if self.area == 1: #area 2 is boss fight
                                     b = await self.get_level_badges((0x34C468,), level, ctx)
+                                    badges_to_send = [x for x in ["Super Badge"] if x not in b]
+                            case 0x1A:
+                                b = await self.get_level_badges((0x342548,), level, ctx)
+                                badges_to_send = [x for x in ["Ultra Badge"] if x not in b]
+                    case "STAR REVENGE 8 edit ": #awesome's sr8 edit for AP
+                        match level:
+                            case 0x14:
+                                if self.area == 1: #area 2 is boss fight
+                                    b = await self.get_level_badges((0x34CB88,), level, ctx)
                                     badges_to_send = [x for x in ["Super Badge"] if x not in b]
                             case 0x1A:
                                 b = await self.get_level_badges((0x342548,), level, ctx)
@@ -649,12 +672,6 @@ class SM64HackClient(BizHawkClient):
                     writes.append(self.get_junk_item_write(trap[1]))
 
             #print(list(read[10])[0])
-            if(list(read[10])[0] == 69 and not ctx.finished_game):
-                ctx.finished_game = True
-                await ctx.send_msgs([{
-                    "cmd": "StatusUpdate",
-                    "status": ClientStatus.CLIENT_GOAL
-                }])
             await bizhawk.write(ctx.bizhawk_ctx, writes)
             
         except bizhawk.RequestFailedError:
