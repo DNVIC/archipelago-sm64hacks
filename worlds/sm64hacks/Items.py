@@ -11,7 +11,7 @@ def star_count(data):
 
 def item_is_important(item_name, data = Data()):
     datastring = str(data.locations)
-    if("Cap" in item_name):
+    if(item_name.endswith("Cap")):
         return datastring.count(item_name) > 1 #since each cap is also the name of a stage
     if item_name == "Progressive Key":
         return item_is_important("Key 1", data) or item_is_important("Key 2", data)

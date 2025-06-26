@@ -287,6 +287,7 @@ class SM64HackClient(BizHawkClient):
                 }])
 
             
+            writes = []
             resettest = read[3]
             if(resettest.hex() != "24040001"):
                 logger.info("Reminder: Save and load a savestate so that traps can take effect")
@@ -312,6 +313,7 @@ class SM64HackClient(BizHawkClient):
                 ])
 
             if int.from_bytes(read[4]) == 0: #mario doesn't exist yet
+                await bizhawk.write(ctx.bizhawk_ctx, writes)
                 return
             if self.loops == 0:
                 self.eeprom = read[12].decode("ascii")
@@ -325,7 +327,6 @@ class SM64HackClient(BizHawkClient):
 
             
             file1data = list(read[0])
-            writes = []
             if self.file1Stars is not None:
                 if(file1data[5] != self.file1Stars[5]) and ctx.slot_data["Badges"]:
                     file1data[5] = self.file1Stars[5] #prevent badges from changing the flags, so they can be received correctly.
@@ -620,7 +621,7 @@ class SM64HackClient(BizHawkClient):
                                     b = await self.get_level_badges((0x34CB88,), level, ctx)
                                     badges_to_send = [x for x in ["Super Badge"] if x not in b]
                             case 0x1A:
-                                b = await self.get_level_badges((0x342548,), level, ctx)
+                                b = await self.get_level_badges((0x342A08,), level, ctx)
                                 badges_to_send = [x for x in ["Ultra Badge"] if x not in b]
                 locs = []
                 for badge in badges_to_send:

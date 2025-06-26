@@ -44,6 +44,10 @@ class SM64HackWorld(World):
     def generate_early(self):
         self.data.import_json(self.options.json_file.value)
         self.progressive_keys = self.options.progressive_keys
+        if isinstance(self.data.locations["Other"]["Settings"], list):
+            raise ValueError("JSON is too old. \
+                            \nPlease reimport the JSON into the website (https://dnvic.com/ArchipelagoGenerator), \
+                              and export with a new progressive key setting at the bottom, and try again")
         if self.progressive_keys == 3:
             try:
                 self.progressive_keys = self.data.locations["Other"]["Settings"]["prog_key"]
