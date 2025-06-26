@@ -7,7 +7,7 @@ My little archipelago world for (most) Super Mario 64 Romhacks. Currently shuffl
 Video guide [here](https://youtu.be/ugKJhTIC1OE), text guide below, use whichever you prefer. (though it's pretty complicated, the video guide is more thorough)
 Video guide is a bit outdated but it's recommended if you are making your own JSON file, if you are using an existing one the text guide is more than sufficient
 
-Have a quick look through [this repo](https://github.com/DNVIC/sm64hack-archipelago-jsons) first, there's a good chance there's a json file for a hack you want to play in there, especially if it's a major and/or popular hack. If it's in there, the hack is bundled in with the lastest version of the APWorld (you do NOT need to download it), and therefore you can head straight to [generation](#-Generation), though make sure to note down the name of the json file.
+Have a quick look through [this repo](https://github.com/DNVIC/sm64hack-archipelago-jsons) first, there's a good chance there's a json file for a hack you want to play in there, especially if it's a major and/or popular hack. If it's in there, the hack is bundled in with the lastest version of the APWorld (you do NOT need to download it), and therefore you can head straight to [generation](#Generation), though make sure to note down the name of the json file.
 
 # JSON Creation
 
