@@ -24,7 +24,7 @@ Export the .json file, and put it in the sm64hack_jsons folder inside the archip
 
 ### Generation
 
-Copy the template.yaml from the releases, change json_file to be the json file you want to use (just the name of the file, if it's in a subdirectory it will find it), and place it in the worlds folder.
+Copy the template.yaml from the releases, change json_file to be the json file you want to use (just the name of the file, if it's in a subdirectory it will find it), and place it in the players folder.
 There's a few settings you can modify, progressive keys makes keys a progressive item, in some hacks this is a good idea as key 2 stuff is locked entirely behind key 1, whereas others its not. Each json has a default progressive key value, but if you want to change it for your specific hack you can. You can also choose to randomize troll stars, if your hack supports it, though many hacks do not.
 
 
