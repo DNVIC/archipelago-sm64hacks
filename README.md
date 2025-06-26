@@ -27,7 +27,7 @@ Copy the template.yaml from the releases, change json_file to be the json file y
 There's a few settings you can modify, progressive keys makes keys a progressive item, in some hacks this is a good idea as key 2 stuff is locked entirely behind key 1, whereas others its not. Each json has a default progressive key value, but if you want to change it for your specific hack you can. You can also choose to randomize troll stars, if your hack supports it, though many hacks do not.
 
 
-# Client
+### Client
 
 Once your world is generated, open the hack you want to play, and delete/move files A and B (this is important)
 
