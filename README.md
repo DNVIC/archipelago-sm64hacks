@@ -1,6 +1,7 @@
 # NOTE: Use and discussion of this apworld (unfortunately) is not allowed anymore in the main archipelago server. Please join [this one](https://discord.gg/Nu4X9gmGDR) instead, if you want help, or just want to share a json file
 
-My little archipelago world for (most) Super Mario 64 Romhacks. Currently shuffles keys, stars, caps, and cannons throughout the worlds
+My little archipelago world for (most) Super Mario 64 Romhacks. Currently shuffles keys, stars, caps, cannons, and troll stars throughout the worlds
+Special support for Star Revenges 3.5, 6.25, 7, 7.5, and 8 as well!
 
 ## How to use this world:
 
