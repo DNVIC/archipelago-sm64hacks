@@ -5,19 +5,29 @@ My little archipelago world for (most) Super Mario 64 Romhacks. Currently shuffl
 ## How to use this world:
 
 Video guide [here](https://youtu.be/ugKJhTIC1OE), text guide below, use whichever you prefer. (though it's pretty complicated, the video guide is more thorough)
+Video guide is a bit outdated but it's recommended if you are making your own JSON file, if you are using an existing one the text guide is more than sufficient
+
+Have a quick look through [this repo](https://github.com/DNVIC/sm64hack-archipelago-jsons) first, there's a good chance there's a json file for a hack you want to play in there, especially if it's a major and/or popular hack. If it's in there, the hack is bundled in with the lastest version of the APWorld (you do NOT need to download it), and therefore you can head straight to [generation](#-Generation), though make sure to note down the name of the json file.
+
+# JSON Creation
 
 First, create a json file using [this website](http://dnvic.com/ArchipelagoGenerator/index.html), using a .jsml file. You can get a .jsml file for a hack by loading up a hack in PJ64/Mupen64/Retroarch, opening [stardisplay](https://github.com/aglab2/SM64StarDisplay), and finding the layout folder in the same folder the exe file is in.
-You can also get premade json files [here](https://github.com/DNVIC/sm64hack-archipelago-jsons)
 
 Then, get the .jsml file from the layout folder located where the stardisplay .exe is.
 
-Input the jsml file into the website, and fill out the requirements for everything in the hack, by clicking on the stars, cannons, caps/keys, or courses. Most hacks only really have star and key requirements, and maybe per-star cap requirements, but some hacks have more complicated requirements. If a cannon exists, select it, hit the exists checkbox, add requirements, and hit save. Same with keys/caps. Conditional requirements are a bit more confusing, but are necessary if for example you can get to a level with either the vanish cap or key 2. You'd create one conditional requirement for the vanish cap, and one for key 2, and that'll make it so only one is required.
+Input the jsml file into the website, and fill out the requirements for everything in the hack, by clicking on the stars, cannons, caps/keys, troll stars, or course names. Most hacks only really have star and key requirements, and maybe per-star cap requirements, but some hacks have more complicated requirements. If a cannon exists, select it, hit the exists checkbox, add requirements, and hit save. Same with keys/caps/troll stars. Conditional requirements are a bit more confusing, but are necessary if for example you can get to a level with either the vanish cap or key 2. You'd create one conditional requirement for the vanish cap, and one for key 2, and that'll make it so only one is required.
 
 Click on the victory text at the bottom, and put whatever is required to achieve "Victory" in the hack. As it is, this will not be automatically be achieved in the rando when you get it, since its impossible to know what constitutes victory for an arbitrary hack, but its still important since the rando makes sure that victory is possible. If you want to, you can say when you get victory by running the "Victory.js" script when playing the game. It's the honor system, but the best I can do.
 
-Export the .json file, and put it in the same folder as the archipelago .exe (or generate.py)
+Export the .json file, and put it in the sm64hack_jsons folder inside the archipelago root directory (if it does not exist, try generating a sample game with something like superMario64.json and it should work afterwards
 
-Copy the template.yaml, change json_file to be the json file you just made (and if you want keys to be progressive, enable that as well), and place it in the worlds folder.
+# Generation
+
+Copy the template.yaml from the releases, change json_file to be the json file you want to use (just the name of the file, if it's in a subdirectory it will find it), and place it in the worlds folder.
+There's a few settings you can modify, progressive keys makes keys a progressive item, in some hacks this is a good idea as key 2 stuff is locked entirely behind key 1, whereas others its not. Each json has a default progressive key value, but if you want to change it for your specific hack you can. You can also choose to randomize troll stars, if your hack supports it, though many hacks do not.
+
+
+# Client
 
 Once your world is generated, open the hack you want to play, and delete/move files A and B (this is important)
 
@@ -32,7 +42,7 @@ Q: You said (most) romhacks, what hacks aren't supported?
 
 A: Basically any decomp hack will probably not ever be supported since this uses MIPS assembly code to change certain parts of the game to read from File 2 (easiest way to implement it, sm64's code is a mess), and when you recompile a rom from source and edit basically anything, the compiler will shift all of these pointers the assembly code relies upon, which causes the assembly code to fail completely. 
 
-Some more complicated binary hacks/hacks with a lot of stars, like Star Revenge 6.25 and Decades Later are not currently supported. Eventually, the goal is to get these hacks supported though.
+Some more complicated binary hacks/hacks with a lot of stars, like Decades Later and SM64OoT are not currently supported. Eventually, the goal is to get these hacks supported though.
 In the far future, it might be possible to create little C library for decomp hacks, which if the hack is compiled with the library, the hack will be archipelago-compatible. Though that requires the hack to have its source code released, and it's a bit too much work for me for now.
 
 Q: Why don't you support BizHawk even though this uses the "bizhawk client"?
@@ -49,10 +59,8 @@ A: Feel free to pitch ideas to me, but reminder that this world is meant to be g
 
 ## Future ideas (in approximate order of greatest to least priority)
 * Better object and music shuffler
-* Custom items for specific hacks (Badges in sr7/7.5/8, sm64oot, probably others im not thinking of)
-* Ideas I have for dynamic locations that could be interesting
+* Custom items for specific hacks (sm64oot, probably others im not thinking of)
 * Some sort of way to know what items you're sending to other people in-game
-* Presets for major/important hacks (probably every megapack hack)
 
 ## Credits
 * aglab2 - Making StarDisplay (referencing the StarDisplay code was really helpful in figuring out where pointers were)
@@ -61,6 +69,7 @@ A: Feel free to pitch ideas to me, but reminder that this world is meant to be g
 * KingToad74EE - Testing
 * Agyroth - Testing
 * HeralayanSalty - Making a good bit of the bizhawk client connector script
+* Awesome7285 - Usually being the first one to find any bugs in my code
 * Everyone who submitted JSON files for the github repo
 * A bunch of archipelago worlds I ended up referencing when making this.
 
