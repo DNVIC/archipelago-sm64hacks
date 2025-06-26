@@ -9,7 +9,7 @@ Video guide is a bit outdated but it's recommended if you are making your own JS
 
 Have a quick look through [this repo](https://github.com/DNVIC/sm64hack-archipelago-jsons) first, there's a good chance there's a json file for a hack you want to play in there, especially if it's a major and/or popular hack. If it's in there, the hack is bundled in with the lastest version of the APWorld (you do NOT need to download it), and therefore you can head straight to [generation](#Generation), though make sure to note down the name of the json file.
 
-# JSON Creation
+### JSON Creation
 
 First, create a json file using [this website](http://dnvic.com/ArchipelagoGenerator/index.html), using a .jsml file. You can get a .jsml file for a hack by loading up a hack in PJ64/Mupen64/Retroarch, opening [stardisplay](https://github.com/aglab2/SM64StarDisplay), and finding the layout folder in the same folder the exe file is in.
 
@@ -21,7 +21,7 @@ Click on the victory text at the bottom, and put whatever is required to achieve
 
 Export the .json file, and put it in the sm64hack_jsons folder inside the archipelago root directory (if it does not exist, try generating a sample game with something like superMario64.json and it should work afterwards
 
-# Generation
+### Generation
 
 Copy the template.yaml from the releases, change json_file to be the json file you want to use (just the name of the file, if it's in a subdirectory it will find it), and place it in the worlds folder.
 There's a few settings you can modify, progressive keys makes keys a progressive item, in some hacks this is a good idea as key 2 stuff is locked entirely behind key 1, whereas others its not. Each json has a default progressive key value, but if you want to change it for your specific hack you can. You can also choose to randomize troll stars, if your hack supports it, though many hacks do not.
