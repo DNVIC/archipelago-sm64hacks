@@ -39,8 +39,7 @@ class TrollStars(Choice):
 
 class JsonFile(FreeText):
     """Name of the json file which the hack information.
-    Must be placed in base folder upon world generation.
-    If using a preset, ignore this."""
+    Must be placed in sm64hack_jsons folder upon world generation, if using a custom json file"""
     display_name = "Json File"
     default = "superMario64.json"
     
