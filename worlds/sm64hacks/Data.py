@@ -182,7 +182,7 @@ class Data:
         if len(json_file) == 0:
             raise FileNotFoundError(f"JSON file {file_name} does not exist")
         json_file = json_file[0]
-        print(json_file)
+        #print(json_file)
         if(local_file):
             with open(json_file, 'r') as infile:
                 filetext = infile.read()
@@ -190,7 +190,7 @@ class Data:
                 self.locations = json.loads(filetext)
         else:
             json_file = str(json_file).replace("\\", "/") #extremely janky but it works
-            print(json_file, resources.files(__package__))
+            #print(json_file, resources.files(__package__))
             json_file = os.path.relpath(json_file, start=str(resources.files(__package__)).replace("\\", "/"))
             file = pkgutil.get_data(__name__, json_file).decode()
             filetext = file
