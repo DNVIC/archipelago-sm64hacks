@@ -43,7 +43,7 @@ class SM64HackWorld(World):
         
     def generate_early(self):
         self.data.import_json(self.options.json_file.value)
-        self.progressive_keys = self.options.progressive_keys
+        self.progressive_keys = self.options.progressive_keys.value
         if isinstance(self.data.locations["Other"]["Settings"], list):
             raise ValueError("JSON is too old. \
                             \nPlease reimport the JSON into the website (https://dnvic.com/ArchipelagoGenerator), \
@@ -311,7 +311,7 @@ class SM64HackWorld(World):
                             lambda state, course=course, star=star, star_data=self.data.locations[course]["Stars"][star]: self.can_access_location(state, star_data, True, course, star))
                 continue
                     
-                
+            
             
             course_data = self.data.locations[course]
             add_rule(self.multiworld.get_entrance(f"{course} Connection", self.player),
