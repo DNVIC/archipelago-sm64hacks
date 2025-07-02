@@ -32,7 +32,7 @@ There's a few settings you can modify, progressive keys makes keys a progressive
 
 Once your world is generated, open the hack you want to play, and delete/move files A and B (this is important)
 
-Open the rom in [Luna's Project64](https://github.com/Luna-Project64), and open the generic bizhawk client (DO NOT use BizHawk, despite the name. It might work on BizHawk, but I haven't tested it and I am not providing any support to BizHawk users.) Go to Debugger -> Scripts (enable debugger if it isn't enabled), download the two .js files from the releases page, put them in the scripts folder (the scripts folder is in the folder that opens when you hit the ... button in the bottom left), run the 'connector_pj64_generic.js', and you should be ready to go! 
+Open the rom in [Luna's Project64](https://github.com/Luna-Project64), and open the generic bizhawk client (DO NOT use BizHawk, despite the name. It might work on BizHawk, but I haven't tested it and I am not providing any support to BizHawk users.) Go to Debugger -> Scripts (enable debugger if it isn't enabled), download the two .js files from the releases page, put them in the scripts folder (the scripts folder is in the folder that opens when you hit the ... button in the bottom left, if it doesnt open, go to the main window, help->appdata, and make a folder named "Scripts" there), run the 'connector_pj64_generic.js', and you should be ready to go! 
 
 ## Anticipated Questions
 Q: Why does this exist? Why not just use the regular randomizer?
