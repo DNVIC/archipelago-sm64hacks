@@ -291,6 +291,8 @@ class SM64HackClient(BizHawkClient):
             resettest = read[3]
             if(resettest.hex() != "24040001"):
                 logger.info("Reminder: Save and load a savestate so that traps can take effect")
+                self.receive_items = True
+                
                 trap_patch = pkgutil.get_data(__name__, "asm/trap_patch") #patches are external files for ease of editing them
                 choir_patch = pkgutil.get_data(__name__, "asm/choir_patch")
                 star_patch = pkgutil.get_data(__name__, "asm/star_patch")
