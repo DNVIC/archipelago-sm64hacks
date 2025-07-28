@@ -58,6 +58,7 @@ class SM64HackClient(BizHawkClient):
             37: False
         }
         self.death_flag = True
+        self.death_time = 0
         self.last_death_link = None
         self.level = None
         self.choir_active = False
@@ -137,6 +138,10 @@ class SM64HackClient(BizHawkClient):
                 return 0 #stargrab, to prevent fake deaths
             case "00001904":
                 return 0 #stargrab, to prevent fake deaths
+            case "00001320":
+                return 0 #pulling door, to prevent fake deaths
+            case "00001321":
+                return 0 #pushing door, to prevent fake deaths
             case "00021312":
                 return 1 #quicksand
             case "300222E3":
@@ -607,6 +612,21 @@ class SM64HackClient(BizHawkClient):
                             case 0xB:
                                 b = await self.get_level_badges((0x34E808,), level, ctx)
                                 badges_to_send = [x for x in ["Ultra Badge"] if x not in b]
+
+                    case "STAR REVENGE 7.5edit":
+                        match level:
+                            case 0x11:
+                                b = await self.get_level_badges((0x348B68,), level, ctx)
+                                badges_to_send = [x for x in ["Super Badge"] if x not in b]
+                            case 0x13:
+                                b = await self.get_level_badges((0x345008, 0x34C208), level, ctx)
+                                badges_to_send = [x for x in ["Wall Badge", "Triple Jump Badge"] if x not in b]
+                            case 0xA:
+                                b = await self.get_level_badges((0x348B68,), level, ctx)
+                                badges_to_send = [x for x in ["Lava Badge"] if x not in b]
+                            case 0xB:
+                                b = await self.get_level_badges((0x34ECC8,), level, ctx)
+                                badges_to_send = [x for x in ["Ultra Badge"] if x not in b]
                     case "STAR REVENGE 8 SOH  ":
                         match level:
                             case 0x14:
@@ -639,7 +659,7 @@ class SM64HackClient(BizHawkClient):
             # deathlink
             if read[2][0] != 0x00:
                 self.death_flag = True
-            if(ctx.slot_data.get("DeathLink") and self.death_flag):
+            if(ctx.slot_data.get("DeathLink") and self.death_flag and time() - self.death_time > 5):
                 if "DeathLink" not in ctx.tags:
                     await ctx.update_death_link(True)
                 
@@ -647,12 +667,15 @@ class SM64HackClient(BizHawkClient):
                     self.death_flag = False
                     self.last_death_link = ctx.last_death_link
                     writes.append((hpPtr, bytes.fromhex("0000"), "RDRAM"))
+                    self.death_time = time()
                 elif self.last_death_link is None:
                     self.last_death_link = ctx.last_death_link
                 else: #if you die naturally and get a deathlink on the same frame or whatever the deathlink takes priority to avoid loops
                     death = 0
                     death = await self.check_death(read,ctx)
+                    print(causeStrings[death])
                     if(death != 0):
+                        self.death_time = time()
                         cs = causeStrings[death].replace("slot", ctx.player_names[ctx.slot])
                         self.death_flag = False
                         await ctx.send_death(cs)
