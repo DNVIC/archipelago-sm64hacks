@@ -58,7 +58,7 @@ class SM64HackWorld(World):
     def create_item(self, item: str) -> SM64HackItem:
         if item == "Power Star":
             if self.stars_created < self.data.maxstarcount: #only create progression stars up to the max starcount for the hack
-                classification = ItemClassification.progression_skip_balancing
+                classification = ItemClassification.progression_deprioritized_skip_balancing
                 self.stars_created += 1
             else:
                 classification = ItemClassification.useful
@@ -73,7 +73,7 @@ class SM64HackWorld(World):
             classification = ItemClassification.progression if item_is_important(item, self.data) else ItemClassification.useful
 
         if hasattr(self.multiworld, "generation_is_fake") and classification == ItemClassification.useful: #UT shenanigans
-            classification = ItemClassification.progression if item != "Power Star" else ItemClassification.progression_skip_balancing
+            classification = ItemClassification.progression if item != "Power Star" else ItemClassification.progression_deprioritized_skip_balancing
         return SM64HackItem(item, classification, self.item_name_to_id[item], self.player)
 
     def create_event(self, event: str):
