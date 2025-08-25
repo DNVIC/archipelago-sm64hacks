@@ -349,6 +349,8 @@ class SM64HackClient(BizHawkClient):
                             file1data[index_course[]] |= 1 << int(location_name[-1]) - 1
                         elif location_name in self.items:
                             file1data[11] |= 1 << self.items.index(location_name) + 1
+                    
+                    writes.append((filesPtr[0], bytearray(file1data), "RDRAM"))
 
             file2data = list(read[1])
             file2flag = False
@@ -388,8 +390,10 @@ class SM64HackClient(BizHawkClient):
                         if self.file1Stars[i] & 0b00000010:
                             if(ctx.slot_data["sr3.5"]):
                                 locs.append(self.location_name_to_id["Black Switch"])
-                            if(ctx.slot_data["sr6.25"]):
+                            elif(ctx.slot_data["sr6.25"]):
                                 locs.append(self.location_name_to_id["Yellow Switch"])
+                            elif(ctx.slot_data.get("moat")):
+                                locs.append(self.location_name_to_id["Castle Moat"])
                     elif i == 11:
                         for j in range(1,6):
                             bit = self.file1Stars[i] >> j & 0x1
@@ -454,6 +458,8 @@ class SM64HackClient(BizHawkClient):
                         case "Yellow Switch":
                             self.moat = 1
                         case "Black Switch":
+                            self.moat = 1
+                        case "Castle Moat":
                             self.moat = 1
                         case "Overworld Cannon Star":
                             starcount += 1

@@ -35,7 +35,7 @@ class SM64HackWorld(World):
     location_name_to_id = {name: id for
                        id, name in enumerate(location_names(), base_id)}
     
-    required_client_version: Tuple[int, int, int] = (0, 4, 0)
+    required_client_version: Tuple[int, int, int] = (0, 4, 3)
 
     def __init__(self,multiworld, player: int):
         super().__init__(multiworld, player)
@@ -125,6 +125,10 @@ class SM64HackWorld(World):
         for item in range(2,5):
             if self.data.locations["Other"]["Stars"][item]["exists"]:
                 self.multiworld.itempool += [self.create_item(sm64hack_items[item])]
+        
+        if(self.options.randomize_moat):
+            if self.data.locations["Other"]["Stars"][6]["exists"]:
+                self.multiworld.itempool += [self.create_item("Castle Moat")]
         
         if("sr7" in self.data.locations["Other"]["Settings"]):
             for item in range(5):
@@ -279,7 +283,7 @@ class SM64HackWorld(World):
     def set_rules(self) -> None:
         for course in self.data.locations:
             if course == "Other":
-                for item in range(5):
+                for item in range(6):
                     star_data = self.data.locations[course]["Stars"][item]
                     if(star_data.get("exists")):
                         add_rule(self.multiworld.get_location(sm64hack_items[item], self.player),
@@ -339,6 +343,8 @@ class SM64HackWorld(World):
     
     def generate_basic(self) -> None:
         self.multiworld.get_location("Victory Location", self.player).place_locked_item(self.create_event("Victory"))
+        if not self.options.randomize_moat.value and self.data.locations["Other"]["Stars"][6]["exists"]:
+            self.multiworld.get_location("Castle Moat", self.player).place_locked_item(self.create_item("Castle Moat"))
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
 
     def fill_slot_data(self) -> Mapping[str, Any]:
@@ -348,5 +354,6 @@ class SM64HackWorld(World):
             "DeathLink": self.options.death_link.value == True, # == True so it turns it into a boolean value
             "Badges": "sr7" in self.data.locations["Other"]["Settings"],
             "sr6.25": "sr6.25" in self.data.locations["Other"]["Settings"],
-            "sr3.5": "sr3.5" in self.data.locations["Other"]["Settings"]
+            "sr3.5": "sr3.5" in self.data.locations["Other"]["Settings"],
+            "moat": True #so the client doesnt break on games generated on old versions, will be removed in the next major version
         }
