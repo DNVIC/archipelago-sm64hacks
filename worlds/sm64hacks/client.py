@@ -673,7 +673,6 @@ class SM64HackClient(BizHawkClient):
                 else: #if you die naturally and get a deathlink on the same frame or whatever the deathlink takes priority to avoid loops
                     death = 0
                     death = await self.check_death(read,ctx)
-                    print(causeStrings[death])
                     if(death != 0):
                         self.death_time = time()
                         cs = causeStrings[death].replace("slot", ctx.player_names[ctx.slot])
