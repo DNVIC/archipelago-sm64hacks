@@ -37,6 +37,9 @@ class TrollStars(Choice):
     option_on_no_traps = 2
     display_name = "Troll Stars"
 
+class RandomizeMoat(Toggle):
+    """Shuffles the moat as a check in logic. If off, the moat will instead be placed in the vanilla location."""
+
 class JsonFile(FreeText):
     """Name of the json file which the hack information.
     Must be placed in sm64hack_jsons folder upon world generation, if using a custom json file"""
@@ -48,5 +51,6 @@ class SM64HackOptions(PerGameCommonOptions):
     progressive_keys: ProgressiveKeys
     troll_stars: TrollStars
     json_file: JsonFile
+    randomize_moat: RandomizeMoat
     death_link: DeathLink
 

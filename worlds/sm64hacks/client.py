@@ -338,7 +338,19 @@ class SM64HackClient(BizHawkClient):
                 if(file1data[5] != self.file1Stars[5]) and ctx.slot_data["Badges"]:
                     file1data[5] = self.file1Stars[5] #prevent badges from changing the flags, so they can be received correctly.
                     writes.append((filesPtr[0] + 0x5, bytearray(file1data[5:6]),"RDRAM"))
-
+                else:
+                    location_id_to_name = dict((value, key) for key, value in self.location_name_to_id.items()) #sync local stars with server, easier coordination if people are sharing a slot
+                    index_course = dict((value, key) for key, value in course_index.items())
+                    for location in self.checked_locations:
+                        location_name = location_id_to_name
+                        if location_name in sr6_25_locations[1:]:
+                            file1data[9] |= 1 << sr6_25_locations[1:].index(location_name)
+                        elif location_name[:7] in index_course:
+                            file1data[index_course[]] |= 1 << int(location_name[-1]) - 1
+                        elif location_name in self.items:
+                            file1data[11] |= 1 << self.items.index(location_name) + 1
+                    
+                    writes.append((filesPtr[0], bytearray(file1data), "RDRAM"))
 
             file2data = list(read[1])
             file2flag = False
@@ -378,8 +390,10 @@ class SM64HackClient(BizHawkClient):
                         if self.file1Stars[i] & 0b00000010:
                             if(ctx.slot_data["sr3.5"]):
                                 locs.append(self.location_name_to_id["Black Switch"])
-                            if(ctx.slot_data["sr6.25"]):
+                            elif(ctx.slot_data["sr6.25"]):
                                 locs.append(self.location_name_to_id["Yellow Switch"])
+                            elif(ctx.slot_data.get("moat")):
+                                locs.append(self.location_name_to_id["Castle Moat"])
                     elif i == 11:
                         for j in range(1,6):
                             bit = self.file1Stars[i] >> j & 0x1
@@ -444,6 +458,8 @@ class SM64HackClient(BizHawkClient):
                         case "Yellow Switch":
                             self.moat = 1
                         case "Black Switch":
+                            self.moat = 1
+                        case "Castle Moat":
                             self.moat = 1
                         case "Overworld Cannon Star":
                             starcount += 1
