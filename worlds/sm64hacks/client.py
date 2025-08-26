@@ -102,7 +102,7 @@ class SM64HackClient(BizHawkClient):
     
     def set_file_2_flags(self, file1data, file2data, ctx) -> None:
         file2data[9] = file1data[9] if not ctx.slot_data["sr6.25"] else file2data[9]
-        if ctx.slot_data["sr3.5"] or ctx.slot_data["sr6.25"]:
+        if ctx.slot_data["sr3.5"] or ctx.slot_data["sr6.25"] or ctx.slot_data.get("moat"):
             file2data[10] = file1data[10] & 0b11111101
             file2data[10] |= self.moat << 1 #yellow/black switch is the same flag as moat
         else:
@@ -313,6 +313,7 @@ class SM64HackClient(BizHawkClient):
                     (toad1APPtr, bytes.fromhex("0809DA70"), "RDRAM"),
                     (toad2APPtr, bytes.fromhex("0809DA7D"), "RDRAM"),
                     (toad3APPtr, bytes.fromhex("0809DA8A"), "RDRAM"),
+                    (moatAPPtr, bytes.fromhex("10000005"), "RDRAM"),
                     (trapPatchPtr, trap_patch, "RDRAM"),
                     (choirPatchPtr, choir_patch, "RDRAM"),
                     (choirHookPtr, bytes.fromhex("0C09FFC0"), "RDRAM"),
@@ -340,13 +341,13 @@ class SM64HackClient(BizHawkClient):
                     writes.append((filesPtr[0] + 0x5, bytearray(file1data[5:6]),"RDRAM"))
                 else:
                     location_id_to_name = dict((value, key) for key, value in self.location_name_to_id.items()) #sync local stars with server, easier coordination if people are sharing a slot
-                    index_course = dict((value, key) for key, value in course_index.items())
-                    for location in self.checked_locations:
-                        location_name = location_id_to_name
+                    index_course = dict((value, key) for key, value in courseIndex.items())
+                    for location in ctx.checked_locations:
+                        location_name = location_id_to_name[location]
                         if location_name in sr6_25_locations[1:]:
                             file1data[9] |= 1 << sr6_25_locations[1:].index(location_name)
-                        elif location_name[:7] in index_course:
-                            file1data[index_course[]] |= 1 << int(location_name[-1]) - 1
+                        elif location_name[:-7] in index_course:
+                            file1data[index_course[location_name[:-7]]] |= 1 << int(location_name[-1]) - 1
                         elif location_name in self.items:
                             file1data[11] |= 1 << self.items.index(location_name) + 1
                     

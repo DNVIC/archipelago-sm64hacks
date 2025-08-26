@@ -166,7 +166,7 @@ class SM64HackWorld(World):
             match course:
                 case "Other":
                     course_region.add_locations(
-                        dict(filter(lambda location: location[0] in sm64hack_items[:5], location_names_that_exist_to_id.items())),
+                        dict(filter(lambda location: location[0] in list(sm64hack_items[:5]) + [sm64hack_items[-1]], location_names_that_exist_to_id.items())),
                         SM64HackLocation
                     )
                     course_region.add_locations(
@@ -286,8 +286,14 @@ class SM64HackWorld(World):
                 for item in range(6):
                     star_data = self.data.locations[course]["Stars"][item]
                     if(star_data.get("exists")):
-                        add_rule(self.multiworld.get_location(sm64hack_items[item], self.player),
-                            lambda state, star_data=self.data.locations[course]["Stars"][item]: self.can_access_location(state, star_data))
+                        if item == 5:
+                            add_rule(self.multiworld.get_location("Castle Moat", self.player),
+                                     lambda state, star_data=self.data.locations[course]["Stars"][item]: self.can_access_location(state, star_data))
+                        else:
+                            add_rule(self.multiworld.get_location(sm64hack_items[item], self.player),
+                                lambda state, star_data=self.data.locations[course]["Stars"][item]: self.can_access_location(state, star_data))
+
+                    
                     
                 
                 if("sr7" in self.data.locations["Other"]["Settings"]):

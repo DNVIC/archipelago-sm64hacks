@@ -27,6 +27,7 @@ def location_names(data = Data()) -> List[str]:
     
     output.append("Black Switch") #star revenge 3.5
     output.extend(sr6_25_locations)
+    output.append("Castle Moat")
 
     return output
 
@@ -61,6 +62,9 @@ def location_names_that_exist(data: Data, troll_stars: int) -> List[str]:
         output.append("Black Switch")
     if "sr6.25" in data.locations["Other"]["Settings"]:
         output.extend(sr6_25_locations)
+
+    if data.locations["Other"]["Stars"][6].get("exists"):
+        output.append("Castle Moat") #at the end for now to avoid client troubles
     
 
     return output
