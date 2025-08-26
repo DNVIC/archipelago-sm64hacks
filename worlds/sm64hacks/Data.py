@@ -15,7 +15,7 @@ sm64hack_items: Tuple[str] = (
     "Wing Cap", 
     "Vanish Cap", 
     "Metal Cap", 
-    "Power Star", 
+    "Power Star",
     "Progressive Key", 
     "Course 1 Cannon",
     "Course 2 Cannon",
@@ -55,7 +55,8 @@ sm64hack_items: Tuple[str] = (
     "Green Demon Trap",
     "Mario Choir",
     "Heave-Ho Trap",
-    "Squish Trap"
+    "Squish Trap",
+    "Castle Moat" 
 )
 
 traps: Tuple[str] = (

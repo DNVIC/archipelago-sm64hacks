@@ -102,7 +102,7 @@ class SM64HackClient(BizHawkClient):
     
     def set_file_2_flags(self, file1data, file2data, ctx) -> None:
         file2data[9] = file1data[9] if not ctx.slot_data["sr6.25"] else file2data[9]
-        if ctx.slot_data["sr3.5"] or ctx.slot_data["sr6.25"]:
+        if ctx.slot_data["sr3.5"] or ctx.slot_data["sr6.25"] or ctx.slot_data.get("moat"):
             file2data[10] = file1data[10] & 0b11111101
             file2data[10] |= self.moat << 1 #yellow/black switch is the same flag as moat
         else:
@@ -313,6 +313,7 @@ class SM64HackClient(BizHawkClient):
                     (toad1APPtr, bytes.fromhex("0809DA70"), "RDRAM"),
                     (toad2APPtr, bytes.fromhex("0809DA7D"), "RDRAM"),
                     (toad3APPtr, bytes.fromhex("0809DA8A"), "RDRAM"),
+                    (moatAPPtr, bytes.fromhex("10000005"), "RDRAM"),
                     (trapPatchPtr, trap_patch, "RDRAM"),
                     (choirPatchPtr, choir_patch, "RDRAM"),
                     (choirHookPtr, bytes.fromhex("0C09FFC0"), "RDRAM"),
@@ -338,7 +339,19 @@ class SM64HackClient(BizHawkClient):
                 if(file1data[5] != self.file1Stars[5]) and ctx.slot_data["Badges"]:
                     file1data[5] = self.file1Stars[5] #prevent badges from changing the flags, so they can be received correctly.
                     writes.append((filesPtr[0] + 0x5, bytearray(file1data[5:6]),"RDRAM"))
-
+                else:
+                    location_id_to_name = dict((value, key) for key, value in self.location_name_to_id.items()) #sync local stars with server, easier coordination if people are sharing a slot
+                    index_course = dict((value, key) for key, value in courseIndex.items())
+                    for location in ctx.checked_locations:
+                        location_name = location_id_to_name[location]
+                        if location_name in sr6_25_locations[1:]:
+                            file1data[9] |= 1 << sr6_25_locations[1:].index(location_name)
+                        elif location_name[:-7] in index_course:
+                            file1data[index_course[location_name[:-7]]] |= 1 << int(location_name[-1]) - 1
+                        elif location_name in self.items:
+                            file1data[11] |= 1 << self.items.index(location_name) + 1
+                    
+                    writes.append((filesPtr[0], bytearray(file1data), "RDRAM"))
 
             file2data = list(read[1])
             file2flag = False
@@ -378,8 +391,10 @@ class SM64HackClient(BizHawkClient):
                         if self.file1Stars[i] & 0b00000010:
                             if(ctx.slot_data["sr3.5"]):
                                 locs.append(self.location_name_to_id["Black Switch"])
-                            if(ctx.slot_data["sr6.25"]):
+                            elif(ctx.slot_data["sr6.25"]):
                                 locs.append(self.location_name_to_id["Yellow Switch"])
+                            elif(ctx.slot_data.get("moat")):
+                                locs.append(self.location_name_to_id["Castle Moat"])
                     elif i == 11:
                         for j in range(1,6):
                             bit = self.file1Stars[i] >> j & 0x1
@@ -444,6 +459,8 @@ class SM64HackClient(BizHawkClient):
                         case "Yellow Switch":
                             self.moat = 1
                         case "Black Switch":
+                            self.moat = 1
+                        case "Castle Moat":
                             self.moat = 1
                         case "Overworld Cannon Star":
                             starcount += 1
@@ -673,7 +690,6 @@ class SM64HackClient(BizHawkClient):
                 else: #if you die naturally and get a deathlink on the same frame or whatever the deathlink takes priority to avoid loops
                     death = 0
                     death = await self.check_death(read,ctx)
-                    print(causeStrings[death])
                     if(death != 0):
                         self.death_time = time()
                         cs = causeStrings[death].replace("slot", ctx.player_names[ctx.slot])
