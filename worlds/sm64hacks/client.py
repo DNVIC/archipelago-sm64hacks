@@ -63,6 +63,7 @@ class SM64HackClient(BizHawkClient):
         self.level = None
         self.choir_active = False
         self.choir_timer = 0
+        self.choirs = 0
         self.area = None
         self.level_start_time = None
         self.flagPtr = None
@@ -195,7 +196,7 @@ class SM64HackClient(BizHawkClient):
         #flag for if unimportant items have been received can't be stored in savedata both because it'd fuck with the async traps 
         #and more importantly because there is no "safe" savedata to store the most recent index in, due to there not being much savedata in sm64, 
         #and as a result the unused portions are very likely to be used by some hackers.
-        print("tetttt", self.sent_get_requests, ctx.stored_data)
+        #print("tetttt", self.sent_get_requests, ctx.stored_data)
         if f"sm64hack_junk_{ctx.team}_{ctx.slot}_{index}" not in self.sent_get_requests: #need to let it loop through to receive the results of this
             await ctx.send_msgs([{
                 "cmd": "Get",
@@ -207,6 +208,7 @@ class SM64HackClient(BizHawkClient):
             self.receive_items = True #australia ping
         elif not ctx.stored_data.get(f"sm64hack_junk_{ctx.team}_{ctx.slot}_{index}") and index not in self.traps_received_this_game:
             self.traps_received_this_game.append(index)
+            #print(self.loops)
             if self.loops > 4 or name == "Coin":
                 await ctx.send_msgs([{
                     "cmd": "Set",
@@ -283,13 +285,6 @@ class SM64HackClient(BizHawkClient):
             read = await bizhawk.read(ctx.bizhawk_ctx, reads)
             if(int.from_bytes(read[9]) < 60):
                 return #game isnt initialized yet so things might be fucky
-            
-            if(list(read[10])[0] == 69 and not ctx.finished_game): #this and patch are before mario exists check because they should be active even if mario doesn't exist
-                ctx.finished_game = True                           #because victory is usually on stuff like end screen where mario doesn't exist
-                await ctx.send_msgs([{                             #and patch is on file select usually
-                    "cmd": "StatusUpdate",
-                    "status": ClientStatus.CLIENT_GOAL
-                }])
 
             
             writes = []
@@ -320,18 +315,29 @@ class SM64HackClient(BizHawkClient):
                     (starPatchPtr, star_patch, "RDRAM")
                 ])
 
-            if int.from_bytes(read[4]) == 0: #mario doesn't exist yet
-                await bizhawk.write(ctx.bizhawk_ctx, writes)
-                return
             if self.loops == 0:
                 self.eeprom = read[12].decode("ascii")
             if self.eeprom != read[12].decode("ascii"): #rom changed
                 logger.info(f"Detected rom change, now playing {read[12].decode("ascii")}.")
                 self.reset_data()
+                ctx.slot_data = None
+                ctx.finished_game = False
+                return
+            
+            
+            if(list(read[10])[0] == 69 and not ctx.finished_game and self.loops > 4): #this and patch are before mario exists check because they should be active even if mario doesn't exist
+                print("tmtnf")
+                ctx.finished_game = True                           #because victory is usually on stuff like end screen where mario doesn't exist
+                await ctx.send_msgs([{                             #and patch is on file select usually
+                    "cmd": "StatusUpdate",
+                    "status": ClientStatus.CLIENT_GOAL
+                }])
+            
+            if int.from_bytes(read[4]) == 0: #mario doesn't exist yet
+                await bizhawk.write(ctx.bizhawk_ctx, writes)
                 return
             
             self.loops += 1
-                
 
             
             file1data = list(read[0])
@@ -344,6 +350,8 @@ class SM64HackClient(BizHawkClient):
                     index_course = dict((value, key) for key, value in courseIndex.items())
                     for location in ctx.checked_locations:
                         location_name = location_id_to_name[location]
+                        if "Cannon" in location_name:
+                            continue
                         if location_name in sr6_25_locations[1:]:
                             file1data[9] |= 1 << sr6_25_locations[1:].index(location_name)
                         elif location_name[:-7] in index_course:
@@ -365,7 +373,6 @@ class SM64HackClient(BizHawkClient):
                             if(bit == 1):
                                 location_name = f"{courseIndex[i]} Star {j + 1}"
                                 if(j == 7 and ctx.slot_data["Cannons"]):
-                                    print("test")
                                     level = int.from_bytes(read[11])
                                     if(level_index[level] == i):
                                         location_name = f"{courseIndex[i]} Troll Star"
@@ -409,7 +416,6 @@ class SM64HackClient(BizHawkClient):
             if int.from_bytes(read[17]) > 7 and int.from_bytes(read[17]) < 255: #only star id 7 gives the previous level's cannon, 8+ do not and so i need to do some asm to store the id in a readable memory location
                 level = int.from_bytes(read[11])
                 location_name = f"{courseIndex[level_index[level]]} Troll Star"
-                print(location_name)
                 await ctx.send_msgs([{"cmd": "LocationChecks", "locations": [self.location_name_to_id[location_name]]}])
                 writes.append((self.starIdPtr, bytes.fromhex("00000000"), "RDRAM"))
 
@@ -478,7 +484,6 @@ class SM64HackClient(BizHawkClient):
                                     self.cannons[course_num + 1] = True
                             else:
                                 write = await self.receive_junk_item(ctx, index, item_name, int.from_bytes(read[18]))
-                                print(write, item_name)
                                 if write:
                                     writes.append(write)
 
@@ -562,7 +567,6 @@ class SM64HackClient(BizHawkClient):
             #heaveho
             if read[15].hex().upper().startswith('80'): #sm64 animations are broken if you load an object in after you enter the level due to behaviorscript shit. this is a janky solution but it works
                 addr = int.from_bytes(read[15]) & 0x7FFFFFFF
-                print(hex(addr))
                 heaveho_reads = (
                     (addr + 0x74, 0x4, "RDRAM"), #0, active flag
                     (addr + 0x20c, 0x4, "RDRAM"), #1, beh data
@@ -573,15 +577,14 @@ class SM64HackClient(BizHawkClient):
                 behavior = heave_read[1]
                 
                 if active == 0 or int.from_bytes(behavior) != self.get_segmented_behavior(0x1548, read[16]):
-                    print(active, behavior.hex().upper())
                     writes.append((self.heaveHoPtr, bytes.fromhex("00000000"), "RDRAM"))
                 elif heave_read[2].hex().upper() != "80735118":
-                    print("test")
                     writes.append((addr + 0x3c, bytes.fromhex("80735118"), "RDRAM"))
 
             #choir
-            if self.choir_active == 2 and (time() - self.choir_timer) > 300:
+            if self.choir_active == 2 and (time() - self.choir_timer) > self.choirs * 300:
                 self.choir_active = 0
+                self.choirs = 0
                 writes.append((self.choirFlagPtr, bytes.fromhex("00000000"), "RDRAM"))
 
             # badges/choir
@@ -590,6 +593,7 @@ class SM64HackClient(BizHawkClient):
                 if self.choir_active == 1:
                     self.choir_active = 2
                     self.choir_timer = time()
+                    self.choirs += 1
                 self.area = int.from_bytes(read[13])
                 self.level_start_time = int.from_bytes(read[9])
             elif(ctx.slot_data["Badges"] and int.from_bytes(read[4]) != 0 and (int.from_bytes(read[9]) - self.level_start_time) > 150):
@@ -699,7 +703,6 @@ class SM64HackClient(BizHawkClient):
             
             #async traps
             if self.async_traps:
-                print(self.async_traps)
                 if random.random() < (2/1731): #approx 1 every 5 minutes
                     trap = random.choice(self.async_traps)
                     self.async_traps.remove(trap)
