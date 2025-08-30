@@ -53,6 +53,9 @@ class SM64HackWorld(World):
                 self.progressive_keys = self.data.locations["Other"]["Settings"]["prog_key"]
             except TypeError:
                 raise ValueError("JSON is too old and does not have a default for progressive keys")
+        
+        non_local_traps = [trap for trap in traps if trap != "Mario Choir"]
+        self.options.non_local_items.value |= set(non_local_traps)
 
 
     def create_item(self, item: str) -> SM64HackItem:
@@ -127,7 +130,7 @@ class SM64HackWorld(World):
                 self.multiworld.itempool += [self.create_item(sm64hack_items[item])]
         
         if(self.options.randomize_moat):
-            if self.data.locations["Other"]["Stars"][6]["exists"]:
+            if self.data.locations["Other"]["Stars"][5]["exists"]:
                 self.multiworld.itempool += [self.create_item("Castle Moat")]
         
         if("sr7" in self.data.locations["Other"]["Settings"]):
