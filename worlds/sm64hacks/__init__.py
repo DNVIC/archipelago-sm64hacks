@@ -339,7 +339,7 @@ class SM64HackWorld(World):
                     lambda state, star_data=self.data.locations[course]["Cannon"]: self.can_access_location(state, star_data))
                     
             star_data = self.data.locations[course]["Troll Star"]
-            if(star_data.get("exists")):
+            if(star_data.get("exists") and self.options.troll_stars):
                 add_rule(self.multiworld.get_location(f"{course} Troll Star", self.player),
                     lambda state, star_data=self.data.locations[course]["Troll Star"]: self.can_access_location(state, star_data))
 
@@ -352,7 +352,7 @@ class SM64HackWorld(World):
     
     def generate_basic(self) -> None:
         self.multiworld.get_location("Victory Location", self.player).place_locked_item(self.create_event("Victory"))
-        if not self.options.randomize_moat.value and self.data.locations["Other"]["Stars"][6]["exists"]:
+        if not self.options.randomize_moat.value and self.data.locations["Other"]["Stars"][5]["exists"]:
             self.multiworld.get_location("Castle Moat", self.player).place_locked_item(self.create_item("Castle Moat"))
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
 
