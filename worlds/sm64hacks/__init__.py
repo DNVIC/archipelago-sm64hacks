@@ -10,11 +10,10 @@ from .Data import sm64hack_items, star_like, traps, badges, sr6_25_locations, Da
 from .client import SM64HackClient
 from BaseClasses import Region, Location, Entrance, Item, ItemClassification, CollectionState
 
-#class SM64HackSettings(settings.Group):
-#    pass
-    #class RomFile(settings.HackRomPath):
-    #    """Insert help text for host.yaml here"""
-    #rom_file: RomFile = RomFile("SM64Hack.z64")
+class SM64HackSettings(settings.Group):
+    class AutoUpdate(settings.Bool):
+        """Automatically download updated json files from GitHub when generating SM64Hack worlds"""
+    auto_update: AutoUpdate | bool = True
 
 
 
@@ -22,7 +21,7 @@ class SM64HackWorld(World):
     game = "SM64 Romhack"
     options_dataclass = SM64HackOptions
     options: SM64HackOptions
-#    settings: ClassVar[SM64HackSettings]
+    settings: ClassVar[SM64HackSettings]
     topology_present = True
     data: Data
 
@@ -42,7 +41,7 @@ class SM64HackWorld(World):
         self.data = Data()
         
     def generate_early(self):
-        self.data.import_json(self.options.json_file.value)
+        self.data.import_json(self.options.json_file.value, self.settings.auto_update)
         self.progressive_keys = self.options.progressive_keys.value
         if isinstance(self.data.locations["Other"]["Settings"], list):
             raise ValueError("JSON is too old. \
@@ -303,7 +302,6 @@ class SM64HackWorld(World):
                     for item in range(5):
                         stardata = self.data.locations[course]["Stars"][item + 7]
                         if(stardata.get("exists")):
-                            print(self.multiworld.get_location(badges[item], self.player))
                             add_rule(self.multiworld.get_location(badges[item], self.player),
                                 lambda state, star_data=self.data.locations[course]["Stars"][item + 7]: self.can_access_location(state, star_data))
                 
