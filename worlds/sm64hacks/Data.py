@@ -2,12 +2,13 @@ from typing import List, Tuple
 from pathlib import Path
 from importlib import resources
 from importlib.resources.abc import Traversable
+from .Updater import update_jsons
 import pkgutil
 import Utils
 import json
 import re
 import os
-
+import shutil
 
 sm64hack_items: Tuple[str] = (
     "Key 1", 
@@ -170,35 +171,32 @@ class Data:
     }
 
 
-    def import_json(self, file_name):
-        json_dir = os.path.join(Utils.home_path(), "sm64hack_jsons")
+    def import_json(self, file_name, auto_update):
+        json_dir = os.path.join(Utils.user_path(), "sm64hack_jsons")
+        custom_json_dir = os.path.join(json_dir, "custom_jsons")
+        downloaded_json_dir = os.path.join(json_dir, "downloaded_jsons")
         os.makedirs(json_dir, exist_ok=True)
-        json_file = list(Path(json_dir).rglob(file_name)) #external takes priority over internal
-        local_file = True
+        if not os.path.exists(custom_json_dir): #new install and/or update from before 0.4.4
+            files = os.listdir(json_dir)
+            os.makedirs(custom_json_dir, exist_ok=True)
+            for file in files:
+                shutil.move(os.path.join(json_dir, file), os.path.join(json_dir, "custom_jsons", file))
+
+        
+        os.makedirs(downloaded_json_dir, exist_ok=True)
+        if(auto_update):
+            update_jsons()
+
+        json_file = list(Path(custom_json_dir).rglob(file_name)) #custom takes priority over downloaded
         if json_file == []:
-            json_file = list(resources.files(__package__).joinpath("jsons").rglob(file_name))
-            local_file = False
+            json_file = list(Path(downloaded_json_dir).rglob(file_name))
         if len(json_file) > 1:
             raise ValueError("Multiple JSON files with the same name detected")
         if len(json_file) == 0:
             raise FileNotFoundError(f"JSON file {file_name} does not exist")
         json_file = json_file[0]
         #print(json_file)
-        if(local_file):
-            with open(json_file, 'r') as infile:
-                filetext = infile.read()
-                self.maxstarcount = max(int(i) for i in re.findall("\"StarRequirement\": *\"(\\d+)\"", filetext))
-                self.locations = json.loads(filetext)
-        else:
-            json_file = str(json_file).replace("\\", "/") #extremely janky but it works
-            #print(json_file, resources.files(__package__))
-            json_file = os.path.relpath(json_file, start=str(resources.files(__package__)).replace("\\", "/"))
-            file = pkgutil.get_data(__name__, json_file).decode()
-            filetext = file
+        with open(json_file, 'r') as infile:
+            filetext = infile.read()
             self.maxstarcount = max(int(i) for i in re.findall("\"StarRequirement\": *\"(\\d+)\"", filetext))
             self.locations = json.loads(filetext)
-
-
-
-
-

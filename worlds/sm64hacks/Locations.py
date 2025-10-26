@@ -60,10 +60,9 @@ def location_names_that_exist(data: Data, troll_stars: int) -> List[str]:
         
     if "sr3.5" in data.locations["Other"]["Settings"]:
         output.append("Black Switch")
-    if "sr6.25" in data.locations["Other"]["Settings"]:
+    elif "sr6.25" in data.locations["Other"]["Settings"]:
         output.extend(sr6_25_locations)
-
-    if data.locations["Other"]["Stars"][5].get("exists"):
+    elif data.locations["Other"]["Stars"][5].get("exists"):
         output.append("Castle Moat") #at the end for now to avoid client troubles
     
 
