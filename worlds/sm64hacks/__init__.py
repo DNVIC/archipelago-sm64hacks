@@ -289,8 +289,15 @@ class SM64HackWorld(World):
                     star_data = self.data.locations[course]["Stars"][item]
                     if(star_data.get("exists")):
                         if item == 5:
-                            add_rule(self.multiworld.get_location("Castle Moat", self.player),
-                                     lambda state, star_data=self.data.locations[course]["Stars"][item]: self.can_access_location(state, star_data))
+                            if("sr6.25" in self.data.locations["Other"]["Settings"]):
+                                add_rule(self.multiworld.get_location("Yellow Switch", self.player),
+                                        lambda state, star_data=self.data.locations[course]["Stars"][5]: self.can_access_location(state, star_data))
+                            elif("sr3.5" in self.data.locations["Other"]["Settings"]):
+                                add_rule(self.multiworld.get_location("Black Switch", self.player),
+                                        lambda state, star_data=self.data.locations[course]["Stars"][5]: self.can_access_location(state, star_data))
+                            else:
+                                add_rule(self.multiworld.get_location("Castle Moat", self.player),
+                                        lambda state, star_data=self.data.locations[course]["Stars"][item]: self.can_access_location(state, star_data))
                         else:
                             add_rule(self.multiworld.get_location(sm64hack_items[item], self.player),
                                 lambda state, star_data=self.data.locations[course]["Stars"][item]: self.can_access_location(state, star_data))
@@ -305,13 +312,6 @@ class SM64HackWorld(World):
                             add_rule(self.multiworld.get_location(badges[item], self.player),
                                 lambda state, star_data=self.data.locations[course]["Stars"][item + 7]: self.can_access_location(state, star_data))
                 
-                if("sr6.25" in self.data.locations["Other"]["Settings"]):
-                    add_rule(self.multiworld.get_location("Yellow Switch", self.player),
-                             lambda state, star_data=self.data.locations[course]["Stars"][5]: self.can_access_location(state, star_data))
-                
-                if("sr3.5" in self.data.locations["Other"]["Settings"]):
-                    add_rule(self.multiworld.get_location("Black Switch", self.player),
-                             lambda state, star_data=self.data.locations[course]["Stars"][5]: self.can_access_location(state, star_data))
 
                 star_data = self.data.locations[course]["Stars"][6]
                 add_rule(self.multiworld.get_location("Victory Location", self.player),
