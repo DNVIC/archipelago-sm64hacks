@@ -1,4 +1,3 @@
-import urllib.request
 import tarfile
 import json
 import requests
@@ -31,8 +30,9 @@ def update_jsons():
         pass #intended behavior
     
     
-
-    urllib.request.urlretrieve(tarpath, localpath)
+    response = requests.get(tarpath)
+    with open(localpath, 'wb') as file:
+        file.write(response.content)
     with tarfile.open(localpath, "r:gz") as tf:
         tf.extractall(path=tempfolderpath, members=strip_members(tf))
     os.remove(localpath)
