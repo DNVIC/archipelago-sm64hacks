@@ -5,6 +5,8 @@ import os
 import shutil
 import Utils
 from pathlib import Path
+import logging
+logger = logging.getLogger("SM64 Romhack")
 
 tarpath = "https://api.github.com/repos/DNVIC/sm64hack-archipelago-jsons/tarball"
 requestpath = "https://api.github.com/repos/DNVIC/sm64hack-archipelago-jsons/branches/main"
@@ -22,12 +24,16 @@ def update_jsons():
 
     last_updated = requests.get(requestpath).json()
     try:
+        assert last_updated.get("commit") is not None
         with open(jsonpath, 'r') as jsonfile:
             if json.load(jsonfile)["commit"]["commit"]["author"]["date"] == last_updated["commit"]["commit"]["author"]["date"] and \
                 os.path.isdir(folderpath): #incase you delete the folder for some reason itll come back
                 return #up to date
     except FileNotFoundError:
         pass #intended behavior
+    except AssertionError:
+        logger.warning("Could not update JSON list; JSONs used for generation may be outdated. ")
+        return
     
     
     response = requests.get(tarpath)
