@@ -5,6 +5,8 @@ import os
 import shutil
 import Utils
 from pathlib import Path
+import logging
+logger = logging.getLogger("SM64 Romhack")
 
 tarpath = "https://api.github.com/repos/DNVIC/sm64hack-archipelago-jsons/tarball"
 requestpath = "https://api.github.com/repos/DNVIC/sm64hack-archipelago-jsons/branches/main"
@@ -13,21 +15,24 @@ tempfolderpath = os.path.join(Utils.user_path(), "sm64hack_jsons", "tempfolder")
 folderpath = os.path.join(Utils.user_path(), "sm64hack_jsons", "downloaded_jsons")
 jsonpath = os.path.join(Utils.user_path(), "sm64hack_jsons", "last_updated.json")
 
-def strip_members(tarfile):
-    for member in tarfile.getmembers():
+def strip_members(tar):
+    for member in tar.getmembers():
         member.path = os.path.relpath(member.path, Path(member.path).parts[0])
         yield member
 
 def update_jsons():
-
     last_updated = requests.get(requestpath).json()
     try:
+        assert last_updated.get("commit") is not None
         with open(jsonpath, 'r') as jsonfile:
             if json.load(jsonfile)["commit"]["commit"]["author"]["date"] == last_updated["commit"]["commit"]["author"]["date"] and \
                 os.path.isdir(folderpath): #incase you delete the folder for some reason itll come back
                 return #up to date
     except FileNotFoundError:
         pass #intended behavior
+    except AssertionError:
+        logger.warning("Could not update JSON list; JSONs used for generation may be outdated. API request returned this: %s", last_updated.dumps())
+        return
     
     
     response = requests.get(tarpath)

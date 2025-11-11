@@ -41,7 +41,7 @@ class SM64HackWorld(World):
         self.data = Data()
         
     def generate_early(self):
-        self.data.import_json(self.options.json_file.value, self.settings.auto_update)
+        self.data.import_json(self.options.json_file.value, self.settings.auto_update and not hasattr(self.multiworld, "generation_is_fake"))
         self.progressive_keys = self.options.progressive_keys.value
         if isinstance(self.data.locations["Other"]["Settings"], list):
             raise ValueError("JSON is too old. \
@@ -128,10 +128,6 @@ class SM64HackWorld(World):
             if self.data.locations["Other"]["Stars"][item]["exists"]:
                 self.multiworld.itempool += [self.create_item(sm64hack_items[item])]
         
-        if(self.options.randomize_moat):
-            if self.data.locations["Other"]["Stars"][5]["exists"]:
-                self.multiworld.itempool += [self.create_item("Castle Moat")]
-        
         if("sr7" in self.data.locations["Other"]["Settings"]):
             for item in range(5):
                 if item < 2:
@@ -145,9 +141,11 @@ class SM64HackWorld(World):
             self.multiworld.itempool += [self.create_item("Yellow Switch")]
             self.multiworld.itempool += [self.create_item("Overworld Cannon Star")]
             self.multiworld.itempool += [self.create_item("Bowser 2 Cannon Star")]
-        
-        if("sr3.5" in self.data.locations["Other"]["Settings"]):
+        elif("sr3.5" in self.data.locations["Other"]["Settings"]):
             self.multiworld.itempool += [self.create_item("Black Switch")]
+        elif(self.options.randomize_moat):
+            if self.data.locations["Other"]["Stars"][5]["exists"]:
+                self.multiworld.itempool += [self.create_item("Castle Moat")]
         #print("TEST" + str(len(self.multiworld.itempool)))
 
         if self.options.troll_stars == 1:
@@ -350,7 +348,9 @@ class SM64HackWorld(World):
     
     def generate_basic(self) -> None:
         self.multiworld.get_location("Victory Location", self.player).place_locked_item(self.create_event("Victory"))
-        if not self.options.randomize_moat.value and self.data.locations["Other"]["Stars"][5]["exists"]:
+        if not self.options.randomize_moat.value and self.data.locations["Other"]["Stars"][5]["exists"] \
+                and not "sr6.25" in self.data.locations["Other"]["Settings"] \
+                and not "sr3.5" in self.data.locations["Other"]["Settings"]:
             self.multiworld.get_location("Castle Moat", self.player).place_locked_item(self.create_item("Castle Moat"))
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
 
