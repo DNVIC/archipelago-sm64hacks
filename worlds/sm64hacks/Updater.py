@@ -15,13 +15,12 @@ tempfolderpath = os.path.join(Utils.user_path(), "sm64hack_jsons", "tempfolder")
 folderpath = os.path.join(Utils.user_path(), "sm64hack_jsons", "downloaded_jsons")
 jsonpath = os.path.join(Utils.user_path(), "sm64hack_jsons", "last_updated.json")
 
-def strip_members(tarfile):
-    for member in tarfile.getmembers():
+def strip_members(tar):
+    for member in tar.getmembers():
         member.path = os.path.relpath(member.path, Path(member.path).parts[0])
         yield member
 
 def update_jsons():
-
     last_updated = requests.get(requestpath).json()
     try:
         assert last_updated.get("commit") is not None
@@ -32,7 +31,7 @@ def update_jsons():
     except FileNotFoundError:
         pass #intended behavior
     except AssertionError:
-        logger.warning("Could not update JSON list; JSONs used for generation may be outdated. ")
+        logger.warning("Could not update JSON list; JSONs used for generation may be outdated. API request returned this: %s", last_updated.dumps())
         return
     
     
