@@ -1,13 +1,13 @@
 import settings
-from random import choice
 from worlds.AutoWorld import World
 from worlds.generic.Rules import add_rule
 from typing import Union, Tuple, List, Dict, Set, ClassVar, Mapping, Any
 from .Options import SM64HackOptions
 from .Items import SM64HackItem, item_is_important
 from .Locations import SM64HackLocation, location_names, location_names_that_exist
-from .Data import sm64hack_items, star_like, traps, badges, sr6_25_locations, Data
+from .Data import sm64hack_items, star_like, traps, badges, sr6_25_locations, create_json_folders, Data
 from .client import SM64HackClient
+from settings import get_settings
 from BaseClasses import Region, Location, Entrance, Item, ItemClassification, CollectionState
 
 class SM64HackSettings(settings.Group):
@@ -40,8 +40,12 @@ class SM64HackWorld(World):
         super().__init__(multiworld, player)
         self.data = Data()
         
+    @classmethod
+    def stage_assert_generate(cls, multiworld): # this is supposed to be used for rom files but its the only bit of code that i could find that runs before everything and only once before generation so im using it
+        create_json_folders(get_settings()["sm64hacks_options"]["auto_update"] and not hasattr(multiworld, "generation_is_fake"))
+
     def generate_early(self):
-        self.data.import_json(self.options.json_file.value, self.settings.auto_update and not hasattr(self.multiworld, "generation_is_fake"))
+        self.data.import_json(self.options.json_file.value)
         self.progressive_keys = self.options.progressive_keys.value
         if isinstance(self.data.locations["Other"]["Settings"], list):
             raise ValueError("JSON is too old. \
@@ -57,29 +61,41 @@ class SM64HackWorld(World):
         self.options.non_local_items.value |= set(non_local_traps)
 
 
-    def create_item(self, item: str) -> SM64HackItem:
-        if item == "Power Star":
-            if self.stars_created < self.data.maxstarcount: #only create progression stars up to the max starcount for the hack
+    def create_item(self, item: str, item_link = True) -> SM64HackItem:
+        
+        if item_link: #item link is dumb and i need to make all item_link items some sort of progression
+            classification = ItemClassification.progression
+            if item == "Power Star":
                 classification = ItemClassification.progression_deprioritized_skip_balancing
+        else:
+            if item == "Power Star":
+                if self.stars_created < self.data.maxstarcount: #only create progression stars up to the max starcount for the hack
+                    classification = ItemClassification.progression_deprioritized_skip_balancing
+                    self.stars_created += 1
+                else:
+                    classification = ItemClassification.useful
+            elif item in traps:
+                classification = ItemClassification.trap
+            elif item == "Coin":
+                classification = ItemClassification.filler
+            elif item.endswith("Star"): # cannon stars in sr6.25
+                classification = ItemClassification.progression
                 self.stars_created += 1
             else:
-                classification = ItemClassification.useful
-        elif item in traps:
-            classification = ItemClassification.trap
-        elif item == "Coin":
-            classification = ItemClassification.filler
-        elif item.endswith("Star"): # cannon stars in sr6.25
-            classification = ItemClassification.progression
-            self.stars_created += 1
-        else:
-            classification = ItemClassification.progression if item_is_important(item, self.data) else ItemClassification.useful
+                classification = ItemClassification.progression if item_is_important(item, self.data) else ItemClassification.useful
 
-        if hasattr(self.multiworld, "generation_is_fake") and classification == ItemClassification.useful: #UT shenanigans
-            classification = ItemClassification.progression if item != "Power Star" else ItemClassification.progression_deprioritized_skip_balancing
+            if hasattr(self.multiworld, "generation_is_fake") and classification == ItemClassification.useful: #UT shenanigans
+                classification = ItemClassification.progression if item != "Power Star" else ItemClassification.progression_deprioritized_skip_balancing
         return SM64HackItem(item, classification, self.item_name_to_id[item], self.player)
 
     def create_event(self, event: str):
         return SM64HackItem(event, ItemClassification.progression, None, self.player)
+
+    def get_filler_item_name(self):
+        if self.random.randrange(0, 100) < self.options.filler_trap_percentage:
+            return self.random.choice(traps)
+        return "Coin"
+        
 
     def create_items(self) -> None:
         
@@ -108,50 +124,50 @@ class SM64HackWorld(World):
             if(course == "Other"):
                 continue
             if(self.data.locations[course]["Cannon"]["exists"]):
-                self.multiworld.itempool += [self.create_item(f"{course} Cannon")]
+                self.multiworld.itempool += [self.create_item(f"{course} Cannon", False)]
             if(self.data.locations[course]["Troll Star"]["exists"]):
                 junk += 1
             for i in range(8):
                 if self.data.locations[course]["Stars"][i]["exists"]:
                     if "sr6.25" not in self.data.locations["Other"]["Settings"] or (i != 7 or (course != "Course 1" and course != "Bowser 3")): #cannon star nonsense
-                        self.multiworld.itempool += [self.create_item("Power Star")]
+                        self.multiworld.itempool += [self.create_item("Power Star", False)]
         if self.progressive_keys > 0:
             for Key in range(2):
                 if self.data.locations["Other"]["Stars"][Key]["exists"]:
-                    self.multiworld.itempool += [self.create_item("Progressive Key")]
+                    self.multiworld.itempool += [self.create_item("Progressive Key", False)]
         else:
             for Key in range(2):
                 if self.data.locations["Other"]["Stars"][Key]["exists"]:
-                    self.multiworld.itempool += [self.create_item(sm64hack_items[Key])]
+                    self.multiworld.itempool += [self.create_item(sm64hack_items[Key], False)]
         
         for item in range(2,5):
             if self.data.locations["Other"]["Stars"][item]["exists"]:
-                self.multiworld.itempool += [self.create_item(sm64hack_items[item])]
+                self.multiworld.itempool += [self.create_item(sm64hack_items[item], False)]
         
         if("sr7" in self.data.locations["Other"]["Settings"]):
             for item in range(5):
                 if item < 2:
                     if self.data.locations["Other"]["Stars"][item + 7]["exists"]:
-                        self.multiworld.itempool += [self.create_item("Progressive Stomp Badge")]
+                        self.multiworld.itempool += [self.create_item("Progressive Stomp Badge", False)]
                 else:
                     if self.data.locations["Other"]["Stars"][item + 7]["exists"]:
-                        self.multiworld.itempool += [self.create_item(sm64hack_items[item + 32])]
+                        self.multiworld.itempool += [self.create_item(sm64hack_items[item + 32], False)]
 
         if("sr6.25" in self.data.locations["Other"]["Settings"]):
-            self.multiworld.itempool += [self.create_item("Yellow Switch")]
-            self.multiworld.itempool += [self.create_item("Overworld Cannon Star")]
-            self.multiworld.itempool += [self.create_item("Bowser 2 Cannon Star")]
+            self.multiworld.itempool += [self.create_item("Yellow Switch", False)]
+            self.multiworld.itempool += [self.create_item("Overworld Cannon Star", False)]
+            self.multiworld.itempool += [self.create_item("Bowser 2 Cannon Star", False)]
         elif("sr3.5" in self.data.locations["Other"]["Settings"]):
-            self.multiworld.itempool += [self.create_item("Black Switch")]
+            self.multiworld.itempool += [self.create_item("Black Switch", False)]
         elif(self.options.randomize_moat):
             if self.data.locations["Other"]["Stars"][5]["exists"]:
-                self.multiworld.itempool += [self.create_item("Castle Moat")]
+                self.multiworld.itempool += [self.create_item("Castle Moat", False)]
         #print("TEST" + str(len(self.multiworld.itempool)))
 
         if self.options.troll_stars == 1:
-            self.multiworld.itempool += [self.create_item(choice(traps)) for _ in range(junk)]
+            self.multiworld.itempool += [self.create_item(self.random.choice(traps), False) for _ in range(junk)]
         elif self.options.troll_stars == 2:
-            self.multiworld.itempool += [self.create_item("Coin") for _ in range(junk)]
+            self.multiworld.itempool += [self.create_item("Coin", False) for _ in range(junk)]
 
 
 
@@ -351,7 +367,7 @@ class SM64HackWorld(World):
         if not self.options.randomize_moat.value and self.data.locations["Other"]["Stars"][5]["exists"] \
                 and not "sr6.25" in self.data.locations["Other"]["Settings"] \
                 and not "sr3.5" in self.data.locations["Other"]["Settings"]:
-            self.multiworld.get_location("Castle Moat", self.player).place_locked_item(self.create_item("Castle Moat"))
+            self.multiworld.get_location("Castle Moat", self.player).place_locked_item(self.create_item("Castle Moat", False))
         self.multiworld.completion_condition[self.player] = lambda state: state.has("Victory", self.player)
 
     def fill_slot_data(self) -> Mapping[str, Any]:

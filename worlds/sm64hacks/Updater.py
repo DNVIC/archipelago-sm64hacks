@@ -31,7 +31,7 @@ def update_jsons():
     except FileNotFoundError:
         pass #intended behavior
     except AssertionError:
-        logger.warning("Could not update JSON list; JSONs used for generation may be outdated. API request returned this: %s", last_updated.dumps())
+        logger.warning("Could not update JSON list; JSONs used for generation may be outdated. API request returned this: %s", json.dumps(last_updated))
         return
     
     
