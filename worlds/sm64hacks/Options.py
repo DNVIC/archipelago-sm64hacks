@@ -1,6 +1,11 @@
 from dataclasses import dataclass
 from Options import Toggle, Range, Choice, FreeText, PerGameCommonOptions, DeathLink
 
+class JsonFile(FreeText):
+    """Name of the json file which the hack information.
+    Must be placed in sm64hack_jsons folder upon world generation, if using a custom json file"""
+    display_name = "Json File"
+    default = "superMario64.json"
 
 class ProgressiveKeys(Choice):
     """Makes the keys progressive items
@@ -40,12 +45,19 @@ class TrollStars(Choice):
 class RandomizeMoat(Toggle):
     """Shuffles the moat as a check in logic. If off, the moat will instead be placed in the vanilla location."""
 
-class JsonFile(FreeText):
-    """Name of the json file which the hack information.
-    Must be placed in sm64hack_jsons folder upon world generation, if using a custom json file"""
-    display_name = "Json File"
-    default = "superMario64.json"
+class FillerTrapPercentage(Range):
+    """Decides what percent chance of filler items should be traps, compared to coins. This only matters if some items need to be created outside of the APWorld (for example, due to item_links), not for internal junk (i.e. Troll Stars)
     
+    0 - All filler is coins
+    
+    100 - All filler is traps"""
+
+    display_name = "Filler Trap Percentage"
+    range_start = 0
+    default = 30
+    range_end = 100
+
+
 @dataclass
 class SM64HackOptions(PerGameCommonOptions):
     progressive_keys: ProgressiveKeys
@@ -53,4 +65,4 @@ class SM64HackOptions(PerGameCommonOptions):
     json_file: JsonFile
     randomize_moat: RandomizeMoat
     death_link: DeathLink
-
+    filler_trap_percentage: FillerTrapPercentage

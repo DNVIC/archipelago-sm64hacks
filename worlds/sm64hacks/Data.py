@@ -135,6 +135,21 @@ def find_json_files(directory: Traversable):
 
     print("gay", list(directory.iterdir()))
 
+def create_json_folders(auto_update):
+    json_dir = os.path.join(Utils.user_path(), "sm64hack_jsons")
+    custom_json_dir = os.path.join(json_dir, "custom_jsons")
+    downloaded_json_dir = os.path.join(json_dir, "downloaded_jsons")
+    os.makedirs(json_dir, exist_ok=True)
+    if not os.path.exists(custom_json_dir): #new install and/or update from before 0.4.4
+        files = os.listdir(json_dir)
+        os.makedirs(custom_json_dir, exist_ok=True)
+        for file in files:
+            shutil.move(os.path.join(json_dir, file), os.path.join(json_dir, "custom_jsons", file))
+
+    
+    os.makedirs(downloaded_json_dir, exist_ok=True)
+    if(auto_update):
+        update_jsons()
 
 class Data:
     #default locations for location_name_to_id, will be overritten by import_json
@@ -171,21 +186,10 @@ class Data:
     }
 
 
-    def import_json(self, file_name, auto_update):
+    def import_json(self, file_name):
         json_dir = os.path.join(Utils.user_path(), "sm64hack_jsons")
         custom_json_dir = os.path.join(json_dir, "custom_jsons")
         downloaded_json_dir = os.path.join(json_dir, "downloaded_jsons")
-        os.makedirs(json_dir, exist_ok=True)
-        if not os.path.exists(custom_json_dir): #new install and/or update from before 0.4.4
-            files = os.listdir(json_dir)
-            os.makedirs(custom_json_dir, exist_ok=True)
-            for file in files:
-                shutil.move(os.path.join(json_dir, file), os.path.join(json_dir, "custom_jsons", file))
-
-        
-        os.makedirs(downloaded_json_dir, exist_ok=True)
-        if(auto_update):
-            update_jsons()
 
         json_file = list(Path(custom_json_dir).rglob(file_name)) #custom takes priority over downloaded
         if json_file == []:
