@@ -375,6 +375,7 @@ class SM64HackWorld(World):
             "Cannons": self.data.locations["Other"]["Settings"]["cannons"],
             "ProgressiveKeys": self.progressive_keys,
             "DeathLink": self.options.death_link.value == True, # == True so it turns it into a boolean value
+            "RingLink": self.options.ring_link.value == True, # == True so it turns it into a boolean value
             "Badges": "sr7" in self.data.locations["Other"]["Settings"],
             "sr6.25": "sr6.25" in self.data.locations["Other"]["Settings"],
             "sr3.5": "sr3.5" in self.data.locations["Other"]["Settings"],

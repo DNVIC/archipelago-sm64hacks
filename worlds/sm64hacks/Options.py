@@ -57,6 +57,12 @@ class FillerTrapPercentage(Range):
     default = 30
     range_end = 100
 
+class RingLink(Toggle):
+    """
+    Whether your coin counter is linked to other players.
+    """
+    display_name = "Ring Link"
+
 
 @dataclass
 class SM64HackOptions(PerGameCommonOptions):
@@ -65,4 +71,5 @@ class SM64HackOptions(PerGameCommonOptions):
     json_file: JsonFile
     randomize_moat: RandomizeMoat
     death_link: DeathLink
+    ring_link: RingLink
     filler_trap_percentage: FillerTrapPercentage
