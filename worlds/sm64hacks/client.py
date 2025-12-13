@@ -248,13 +248,17 @@ class SM64HackClient(BizHawkClient):
     def get_segmented_behavior(self, absolute_behavior, bank_13_ram_start):
         return 0x80000000 + int.from_bytes(bank_13_ram_start) + absolute_behavior
     
-    async def update_ring_link(self, ctx, ring_link: bool):
+    async def update_ring_link(self, ctx, ring_link: int):
         """Helper function to set Ring Link connection tag on/off and update the connection if already connected."""
         old_tags = ctx.tags.copy()
-        if ring_link:
+        if ring_link != 0:
             ctx.tags.add("RingLink")
         else:
             ctx.tags -= {"RingLink"}
+        if ring_link == 2:
+            ctx.tags.add("HardRingLink")
+        else:
+            ctx.tags -= {"HardRingLink"}
         if old_tags != ctx.tags and ctx.server and not ctx.server.socket.closed:
             await ctx.send_msgs([{"cmd": "ConnectUpdate", "tags": ctx.tags}])
     
@@ -739,9 +743,9 @@ class SM64HackClient(BizHawkClient):
                         self.last_death_link = ctx.last_death_link
             
             # ringlink
-            if ctx.slot_data.get("RingLink"):
+            if ctx.slot_data.get("RingLink") != 0:
                 if "RingLink" not in ctx.tags:
-                    await self.update_ring_link(ctx, True)
+                    await self.update_ring_link(ctx, ctx.slot_data.get("RingLink"))
 
                 # Read current coins
                 current = int.from_bytes(read[18])
@@ -760,21 +764,31 @@ class SM64HackClient(BizHawkClient):
                     # Write back
                     if coins != current:
                         writes.append((coinPtr, coins.to_bytes(2), "RDRAM"))
+                        writes.append((coinVisualPtr, coins.to_bytes(2), "RDRAM"))
 
                     print(f"[RingLink] New coin total: {coins}")
                 
                 else:
                     if self.supposed_ring_count != current:
+                        # Calc rings to send
+                        link_type = "RingLink"
                         rings_to_send = current - self.supposed_ring_count
-                        self.supposed_ring_count = current
-                        await ctx.send_msgs([{
-                            "cmd": "Bounce", "tags": ["RingLink"],
-                            "data": {
-                                "time": time(),
-                                "source": abs(int(hash(get_unique_identifier())/10000000000)), # the shit that makes sonic adventure not crash
-                                "amount": rings_to_send
-                            }
-                        }])
+
+                        # Negative packets are only sent via hard ringlink
+                        if rings_to_send < 0:
+                            link_type = "HardRingLink"
+                        
+                        # If you don't have the HardRingLink tag then this gets skipped
+                        if link_type in ctx.tags:
+                            self.supposed_ring_count = current
+                            await ctx.send_msgs([{
+                                "cmd": "Bounce", "tags": [link_type],
+                                "data": {
+                                    "time": time(),
+                                    "source": abs(int(hash(get_unique_identifier())/10000000000)), # the shit that makes sonic adventure not crash
+                                    "amount": rings_to_send
+                                }
+                            }])
 
 
             
