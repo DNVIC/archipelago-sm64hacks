@@ -743,7 +743,7 @@ class SM64HackClient(BizHawkClient):
                         self.last_death_link = ctx.last_death_link
             
             # ringlink
-            if ctx.slot_data.get("RingLink") != 0:
+            if ctx.slot_data.get("RingLink", 0) != 0:
                 if "RingLink" not in ctx.tags:
                     await self.update_ring_link(ctx, ctx.slot_data.get("RingLink"))
 
@@ -775,7 +775,8 @@ class SM64HackClient(BizHawkClient):
                         rings_to_send = current - self.supposed_ring_count
 
                         # Negative packets are only sent via hard ringlink
-                        if rings_to_send < 0:
+                        # You can still send -1 coins with normal ringlink to compensate for the coin drain section in UCMH
+                        if rings_to_send < -1:
                             link_type = "HardRingLink"
                         
                         # If you don't have the HardRingLink tag then this gets skipped
