@@ -8,7 +8,7 @@ Special support for Star Revenges 3.5, 6.25, 7, 7.5, and 8 as well!
 Video guide [here](https://youtu.be/ugKJhTIC1OE), text guide below, use whichever you prefer. (though it's pretty complicated, the video guide is more thorough)
 Video guide is a bit outdated but it's recommended if you are making your own JSON file, if you are using an existing one the text guide is more than sufficient
 
-Have a quick look through [this repo](https://github.com/DNVIC/sm64hack-archipelago-jsons) first, there's a good chance there's a json file for a hack you want to play in there, especially if it's a major and/or popular hack. If it's in there, the hack is bundled in with the lastest version of the APWorld (you do NOT need to download it), and therefore you can head straight to [generation](#Generation), though make sure to note down the name of the json file.
+Have a quick look through [this repo](https://github.com/DNVIC/sm64hack-archipelago-jsons) first, there's a good chance there's a json file for a hack you want to play in there, especially if it's a major and/or popular hack. If it's in there, the logic for the hack will be automatically downloaded when you generate your game (you do NOT need to download it), and therefore you can head straight to [generation](#Generation), though make sure to note down the name of the json file.
 
 ### JSON Creation
 
@@ -20,19 +20,19 @@ Input the jsml file into the website, and fill out the requirements for everythi
 
 Click on the victory text at the bottom, and put whatever is required to achieve "Victory" in the hack. As it is, this will not be automatically be achieved in the rando when you get it, since its impossible to know what constitutes victory for an arbitrary hack, but its still important since the rando makes sure that victory is possible. If you want to, you can say when you get victory by running the "Victory.js" script when playing the game. It's the honor system, but the best I can do.
 
-Export the .json file, and put it in the sm64hack_jsons folder inside the archipelago root directory (if it does not exist, try generating a sample game with something like superMario64.json and it should work afterwards
+Export the .json file, and put it in the sm64hack_jsons folder (specifically inside the custom_jsons folder in there) inside the archipelago root directory (if it does not exist, try generating a sample game with something like superMario64.json and it should work afterwards)
 
 ### Generation
 
 Copy the template.yaml from the releases, change json_file to be the json file you want to use (just the name of the file, if it's in a subdirectory it will find it), and place it in the players folder.
-There's a few settings you can modify, progressive keys makes keys a progressive item, in some hacks this is a good idea as key 2 stuff is locked entirely behind key 1, whereas others its not. Each json has a default progressive key value, but if you want to change it for your specific hack you can. You can also choose to randomize troll stars, if your hack supports it, though many hacks do not.
+There's a few settings you can modify, progressive keys makes keys a progressive item, in some hacks this is a good idea as key 2 stuff is locked entirely behind key 1, whereas others its not. Each json has a default progressive key value, but if you want to change it for your specific game you can. You can also choose to randomize troll stars, if your hack supports it, though many hacks do not as they don't have troll stars.
 
 
 ### Client
 
 Once your world is generated, open the hack you want to play, and delete/move files A and B (this is important)
 
-Open the rom in [Luna's Project64](https://github.com/Luna-Project64), and open the generic bizhawk client (DO NOT use BizHawk, despite the name. It might work on BizHawk, but I haven't tested it and I am not providing any support to BizHawk users.) Go to Debugger -> Scripts (enable debugger if it isn't enabled), download the two .js files from the releases page, put them in the scripts folder (the scripts folder is in the folder that opens when you hit the ... button in the bottom left, if it doesnt open, go to the main window, help->appdata, and make a folder named "Scripts" there), run the 'connector_pj64_generic.js', and you should be ready to go! 
+Open the rom in [Luna's Project64](https://github.com/Luna-Project64), and open the generic bizhawk client (DO NOT use BizHawk, despite the name. It might work on BizHawk, but I haven't tested it and I am not providing any support to BizHawk users.) Go to Debugger -> Scripts (enable debugger if it isn't enabled), download the two .js files from the releases page, put them in the scripts folder (the scripts folder is in the folder that opens when you hit the ... button in the bottom left, if it doesnt open, go to the main window, help->appdata, and make a folder named "Scripts" there, though this shouldn't be an issue with up-to-date versions), run the 'connector_pj64_generic.js', and you should be ready to go! 
 
 ## Anticipated Questions
 Q: Why does this exist? Why not just use the regular randomizer?
@@ -52,13 +52,16 @@ A: BizHawk is a crappy emulator for SM64 hacks, it is not good at all for them, 
 
 Q: Why aren't objects randomized?
 
-A: The current "best" object randomizer for SM64 hacks is like 6 years old and super janky. If you want an object randomizer, put your rom through [this](https://github.com/aGlitch/Mario-64-Randomizer) after you apply the ASM patch. I'm planning on making a better one as part of this project, but it's not done yet.
+A: The current "best" object randomizer for SM64 hacks is like 6 years old and super janky. If you want an object randomizer, put your rom through [this](https://github.com/aGlitch/Mario-64-Randomizer) after you apply the ASM patch. I'm planning on making a better one as part of this project, but it's a lot of effort.
 
 Q: Can you randomize X?
 
 A: Feel free to pitch ideas to me, but reminder that this world is meant to be generalized to most hacks. A lot of stuff either requires significant amounts of custom code (difficult to do without potentially infringing on already-existing custom code in current hacks), or is difficult to implement in a system that allows it to work for more than one hack.
 
 ## Future ideas (in approximate order of greatest to least priority)
+* Better/more functional JSON editor
+* Level tickets
+* Move rando
 * Better object and music shuffler
 * Custom items for specific hacks (sm64oot, probably others im not thinking of)
 * Some sort of way to know what items you're sending to other people in-game
