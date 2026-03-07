@@ -45,7 +45,7 @@ def update_jsons():
     returnval = False #need to still delete temporary folder if version file is outdated
     with open(os.path.join(tempfolderpath, "version.txt"), 'r') as versionfile:
         if versionfile.read() != "0.4.0":
-            print("Outdated APWorld version - Please update if you want to use the lastest JSON files")
+            logger.warning("Outdated APWorld version - Please update if you want to use the lastest JSON files")
             returnval = True
 
     try:

@@ -10,12 +10,13 @@ import re
 import os
 import shutil
 
-sm64hack_items: Tuple[str] = (
+sm64hack_items: Tuple[str, ...] = (
     "Key 1", 
     "Key 2", 
     "Wing Cap", 
     "Vanish Cap", 
     "Metal Cap", 
+    "Castle Moat",
     "Power Star",
     "Progressive Key", 
     "Course 1 Cannon",
@@ -57,17 +58,92 @@ sm64hack_items: Tuple[str] = (
     "Mario Choir",
     "Heave-Ho Trap",
     "Squish Trap",
-    "Castle Moat" 
+    "Spin Trap",
+    "Tempo Trap",
+    "Course 1 Ticket",
+    "Course 2 Ticket",
+    "Course 3 Ticket",
+    "Course 4 Ticket",
+    "Course 5 Ticket",
+    "Course 6 Ticket",
+    "Course 7 Ticket",
+    "Course 8 Ticket",
+    "Course 9 Ticket",
+    "Course 10 Ticket",
+    "Course 11 Ticket",
+    "Course 12 Ticket",
+    "Course 13 Ticket",
+    "Course 14 Ticket",
+    "Course 15 Ticket",
+    "Bowser 1 Ticket",
+    "Bowser 2 Ticket",
+    "Bowser 3 Ticket",
+    "Slide Ticket",
+    "Secret 1 Ticket",
+    "Secret 2 Ticket",
+    "Secret 3 Ticket",
+    "Metal Cap Ticket",
+    "Wing Cap Ticket",
+    "Vanish Cap Ticket",
+    "Overworld Ticket",
+    "Progressive Jump",
+    "Backflip",
+    "Sideflip",
+    "Wallkick",
+    "Long Jump",
+    "Dive",
+    "Ground Pound",
+    "Kick",
+    "Punch",
+    "Slidekick",
+    "Shell",
+    "Star Bundle",
+    "Blue Star",
+    "Blue Star Bundle",
+    "Gray Switch",
+    "1-Up Mushroom",
+    "5% 100-coin star discount",
+    "Cap Timer Extension",
+    "Temporary Metal Cap",
+    "Temporary Vanish Cap",
+    "Cap Timer Extension",
+    "+1 Wallkick Frame",
+    "Steve"
 )
 
-traps: Tuple[str] = (
+moves: Tuple[str, ...] = (
+    "Backflip",
+    "Sideflip",
+    "Long Jump",
+    "Dive",
+    "Ground Pound",
+    "Kick",
+    "Punch",
+    "Slidekick",
+    "Shell"
+)
+
+traps: Tuple[str, ...] = (
     "Green Demon Trap",
     "Mario Choir",
     "Heave-Ho Trap",
-    "Squish Trap"
+    "Squish Trap",
+    "Spin Trap",
+    "Tempo Trap"
 )
 
-badges: Tuple[str] = (
+junk: Tuple[str, ...] = (
+    "Coin",
+    "1-Up Mushroom"
+)
+
+useful: Tuple[str, ...] = (
+    "5% 100-coin star discount",
+    "Cap Timer Extension",
+    "+1 Wallkick Frame"
+)
+
+badges: Tuple[str, ...] = (
     "Super Badge",
     "Ultra Badge",
     "Wall Badge",
@@ -75,7 +151,7 @@ badges: Tuple[str] = (
     "Lava Badge"
 )
 
-star_like: Tuple[str] = (
+star_like: Tuple[str, ...] = (
     "Power Star",
     "Overworld Cannon Star",
     "Bowser 2 Cannon Star"
@@ -132,8 +208,6 @@ def find_json_files(directory: Traversable):
         return directory
     if directory.is_dir():
         ret = []
-
-    print("gay", list(directory.iterdir()))
 
 def create_json_folders(auto_update):
     json_dir = os.path.join(Utils.user_path(), "sm64hack_jsons")
@@ -202,5 +276,9 @@ class Data:
         #print(json_file)
         with open(json_file, 'r') as infile:
             filetext = infile.read()
-            self.maxstarcount = max(int(i) for i in re.findall("\"StarRequirement\": *\"(\\d+)\"", filetext))
+            self.maxstarcount = max(int(i) for i in re.findall(r"\|Stars:(\d+)\|", filetext))
             self.locations = json.loads(filetext)
+            if(self.locations["Other"]["Settings"]["Entrances"]):
+                self.progression_courses = set() 
+                for entrance in self.locations["Other"]["Entrances"]:
+                    self.progression_courses |= set((entrance[0], entrance[2]))
