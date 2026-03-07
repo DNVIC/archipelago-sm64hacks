@@ -136,7 +136,7 @@ class SM64HackClient(BizHawkClient):
     
     def set_file_2_flags(self, file1data, file2data, ctx) -> None:
         file2data[9] = file1data[9] if not ctx.slot_data["sr6.25"] else file2data[9]
-        if ctx.slot_data["sr3.5"] or ctx.slot_data["sr6.25"] or ctx.slot_data["decadeslater"] or "Castle Moat" in ctx.server_locations:
+        if ctx.slot_data["sr3.5"] or ctx.slot_data["sr6.25"] or ctx.slot_data.get("decadeslater") or "Castle Moat" in ctx.server_locations:
             file2data[10] = file1data[10] & 0b11111101
             file2data[10] |= self.moat << 1 #yellow/black switch is the same flag as moat
         else:
@@ -202,6 +202,32 @@ class SM64HackClient(BizHawkClient):
             return 10 #generic
         
         return 0
+
+    async def handle_deathlink(self, read, ctx):
+        writes = []
+        if read[2][0] != 0x00:
+            self.death_flag = True
+        if(ctx.slot_data.get("DeathLink") and self.death_flag and time() - self.death_time > 5):
+            if "DeathLink" not in ctx.tags:
+                await ctx.update_death_link(True)
+            
+            if(self.last_death_link != ctx.last_death_link and self.last_death_link is not None):
+                self.death_flag = False
+                self.last_death_link = ctx.last_death_link
+                writes.append((hpPtr, bytes.fromhex("0000"), "RDRAM"))
+                self.death_time = time()
+                return writes
+            elif self.last_death_link is None:
+                self.last_death_link = ctx.last_death_link
+            else: #if you die naturally and get a deathlink on the same frame or whatever the deathlink takes priority to avoid loops
+                death = 0
+                death = await self.check_death(read,ctx)
+                if(death != 0):
+                    self.death_time = time()
+                    cs = causeStrings[death].replace("slot", ctx.player_names[ctx.slot])
+                    self.death_flag = False
+                    await ctx.send_death(cs)
+                    self.last_death_link = ctx.last_death_link
 
     async def get_level_badges(self, addresses, level, ctx):
         level_badges = []
@@ -423,6 +449,58 @@ class SM64HackClient(BizHawkClient):
             self.receiving_ring = True
             self.receiving_ring_amount = amount
 
+    async def handle_ringlink(self, ctx, read):
+        if "RingLink" not in ctx.tags:
+            await self.update_ring_link(ctx, ctx.slot_data.get("RingLink"))
+
+        # Read current coins
+        current = int.from_bytes(read[18])
+
+        if self.receiving_ring:
+            self.receiving_ring = False
+
+            coins = self.receiving_ring_amount + current
+            self.receiving_ring_amount = 0
+
+            coin_star_coins = int(self.basecoincount * (0.95 ** self.coin_discounts))
+            if current < coin_star_coins:
+                coins = min(coins, coin_star_coins) #doesn't give you more coins than you need for the 100c star if you havent gotten the star yet
+            # Safety
+            coins = min(coins, 999)
+            coins = max(coins, 0)
+            self.supposed_ring_count = coins
+
+            writes = []
+            # Write back
+            if coins != current:
+                writes.append((coinPtr, coins.to_bytes(2), "RDRAM"))
+                writes.append((coinVisualPtr, coins.to_bytes(2), "RDRAM"))
+
+            return writes
+        
+        else:
+            if self.supposed_ring_count != current:
+                # Calc rings to send
+                link_type = "RingLink"
+                rings_to_send = current - self.supposed_ring_count
+
+                # Negative packets are only sent via hard ringlink
+                # You can still send -1 coins with normal ringlink to compensate for the coin drain section in UCMH
+                if rings_to_send < -1:
+                    link_type = "HardRingLink"
+                
+                # If you don't have the HardRingLink tag then this gets skipped
+                if link_type in ctx.tags:
+                    self.supposed_ring_count = current
+                    await ctx.send_msgs([{
+                        "cmd": "Bounce", "tags": [link_type],
+                        "data": {
+                            "time": time(),
+                            "source": abs(int(hash(get_unique_identifier())/10000000000)), # the shit that makes sonic adventure not crash
+                            "amount": rings_to_send
+                        }
+                    }])
+        
 
     async def game_watcher(self, ctx: "BizHawkClientContext") -> None:
         from CommonClient import logger
@@ -518,7 +596,7 @@ class SM64HackClient(BizHawkClient):
                 move_patch_hook = pkgutil.get_data(__name__, "asm/move_patch_hook")
                 decades_later_patch = pkgutil.get_data(__name__, "asm/decades_later_patch")
                 self.check_patch_length(logger, trap_patch, choir_patch, star_patch, move_patch, move_patch_hook)
-                if ctx.slot_data["decadeslater"] != 0: #decadeslater overhauls save system so need to do a bunch of code to mitigate that
+                if ctx.slot_data.get("decadeslater") != 0: #decadeslater overhauls save system so need to do a bunch of code to mitigate that
                     writes.extend([
                         (starCountDLPtr1, bytes.fromhex("30900100"), "RDRAM"),
                         (starCountDLPtr2, bytes.fromhex("26040001"), "RDRAM"),
@@ -526,7 +604,7 @@ class SM64HackClient(BizHawkClient):
                         (blueStarActHook, bytes.fromhex("0807840000000000"), "RDRAM"), #no cheesing into act 6 with blue star mode 4Head
                         (blueStarActPatchPtr, decades_later_patch, "RDRAM")
                     ])
-                    if(ctx.slot_data["decadeslater"] == 1):
+                    if(ctx.slot_data.get("decadeslater") == 1):
                         writes.extend([
                             (starDisplayPtr, bytes.fromhex("28410096"), "RDRAM"), #need to make sure that you can switch out of blue star mode or else some normal stars might be impossible
                             (prePlayTransitionPtr,  bytes.fromhex("28410096"), "RDRAM"),
@@ -566,7 +644,7 @@ class SM64HackClient(BizHawkClient):
                     (choirHookPtr, bytes.fromhex("0C09FFC0"), "RDRAM"),
                     (stevePtr, "HE IS WATCHING".encode("ascii"), "RDRAM")
                 ])
-                if ctx.slot_data["moves"]:
+                if ctx.slot_data.get("moves"):
                     self.moves = set()
                     writes.extend([
                         (movePatchPtr, move_patch, "RDRAM"),
@@ -666,7 +744,7 @@ class SM64HackClient(BizHawkClient):
                                     writes.append((filesPtr[self.current_file] + i, bytearray([self.file1Stars[i] & 0b01111111]), "RDRAM")) #reset cannon flag so you can detect both troll stars and cannons
                                 if(self.location_name_to_id[location_name] in ctx.server_locations):
                                     locs.append(self.location_name_to_id[location_name])
-                            if ctx.slot_data["decadeslater"]:
+                            if ctx.slot_data.get("decadeslater"):
                                 dlbit = self.file1Stars[i+56] >> j & 0b00000001
                                 if(dlbit == 1):
                                     location_name = f"{courseIndex[i]} Blue Star {j + 1}"
@@ -689,7 +767,7 @@ class SM64HackClient(BizHawkClient):
                                 locs.append(self.location_name_to_id["Black Switch"])
                             elif(ctx.slot_data["sr6.25"]):
                                 locs.append(self.location_name_to_id["Yellow Switch"])
-                            elif ctx.slot_data["decadeslater"]:
+                            elif ctx.slot_data.get("decadeslater"):
                                 locs.append(self.location_name_to_id["Gray Switch"])
                             else:
                                 locs.append(self.location_name_to_id["Castle Moat"])
@@ -867,7 +945,7 @@ class SM64HackClient(BizHawkClient):
                                 file2data[i] = ((2 ** stars) - 1)
                                 stars = 0
 
-                if(ctx.slot_data["decadeslater"]):
+                if(ctx.slot_data.get("decadeslater")):
                     if bluestars > 7:
                         file2data[8+56] = 127
                         bluestars -= 7
@@ -1061,77 +1139,15 @@ class SM64HackClient(BizHawkClient):
                     writes.append((hpPtr, bytes.fromhex("0000"), "RDRAM"))
 
             # deathlink
-            if read[2][0] != 0x00:
-                self.death_flag = True
-            if(ctx.slot_data.get("DeathLink") and self.death_flag and time() - self.death_time > 5):
-                if "DeathLink" not in ctx.tags:
-                    await ctx.update_death_link(True)
-                
-                if(self.last_death_link != ctx.last_death_link and self.last_death_link is not None):
-                    self.death_flag = False
-                    self.last_death_link = ctx.last_death_link
-                    writes.append((hpPtr, bytes.fromhex("0000"), "RDRAM"))
-                    self.death_time = time()
-                elif self.last_death_link is None:
-                    self.last_death_link = ctx.last_death_link
-                else: #if you die naturally and get a deathlink on the same frame or whatever the deathlink takes priority to avoid loops
-                    death = 0
-                    death = await self.check_death(read,ctx)
-                    if(death != 0):
-                        self.death_time = time()
-                        cs = causeStrings[death].replace("slot", ctx.player_names[ctx.slot])
-                        self.death_flag = False
-                        await ctx.send_death(cs)
-                        self.last_death_link = ctx.last_death_link
+            deathlink_writes = await self.handle_deathlink(read, ctx)
+            if deathlink_writes:
+                writes.extend(deathlink_writes)
             
             # ringlink
             if ctx.slot_data.get("RingLink", 0) != 0:
-                if "RingLink" not in ctx.tags:
-                    await self.update_ring_link(ctx, ctx.slot_data.get("RingLink"))
-
-                # Read current coins
-                current = int.from_bytes(read[18])
-
-                if self.receiving_ring:
-                    self.receiving_ring = False
-
-                    coins = self.receiving_ring_amount + current
-                    self.receiving_ring_amount = 0
-
-                    # Safety
-                    coins = min(coins, 999)
-                    coins = max(coins, 0)
-                    self.supposed_ring_count = coins
-
-                    # Write back
-                    if coins != current:
-                        writes.append((coinPtr, coins.to_bytes(2), "RDRAM"))
-                        writes.append((coinVisualPtr, coins.to_bytes(2), "RDRAM"))
-
-                    print(f"[RingLink] New coin total: {coins}")
-                
-                else:
-                    if self.supposed_ring_count != current:
-                        # Calc rings to send
-                        link_type = "RingLink"
-                        rings_to_send = current - self.supposed_ring_count
-
-                        # Negative packets are only sent via hard ringlink
-                        # You can still send -1 coins with normal ringlink to compensate for the coin drain section in UCMH
-                        if rings_to_send < -1:
-                            link_type = "HardRingLink"
-                        
-                        # If you don't have the HardRingLink tag then this gets skipped
-                        if link_type in ctx.tags:
-                            self.supposed_ring_count = current
-                            await ctx.send_msgs([{
-                                "cmd": "Bounce", "tags": [link_type],
-                                "data": {
-                                    "time": time(),
-                                    "source": abs(int(hash(get_unique_identifier())/10000000000)), # the shit that makes sonic adventure not crash
-                                    "amount": rings_to_send
-                                }
-                            }])
+                ringlink_writes = await self.handle_ringlink(ctx, read)
+                if ringlink_writes:
+                    writes.extend(ringlink_writes)
 
 
             

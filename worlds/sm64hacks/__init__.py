@@ -41,7 +41,7 @@ class SM64HackWorld(World):
     location_name_to_id = {name: id for
                        id, name in enumerate(location_names(), base_id)}
     
-    required_client_version: Tuple[int, int, int] = (0, 5, 0)
+    required_client_version: Tuple[int, int, int] = (1, 0, 0)
 
     def __init__(self,multiworld, player: int):
         self.stars_created = 0
