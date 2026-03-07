@@ -39,6 +39,7 @@ starPatchPtr = 0x279C88
 bank13RamStartPtr = 0x33B400 + 4 * 0x13
 
 coinPtr = 0x33B218
+coinVisualPtr = 0x33B262
 
 level_index = { #sm64's internal level ids are different than the ones used in save data
     16:8, #overworld
