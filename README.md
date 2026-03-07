@@ -1,25 +1,38 @@
-My little archipelago world for (most) Super Mario 64 Romhacks. Currently shuffles keys, stars, caps, and cannons throughout the worlds
+# NOTE: Use and discussion of this apworld (unfortunately) is not allowed anymore in the main archipelago server. Please join [this one](https://discord.gg/Nu4X9gmGDR) instead, if you want help, or just want to share a json file
+
+My little archipelago world for (most) Super Mario 64 Romhacks. Currently shuffles keys, stars, caps, cannons, and troll stars throughout the worlds
+Special support for Star Revenges 3.5, 6.25, 7, 7.5, and 8 as well!
 
 ## How to use this world:
 
-Video guide [here](https://youtu.be/ScKRoSG02nI), text guide below, use whichever you prefer. (though it's pretty complicated, the video guide is more thorough)
+Video guide [here](https://youtu.be/ugKJhTIC1OE), text guide below, use whichever you prefer. (though it's pretty complicated, the video guide is more thorough)
+Video guide is a bit outdated but it's recommended if you are making your own JSON file, if you are using an existing one the text guide is more than sufficient
 
-First, create a json file using [this website](http://dnvic.com/ArchipelagoGenerator/index.html), using a .jsml file. You can get a .jsml file for a hack by loading up a hack in PJ64/Mupen64/Retroarch, opening [stardisplay](https://github.com/aglab2/SM64StarDisplay) (or [the stardisplay client](https://github.com/DNVIC/Archipelago-StarDisplay)), and finding the layout folder in the same folder the exe file is in.
-You can also get premade json files [here](https://github.com/DNVIC/sm64hack-archipelago-jsons)
+Have a quick look through [this repo](https://github.com/DNVIC/sm64hack-archipelago-jsons) first, there's a good chance there's a json file for a hack you want to play in there, especially if it's a major and/or popular hack. If it's in there, the logic for the hack will be automatically downloaded when you generate your game (you do NOT need to download it), and therefore you can head straight to [generation](#Generation), though make sure to note down the name of the json file.
+
+### JSON Creation
+
+First, create a json file using [this website](http://dnvic.com/ArchipelagoGenerator/index.html), using a .jsml file. You can get a .jsml file for a hack by loading up a hack in PJ64/Mupen64/Retroarch, opening [stardisplay](https://github.com/aglab2/SM64StarDisplay), and finding the layout folder in the same folder the exe file is in.
 
 Then, get the .jsml file from the layout folder located where the stardisplay .exe is.
 
-Input the jsml file into the website, and fill out the requirements for everything in the hack, by clicking on the stars, cannons, caps/keys, or courses. Most hacks only really have star and key requirements, and maybe per-star cap requirements, but some hacks have more complicated requirements. If a cannon exists, select it, hit the exists checkbox, add requirements, and hit save. Same with keys/caps. Conditional requirements are a bit more confusing, but are necessary if for example you can get to a level with either the vanish cap or key 2. You'd create one conditional requirement for the vanish cap, and one for key 2, and that'll make it so only one is required.
+Input the jsml file into the website, and fill out the requirements for everything in the hack, by clicking on the stars, cannons, caps/keys, troll stars, or course names. Most hacks only really have star and key requirements, and maybe per-star cap requirements, but some hacks have more complicated requirements. If a cannon exists, select it, hit the exists checkbox, add requirements, and hit save. Same with keys/caps/troll stars. Conditional requirements are a bit more confusing, but are necessary if for example you can get to a level with either the vanish cap or key 2. You'd create one conditional requirement for the vanish cap, and one for key 2, and that'll make it so only one is required.
 
-Click on the victory text at the bottom, and put whatever is required to achieve "Victory" in the hack. As it is, this will not be automatically be achieved in the rando when you get it, since its impossible to know what constitutes victory for an arbitrary hack, but its still important since the rando makes sure that victory is possible.
+Click on the victory text at the bottom, and put whatever is required to achieve "Victory" in the hack. As it is, this will not be automatically be achieved in the rando when you get it, since its impossible to know what constitutes victory for an arbitrary hack, but its still important since the rando makes sure that victory is possible. If you want to, you can say when you get victory by running the "Victory.js" script when playing the game. It's the honor system, but the best I can do.
 
-Export the .json file, and put it in the same folder as the archipelago .exe (or generate.py)
+Export the .json file, and put it in the sm64hack_jsons folder (specifically inside the custom_jsons folder in there) inside the archipelago root directory (if it does not exist, try generating a sample game with something like superMario64.json and it should work afterwards)
 
-Copy the template.yaml, change json_file to be the json file you just made (and if you want keys to be progressive, enable that as well), and place it in the worlds folder.
+### Generation
 
-Once your world is generated, open the hack you want to play, and delete/move file 2 (this is important)
+Copy the template.yaml from the releases, change json_file to be the json file you want to use (just the name of the file, if it's in a subdirectory it will find it), and place it in the players folder.
+There's a few settings you can modify, progressive keys makes keys a progressive item, in some hacks this is a good idea as key 2 stuff is locked entirely behind key 1, whereas others its not. Each json has a default progressive key value, but if you want to change it for your specific game you can. You can also choose to randomize troll stars, if your hack supports it, though many hacks do not as they don't have troll stars.
 
-Open the rom in PJ64/Mupen/Retroarch, open [the stardisplay client](https://github.com/DNVIC/Archipelago-StarDisplay), right click -> archipelago, log in, and you should be ready to go! 
+
+### Client
+
+Once your world is generated, open the hack you want to play, and delete/move files A and B (this is important)
+
+Open the rom in [Luna's Project64](https://github.com/Luna-Project64), and open the generic bizhawk client (DO NOT use BizHawk, despite the name. It might work on BizHawk, but I haven't tested it and I am not providing any support to BizHawk users.) Go to Debugger -> Scripts (enable debugger if it isn't enabled), download the two .js files from the releases page, put them in the scripts folder (the scripts folder is in the folder that opens when you hit the ... button in the bottom left, if it doesnt open, go to the main window, help->appdata, and make a folder named "Scripts" there, though this shouldn't be an issue with up-to-date versions), run the 'connector_pj64_generic.js', and you should be ready to go! 
 
 ## Anticipated Questions
 Q: Why does this exist? Why not just use the regular randomizer?
@@ -30,34 +43,38 @@ Q: You said (most) romhacks, what hacks aren't supported?
 
 A: Basically any decomp hack will probably not ever be supported since this uses MIPS assembly code to change certain parts of the game to read from File 2 (easiest way to implement it, sm64's code is a mess), and when you recompile a rom from source and edit basically anything, the compiler will shift all of these pointers the assembly code relies upon, which causes the assembly code to fail completely. 
 
-Any binary hack with 8 stars per level is not currently supported, nor is Decades Later or Star Revenge 6.25. I want both to work at some point, but that some point might be a bit away depending on how lazy I am (8 stars per level should be relatively simple, but decades later/6.25 won't be so simple, and both would require special code to support them in particular)
+Some more complicated binary hacks/hacks with a lot of stars, like Decades Later and SM64OoT are not currently supported. Eventually, the goal is to get these hacks supported though.
+In the far future, it might be possible to create little C library for decomp hacks, which if the hack is compiled with the library, the hack will be archipelago-compatible. Though that requires the hack to have its source code released, and it's a bit too much work for me for now.
 
-Q: Why doesn't this use BizHawk, and instead this weird thing called "star display"?
+Q: Why don't you support BizHawk even though this uses the "bizhawk client"?
 
-A: Laziness, and practicality. On the part of laziness, all of the memory reading and writing is already implemented into the base code of stardisplay, which is useful since it means giving items to and from the game is super easy since all the hard work is done for me. On the part of practicality, no one in the SM64 romhack community uses BizHawk (for various reasons), and a bunch of hacks use the More Objects Patch which afaik breaks on all the graphics plugins in BizHawk. Whereas StarDisplay supports a bunch of emulators, basically all the main ones people in the community use. 
+A: BizHawk is a crappy emulator for SM64 hacks, it is not good at all for them, it will break in certain hacks. Whereas Luna's Project64 was literally made specifically for SM64 hacks. If you *really* want to use bizhawk, I have no way of stopping you. I will not provide support however, as I have no way of knowing whether or not it's a problem with my code, or just a problem with BizHawk
 
 Q: Why aren't objects randomized?
 
-A: The current "best" object randomizer for SM64 hacks is like 6 years old and super janky. If you want an object randomizer, put your rom through [this](https://github.com/aGlitch/Mario-64-Randomizer) after you apply the ASM patch. I'm planning on making a better one as part of this project, but it's not done yet.
+A: The current "best" object randomizer for SM64 hacks is like 6 years old and super janky. If you want an object randomizer, put your rom through [this](https://github.com/aGlitch/Mario-64-Randomizer) after you apply the ASM patch. I'm planning on making a better one as part of this project, but it's a lot of effort.
 
 Q: Can you randomize X?
 
 A: Feel free to pitch ideas to me, but reminder that this world is meant to be generalized to most hacks. A lot of stuff either requires significant amounts of custom code (difficult to do without potentially infringing on already-existing custom code in current hacks), or is difficult to implement in a system that allows it to work for more than one hack.
 
 ## Future ideas (in approximate order of greatest to least priority)
+* Better/more functional JSON editor
+* Level tickets
+* Move rando
 * Better object and music shuffler
-* Custom items for specific hacks (Badges in sr7/7.5/8, sm64oot, probably others im not thinking of)
-* Client with Mac/Linux support (StarDisplay does not currently support Mac/Linux) (could probably fork the relevant parts of stardisplay and recompile as a purely console application)
-* Ideas I have for dynamic locations that could be interesting
+* Custom items for specific hacks (sm64oot, probably others im not thinking of)
 * Some sort of way to know what items you're sending to other people in-game
-* Presets for major/important hacks (probably every megapack hack)
 
 ## Credits
-* aglab2 - Making StarDisplay (the main program that the client is built off of)
-* ShiN3 - Helping a lot with the ASM code (which doesn't exist anymore as it's now edited in RAM in the stardisplay client)
+* aglab2 - Making StarDisplay (referencing the StarDisplay code was really helpful in figuring out where pointers were)
+* ShiN3 - Helping a lot with the ASM code (which doesn't exist anymore as it's now edited in RAM in the client)
 * SheepSquared - Testing
 * KingToad74EE - Testing
 * Agyroth - Testing
+* HeralayanSalty - Making a good bit of the bizhawk client connector script
+* Awesome7285 - Usually being the first one to find any bugs in my code
+* Everyone who submitted JSON files for the github repo
 * A bunch of archipelago worlds I ended up referencing when making this.
 
 Below this is the main archipelago readme, felt like i should keep it since this repo has basically their whole code, but its unchanged so dont read it if you only care about repo-specific things

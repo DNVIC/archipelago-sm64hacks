@@ -42,8 +42,9 @@ movePatchPtr = 0x29AD80
 bank13RamStartPtr = 0x33B400 + 4 * 0x13
 
 coinPtr = 0x33B218
-livesPtr = 0x33B21C
+coinVisualPtr = 0x33B262
 
+livesPtr = 0x33B21C
 stevePtr = 0x1F1000
 
 level_index = { #sm64's internal level ids are different than the ones used in save data

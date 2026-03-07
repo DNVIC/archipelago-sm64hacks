@@ -160,6 +160,19 @@ class StarBundles(Range):
     default = 0
     range_end = 100
 
+class RingLink(Choice):
+    """
+    Whether your coin counter is linked to other players.
+
+    On - Normal RingLink. You only send coins to other players and can receive any amount of coins from other players.
+
+    Hard RingLink (Not recommended) - Same as on, but allows the client to send negative rings upon leaving a level.
+    """
+    display_name = "Ring Link"
+    option_off = 0
+    option_on = 1
+    option_hard_ringlink = 2
+
 
 option_groups = [
     OptionGroup("Main Options", [
@@ -189,11 +202,10 @@ option_groups = [
         ForceMoveRandomization
     ]),
     OptionGroup("Misc Options", [
-        DeathLink
+        DeathLink,
+        RingLink
     ])
 ]
-
-
 @dataclass
 class SM64HackOptions(PerGameCommonOptions):
     json_file: JsonFile
@@ -216,4 +228,4 @@ class SM64HackOptions(PerGameCommonOptions):
     hack_specific_options: HackSpecificOptions
     death_link: DeathLink
     start_inventory_from_pool: StartInventoryPool
-
+    ring_link: RingLink
