@@ -43,7 +43,7 @@ class TrollStars(Choice):
 class RandomizeMoat(Toggle):
     """Shuffles the moat as a check in logic. If off, the moat will instead be placed in the vanilla location."""
 
-class FillerUsefulkWeight(Range):
+class FillerUsefulWeight(Range):
     """Decides what percent chance of filler items should be somewhat useful items, compared to other filler.
     
     0 - No junk can be generated as useful items
@@ -190,7 +190,7 @@ option_groups = [
         StartingJump,
         StartingTickets,
         StarBundles,
-        FillerUsefulkWeight,
+        FillerUsefulWeight,
         FillerJunkWeight,
         FillerTrapWeight
     ]),
@@ -221,7 +221,7 @@ class SM64HackOptions(PerGameCommonOptions):
     starting_jump: StartingJump
     filler_trap_weight: FillerTrapWeight
     filler_junk_weight: FillerJunkWeight
-    filler_useful_weight: FillerUsefulkWeight
+    filler_useful_weight: FillerUsefulWeight
     logic_difficulty: LogicDifficulty
     glitches_in_logic: LogicGlitches
     major_skips: MajorSkips
