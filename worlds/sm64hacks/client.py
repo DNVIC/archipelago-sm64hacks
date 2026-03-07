@@ -4,7 +4,7 @@ import random
 from worlds._bizhawk.client import BizHawkClient
 from .ClientData import *
 from .Locations import location_names
-from .Data import sm64hack_items, sr6_25_locations
+from .Data import sm64hack_items, sr6_25_locations, junk, useful
 from time import time
 from struct import unpack
 from NetUtils import ClientStatus
@@ -66,9 +66,11 @@ class SM64HackClient(BizHawkClient):
         self.choirs = 0
         self.area = None
         self.level_start_time = None
+        self.spinFlagPtr = None
         self.flagPtr = None
         self.greenDemonPtr = None
         self.heaveHoPtr = None
+        self.movesPtr = None
         self.green_demon_data = None
         self.receive_items = False
         self.sent_get_requests = []
@@ -76,6 +78,22 @@ class SM64HackClient(BizHawkClient):
         self.traps_received_this_game = []
         self.async_traps = []
         self.eeprom = ""
+        self.current_file = 0
+        self.tickets = set()
+        self.checked_locations = []
+        self.moves = set()
+        self.spin = False
+        self.spin_timer = 0
+        self.tempo_timer = 0
+        self.tempo_mini_timer = 0
+        self.tempos = 0
+        self.targettempo = 0
+        self.coin_discounts = 0
+        self.cap_timer_buffs = 0
+        self.additional_wallkick_frames = 0
+        self.basecoincount = 100
+        self.base_cap_times = [600, 600, 1800]
+        self.base_wallkick_frames = 5
         self.receiving_ring = False
         self.receiving_ring_amount = 0
         self.supposed_ring_count = 0
@@ -83,6 +101,18 @@ class SM64HackClient(BizHawkClient):
     def __init__(self) -> None:
         super().__init__()
         self.reset_data()
+
+    def check_patch_length(self, logger, trap_patch, choir_patch, star_patch, move_patch, move_patch_hook):
+        if len(trap_patch) > 452:
+            logger.warning(f"Trap Patch exceeded length: {len(trap_patch)}")
+        if len(choir_patch) > 244:
+            logger.warning(f"Choir Patch exceeded length: {len(choir_patch)}")
+        if len(star_patch) > 12:
+            logger.warning(f"Star Patch exceeded length: {len(star_patch)}")
+        if len(move_patch) > 188:
+            logger.warning(f"Move Patch exceeded length: {len(move_patch)}")
+        if len(move_patch_hook) > 8:
+            logger.warning(f"Move Patch Hook exceeded length: {len(move_patch_hook)}")
 
     
     async def validate_rom(self, ctx: "BizHawkClientContext") -> bool:
@@ -106,7 +136,7 @@ class SM64HackClient(BizHawkClient):
     
     def set_file_2_flags(self, file1data, file2data, ctx) -> None:
         file2data[9] = file1data[9] if not ctx.slot_data["sr6.25"] else file2data[9]
-        if ctx.slot_data["sr3.5"] or ctx.slot_data["sr6.25"] or ctx.slot_data.get("moat"):
+        if ctx.slot_data["sr3.5"] or ctx.slot_data["sr6.25"] or ctx.slot_data.get("decadeslater") or "Castle Moat" in ctx.server_locations:
             file2data[10] = file1data[10] & 0b11111101
             file2data[10] |= self.moat << 1 #yellow/black switch is the same flag as moat
         else:
@@ -173,6 +203,32 @@ class SM64HackClient(BizHawkClient):
         
         return 0
 
+    async def handle_deathlink(self, read, ctx):
+        writes = []
+        if read[2][0] != 0x00:
+            self.death_flag = True
+        if(ctx.slot_data.get("DeathLink") and self.death_flag and time() - self.death_time > 5):
+            if "DeathLink" not in ctx.tags:
+                await ctx.update_death_link(True)
+            
+            if(self.last_death_link != ctx.last_death_link and self.last_death_link is not None):
+                self.death_flag = False
+                self.last_death_link = ctx.last_death_link
+                writes.append((hpPtr, bytes.fromhex("0000"), "RDRAM"))
+                self.death_time = time()
+                return writes
+            elif self.last_death_link is None:
+                self.last_death_link = ctx.last_death_link
+            else: #if you die naturally and get a deathlink on the same frame or whatever the deathlink takes priority to avoid loops
+                death = 0
+                death = await self.check_death(read,ctx)
+                if(death != 0):
+                    self.death_time = time()
+                    cs = causeStrings[death].replace("slot", ctx.player_names[ctx.slot])
+                    self.death_flag = False
+                    await ctx.send_death(cs)
+                    self.last_death_link = ctx.last_death_link
+
     async def get_level_badges(self, addresses, level, ctx):
         level_badges = []
         reads = []
@@ -195,37 +251,128 @@ class SM64HackClient(BizHawkClient):
 
         return level_badges
     
-    async def receive_junk_item(self, ctx, index, name, coins=None):
+    def get_move_writes(self, move_name):
+        addresses = {}
+        special_addresses = {}
+
+        writes = []
+        match move_name:
+            case "Long Jump":
+                addresses.update(long_jump_addresses)
+            case "Slidekick":
+                addresses.update(slidekick_addresses)
+            case "Sideflip":
+                addresses.update(sideflip_addresses)
+            case "Backflip":
+                addresses.update(backflip_addresses)
+            case "Punch":
+                addresses.update(punch_kick_addresses)
+                addresses.update(punch_addresses)
+            case "Kick":
+                addresses.update(punch_kick_addresses)
+                if "Punch" not in self.moves:
+                    addresses.update(kick_no_punch_addresses)
+                special_addresses.update(kick_special_addresses)
+            case "Dive":
+                addresses.update(dive_addresses)
+                special_addresses.update(dive_special_addresses)
+            case "Ground Pound":
+                addresses.update(ground_pound_addresses)
+                special_addresses.update(ground_pound_special_addresses)
+            case "Shell":
+                special_addresses.update(shell_special_addresses)
+            case "Jump":
+                addresses.update(jump_addresses)
+                special_addresses.update(jump_special_addresses)
+                if(self.slope_fix):
+                    special_addresses.update(slope_fix)
+                else:
+                    special_addresses.update(no_slope_fix)
+            case "Double Jump":
+                special_addresses.update(double_jump_special_addresses)
+            case "Triple Jump":
+                special_addresses.update(triple_jump_special_addresses)
+            case "Wallkick":
+                special_addresses.update(wall_kick_special_addresses)
+        
+        for key, value in addresses.items():
+            writes.append((key, bytes.fromhex(value), "RDRAM"))
+        for key, value in special_addresses.items():
+            writes.append((key, bytes.fromhex(value[1]), "RDRAM"))
+
+        return writes
+
+    def get_coin_star_writes(self, coins:int):
+        return [(hundredCoinStarPtr1, coins.to_bytes(2), "RDRAM"), (hundredCoinStarPtr2, coins.to_bytes(2), "RDRAM")]
+                
+    def get_cap_timer_writes(self):
+        times = []
+        for time in self.base_cap_times:
+            times.append(time + 60) #2 seconds
+        print(times)
+        return [(vanishCapTimerPtr, times[0].to_bytes(2), "RDRAM"), (metalCapTimerPtr, times[1].to_bytes(2), "RDRAM"), (wingCapTimerPtr, times[2].to_bytes(2), "RDRAM")]
+
+    def get_wallkick_frame_writes(self):
+        return [(wallkickFramePtr, (self.base_wallkick_frames + self.additional_wallkick_frames).to_bytes(2), "RDRAM"), (wallkickFramePtr2, (self.base_wallkick_frames + self.additional_wallkick_frames).to_bytes(2), "RDRAM")]
+
+
+    def get_choir_write(self):
+        if self.choir_active == 2 and (time() - self.choir_timer) > self.choirs * 300:
+            self.choir_active = 0
+            self.choirs = 0
+            return (self.choirFlagPtr, bytes.fromhex("00000000"), "RDRAM")
+    
+    async def get_heave_write(self, ctx, heavebehavior, bank13start):
+        if heavebehavior.hex().upper().startswith('80'): #sm64 animations are broken if you load an object in after you enter the level due to behaviorscript shit. this is a janky solution but it works
+            addr = int.from_bytes(heavebehavior) & 0x7FFFFFFF
+            heaveho_reads = (
+                (addr + 0x74, 0x4, "RDRAM"), #0, active flag
+                (addr + 0x20c, 0x4, "RDRAM"), #1, beh data
+                (addr + 0x3c, 0x4, "RDRAM") #2, anim
+            )
+            heave_read = await bizhawk.read(ctx.bizhawk_ctx, heaveho_reads)
+            active = int.from_bytes(heave_read[0])
+            behavior = heave_read[1]
+            
+            if active == 0 or int.from_bytes(behavior) != self.get_segmented_behavior(0x1548, bank13start):
+                return (self.heaveHoPtr, bytes.fromhex("00000000"), "RDRAM")
+            elif heave_read[2].hex().upper() != "80735118":
+                return (addr + 0x3c, bytes.fromhex("80735118"), "RDRAM")
+
+
+    async def receive_junk_item(self, ctx, index, name, number=None):
         #flag for if unimportant items have been received can't be stored in savedata both because it'd fuck with the async traps 
         #and more importantly because there is no "safe" savedata to store the most recent index in, due to there not being much savedata in sm64, 
         #and as a result the unused portions are very likely to be used by some hackers.
         #print("tetttt", self.sent_get_requests, ctx.stored_data)
-        if f"sm64hack_junk_{ctx.team}_{ctx.slot}_{index}" not in self.sent_get_requests: #need to let it loop through to receive the results of this
+
+        datastorage_name = f"sm64hack_junk_{ctx.team}_{ctx.slot}_{index}"
+        if datastorage_name not in self.sent_get_requests: #need to let it loop through to receive the results of this
             await ctx.send_msgs([{
                 "cmd": "Get",
-                "keys": [f"sm64hack_junk_{ctx.team}_{ctx.slot}_{index}" ]
+                "keys": [datastorage_name]
             }])
-            self.sent_get_requests.append(f"sm64hack_junk_{ctx.team}_{ctx.slot}_{index}")
+            self.sent_get_requests.append(datastorage_name)
             self.receive_items = True
-        elif f"sm64hack_junk_{ctx.team}_{ctx.slot}_{index}" not in ctx.stored_data.keys():
+        elif datastorage_name not in ctx.stored_data.keys():
             self.receive_items = True #australia ping
-        elif not ctx.stored_data.get(f"sm64hack_junk_{ctx.team}_{ctx.slot}_{index}") and index not in self.traps_received_this_game:
+        elif not ctx.stored_data.get(datastorage_name) and index not in self.traps_received_this_game:
             self.traps_received_this_game.append(index)
             #print(self.loops)
-            if self.loops > 4 or name == "Coin":
+            if self.loops > 4 or name in junk:
                 await ctx.send_msgs([{
                     "cmd": "Set",
-                    "key": f"sm64hack_junk_{ctx.team}_{ctx.slot}_{index}",
+                    "key": datastorage_name,
                     "default": 0,
                     "want_reply": False,
                     "operations": [{"operation": "or", "value": 1}],
                 }])
-                return self.get_junk_item_write(name, coins)
+                return self.get_junk_item_write(name, number)
             else:
                 if (index, name) not in self.async_traps:
                     self.async_traps.append((index, name))
     
-    def get_junk_item_write(self, name, coins=None):
+    def get_junk_item_write(self, name, number=None):
         match name:
             case "Green Demon Trap":
                 if self.flagPtr:
@@ -243,7 +390,22 @@ class SM64HackClient(BizHawkClient):
             case "Squish Trap":
                 return (marioSquishPtr, bytes.fromhex("FE"), "RDRAM")
             case "Coin":
-                return (coinPtr, (coins + 1).to_bytes(2), "RDRAM")
+                return (coinPtr, (number + 1).to_bytes(2), "RDRAM")
+            case "1-Up Mushroom":
+                return (livesPtr, (number + 1).to_bytes(2), "RDRAM")
+            case "Spin Trap":
+                self.spin = True
+                self.spin_timer = time()
+                return (self.spinFlagPtr, bytes.fromhex("0000006A"), "RDRAM")
+            case "Steve":
+                self.spin = True
+                self.spin_timer = time()
+                return (self.spinFlagPtr, bytes.fromhex("0000006B"), "RDRAM")
+            case "Tempo Trap":
+                self.tempo_timer = time()
+                self.tempos += 1
+                return None
+
             
     def get_segmented_behavior(self, absolute_behavior, bank_13_ram_start):
         return 0x80000000 + int.from_bytes(bank_13_ram_start) + absolute_behavior
@@ -287,25 +449,89 @@ class SM64HackClient(BizHawkClient):
             self.receiving_ring = True
             self.receiving_ring_amount = amount
 
+    async def handle_ringlink(self, ctx, read):
+        if "RingLink" not in ctx.tags:
+            await self.update_ring_link(ctx, ctx.slot_data.get("RingLink"))
+
+        # Read current coins
+        current = int.from_bytes(read[18])
+
+        if self.receiving_ring:
+            self.receiving_ring = False
+
+            coins = self.receiving_ring_amount + current
+            self.receiving_ring_amount = 0
+
+            coin_star_coins = int(self.basecoincount * (0.95 ** self.coin_discounts))
+            if current < coin_star_coins:
+                coins = min(coins, coin_star_coins) #doesn't give you more coins than you need for the 100c star if you havent gotten the star yet
+            # Safety
+            coins = min(coins, 999)
+            coins = max(coins, 0)
+            self.supposed_ring_count = coins
+
+            writes = []
+            # Write back
+            if coins != current:
+                writes.append((coinPtr, coins.to_bytes(2), "RDRAM"))
+                writes.append((coinVisualPtr, coins.to_bytes(2), "RDRAM"))
+
+            return writes
+        
+        else:
+            if self.supposed_ring_count != current:
+                # Calc rings to send
+                link_type = "RingLink"
+                rings_to_send = current - self.supposed_ring_count
+
+                # Negative packets are only sent via hard ringlink
+                # You can still send -1 coins with normal ringlink to compensate for the coin drain section in UCMH
+                if rings_to_send < -1:
+                    link_type = "HardRingLink"
+                
+                # If you don't have the HardRingLink tag then this gets skipped
+                if link_type in ctx.tags:
+                    self.supposed_ring_count = current
+                    await ctx.send_msgs([{
+                        "cmd": "Bounce", "tags": [link_type],
+                        "data": {
+                            "time": time(),
+                            "source": abs(int(hash(get_unique_identifier())/10000000000)), # the shit that makes sonic adventure not crash
+                            "amount": rings_to_send
+                        }
+                    }])
+        
 
     async def game_watcher(self, ctx: "BizHawkClientContext") -> None:
         from CommonClient import logger
         try:
             if ctx.server is None or ctx.server.socket.closed or ctx.slot_data is None:
                 return
+            if ctx.slot_data.get("version") == "v0.5":
+                self.sm64hack_items = sm64hack_items
+                self.old_version = False
+            else:
+                self.old_version = True
+                self.sm64hack_items = legacy_item_names
+                self.location_name_to_id = legacy_location_name_to_id
+
+
             if self.flagPtr is None:
                 trapPatch = pkgutil.get_data(__name__, "asm/trap_patch")
                 choirPatch = pkgutil.get_data(__name__, "asm/choir_patch")
+                movePatch = pkgutil.get_data(__name__, "asm/move_patch")
                 self.choirFlagPtr = len(choirPatch) + choirPatchPtr - 4
+                self.spinFlagPtr = len(trapPatch) + trapPatchPtr - 20
                 self.starIdPtr = len(trapPatch) + trapPatchPtr - 16
                 self.flagPtr = len(trapPatch) + trapPatchPtr - 12
                 self.greenDemonPtr = len(trapPatch) + trapPatchPtr - 8
                 self.heaveHoPtr = len(trapPatch) + trapPatchPtr - 4
+                self.movesPtr = len(movePatch) + movePatchPtr - 4
             reads = [
-                (filesPtr[0], 0x70, "RDRAM"),         #0
+                (filesPtr[self.current_file], 0x70, "RDRAM"),         #0
                 (filesPtr[1], 0x70, "RDRAM"),         #1
                 (hpPtr, 0x2, "RDRAM"),                #2
-                (starCountAPPtr1, 0x4, "RDRAM"),      #3
+                (flagAPPtr, 0x4, "RDRAM"),      #3
                 (marioObjectPtr, 0x4, "RDRAM"),       #4
                 (marioActionPtr, 0x4, "RDRAM"),       #5
                 (marioFloorPtr, 0x4, "RDRAM"),        #6
@@ -320,29 +546,90 @@ class SM64HackClient(BizHawkClient):
                 (self.heaveHoPtr, 0x4, "RDRAM"),      #15
                 (bank13RamStartPtr, 0x4, "RDRAM"),    #16
                 (self.starIdPtr, 0x4, "RDRAM"),       #17
-                (coinPtr, 0x2, "RDRAM")               #18
+                (coinPtr, 0x2, "RDRAM"),              #18
+                (currFilePtr, 0x2, "RDRAM"),          #19
+                (next(iter(slope_fix)), 0x4, "RDRAM"),#20
+                (tempoPtr, 0x2, "RDRAM"),             #21
+                (livesPtr, 0x2, "RDRAM"),             #22
+                (hundredCoinStarPtr1, 0x2, "RDRAM"),  #23
+                (vanishCapTimerPtr, 0x2, "RDRAM"),    #24
+                (metalCapTimerPtr, 0x2, "RDRAM"),     #25
+                (wingCapTimerPtr, 0x2, "RDRAM"),      #26
+                (wallkickFramePtr, 0x2, "RDRAM")      #27
             ]
-            
             
 
             read = await bizhawk.read(ctx.bizhawk_ctx, reads)
             if(int.from_bytes(read[9]) < 60):
                 return #game isnt initialized yet so things might be fucky
 
+            if int.from_bytes(read[19]) == 2:
+                logger.warning("You may not choose File B as that is where the received stars are stored")
+                return
+
+            if int.from_bytes(read[19]) - 1 != self.current_file: #allow files C and D
+                self.current_file = int.from_bytes(read[19]) - 1
+                return #wrong file was read so we need to restart
             
+            
+            if read[20].hex() == "150f000f" or read[20].hex() == "1000000f":
+                self.slope_fix = True
+            else:
+                self.slope_fix = False
+
             writes = []
             resettest = read[3]
-            if(resettest.hex() != "24040001"):
-                logger.info("Reminder: Save and load a savestate so that traps can take effect")
+            if(resettest.hex() != "24180002"):
+                logger.info("Reminder: Save and load a savestate so that traps, move rando, or some other things can take effect")
                 self.receive_items = True
+                self.basecoincount = int.from_bytes(read[23])
+                self.base_cap_times = [int.from_bytes(read[24]),int.from_bytes(read[25]),int.from_bytes(read[26])]
+                self.base_wallkick_frames = int.from_bytes(read[27])
+                self.coin_discounts = 0
+                self.cap_timer_buffs = 0
+                self.additional_wallkick_frames = 0
                 
                 trap_patch = pkgutil.get_data(__name__, "asm/trap_patch") #patches are external files for ease of editing them
                 choir_patch = pkgutil.get_data(__name__, "asm/choir_patch")
                 star_patch = pkgutil.get_data(__name__, "asm/star_patch")
+                move_patch = pkgutil.get_data(__name__, "asm/move_patch")
+                move_patch_hook = pkgutil.get_data(__name__, "asm/move_patch_hook")
+                decades_later_patch = pkgutil.get_data(__name__, "asm/decades_later_patch")
+                self.check_patch_length(logger, trap_patch, choir_patch, star_patch, move_patch, move_patch_hook)
+                if ctx.slot_data.get("decadeslater") != 0: #decadeslater overhauls save system so need to do a bunch of code to mitigate that
+                    writes.extend([
+                        (starCountDLPtr1, bytes.fromhex("30900100"), "RDRAM"),
+                        (starCountDLPtr2, bytes.fromhex("26040001"), "RDRAM"),
+                        (starCountDLPtr3, bytes.fromhex("26040001"), "RDRAM"),
+                        (blueStarActHook, bytes.fromhex("0807840000000000"), "RDRAM"), #no cheesing into act 6 with blue star mode 4Head
+                        (blueStarActPatchPtr, decades_later_patch, "RDRAM")
+                    ])
+                    if(ctx.slot_data.get("decadeslater") == 1):
+                        writes.extend([
+                            (starDisplayPtr, bytes.fromhex("28410096"), "RDRAM"), #need to make sure that you can switch out of blue star mode or else some normal stars might be impossible
+                            (prePlayTransitionPtr,  bytes.fromhex("28410096"), "RDRAM"),
+                            (actSelectPathPtr,  bytes.fromhex("28410096"), "RDRAM"),
+                            (blueStarBoxPtr,  bytes.fromhex("28410096"), "RDRAM"),
+                            (afterStarInitPtr,  bytes.fromhex("28810096"), "RDRAM")
+                        ])
+                    else:
+                        writes.extend([
+                            (starDisplayPtr, bytes.fromhex("28410000"), "RDRAM"),
+                            (prePlayTransitionPtr,  bytes.fromhex("28410000"), "RDRAM"),
+                            (actSelectPathPtr,  bytes.fromhex("28410000"), "RDRAM"),
+                            (blueStarBoxPtr,  bytes.fromhex("28410000"), "RDRAM"),
+                            (afterStarInitPtr,  bytes.fromhex("28810000"), "RDRAM"),
+                            (requiredStarsArrPtr, bytes.fromhex("00000137"), "RDRAM")
+                        ])
+                else:
+                    writes.extend([
+                        (starCountAPPtr1, bytes.fromhex("24040001"), "RDRAM"),
+                        (starCountAPPtr2, bytes.fromhex("24040001"), "RDRAM"),
+                        (starPatchPtr, star_patch, "RDRAM") #decades later overrides the function for grabbing a star, so i can't apply the star patch. thankfully the hack has no troll stars or else this would be a problem
+                    ])
+
                 #print(hex(len(patch) + patchPtr))
                 writes.extend([
-                    (starCountAPPtr1, bytes.fromhex("24040001"), "RDRAM"),
-                    (starCountAPPtr2, bytes.fromhex("24040001"), "RDRAM"),
                     (flagAPPtr, bytes.fromhex("24180002"), "RDRAM"),
                     (cannonAPPtr, bytes.fromhex("240E0002"), "RDRAM"),
                     (capAPPtr, bytes.fromhex("080A9BF7"), "RDRAM"),
@@ -355,8 +642,36 @@ class SM64HackClient(BizHawkClient):
                     (trapPatchPtr, trap_patch, "RDRAM"),
                     (choirPatchPtr, choir_patch, "RDRAM"),
                     (choirHookPtr, bytes.fromhex("0C09FFC0"), "RDRAM"),
-                    (starPatchPtr, star_patch, "RDRAM")
+                    (stevePtr, "HE IS WATCHING".encode("ascii"), "RDRAM")
                 ])
+                if ctx.slot_data.get("moves"):
+                    self.moves = set()
+                    writes.extend([
+                        (movePatchPtr, move_patch, "RDRAM"),
+                        (moveHookPtr, move_patch_hook, "RDRAM")
+                    ])
+                    base_move_patches = []
+                    for move in normal_addresses:
+                        for key, value in move.items():
+                            base_move_patches.append((key, bytes.fromhex("00000000"), "RDRAM"))
+                    for move in special_addresses:
+                        for key, value in move.items():
+                            base_move_patches.append((key, bytes.fromhex(value[0]), "RDRAM"))
+                    if self.slope_fix:
+                        for key, value in slope_fix.items():
+                            base_move_patches.append((key, bytes.fromhex(value[0]), "RDRAM"))
+                    else:
+                        for key, value in no_slope_fix.items():
+                            base_move_patches.append((key, bytes.fromhex(value[0]), "RDRAM"))
+
+                    if not read[12].decode("ascii").startswith("STAR REVENGE 7"):
+                        for move in badge_special_addresses:
+                            for key, value in move.items():
+                                base_move_patches.append((key, bytes.fromhex(value[0]), "RDRAM"))
+                    writes.extend(base_move_patches)
+                    
+
+
 
             if self.loops == 0:
                 self.eeprom = read[12].decode("ascii")
@@ -369,7 +684,6 @@ class SM64HackClient(BizHawkClient):
             
             
             if(list(read[10])[0] == 69 and not ctx.finished_game and self.loops > 4): #this and patch are before mario exists check because they should be active even if mario doesn't exist
-                print("tmtnf")
                 ctx.finished_game = True                           #because victory is usually on stuff like end screen where mario doesn't exist
                 await ctx.send_msgs([{                             #and patch is on file select usually
                     "cmd": "StatusUpdate",
@@ -377,7 +691,8 @@ class SM64HackClient(BizHawkClient):
                 }])
             
             if int.from_bytes(read[4]) == 0: #mario doesn't exist yet
-                await bizhawk.write(ctx.bizhawk_ctx, writes)
+                for i in range(0, len(writes), 10):
+                    await bizhawk.write(ctx.bizhawk_ctx, writes[i:i + 10])
                 return
             
             self.loops += 1
@@ -387,22 +702,24 @@ class SM64HackClient(BizHawkClient):
             if self.file1Stars is not None:
                 if(file1data[5] != self.file1Stars[5]) and ctx.slot_data["Badges"]:
                     file1data[5] = self.file1Stars[5] #prevent badges from changing the flags, so they can be received correctly.
-                    writes.append((filesPtr[0] + 0x5, bytearray(file1data[5:6]),"RDRAM"))
+                    writes.append((filesPtr[self.current_file] + 0x5, bytearray(file1data[5:6]),"RDRAM"))
                 else:
                     location_id_to_name = dict((value, key) for key, value in self.location_name_to_id.items()) #sync local stars with server, easier coordination if people are sharing a slot
                     index_course = dict((value, key) for key, value in courseIndex.items())
-                    for location in ctx.checked_locations:
-                        location_name = location_id_to_name[location]
-                        if "Cannon" in location_name:
-                            continue
-                        if location_name in sr6_25_locations[1:]:
-                            file1data[9] |= 1 << sr6_25_locations[1:].index(location_name)
-                        elif location_name[:-7] in index_course:
-                            file1data[index_course[location_name[:-7]]] |= 1 << int(location_name[-1]) - 1
-                        elif location_name in self.items:
-                            file1data[11] |= 1 << self.items.index(location_name) + 1
-                    
-                    writes.append((filesPtr[0], bytearray(file1data), "RDRAM"))
+                    if self.checked_locations != ctx.checked_locations:
+                        self.checked_locations = ctx.checked_locations
+                        for location in ctx.checked_locations:
+                            location_name = location_id_to_name[location]
+                            if "Cannon" in location_name:
+                                continue
+                            if location_name in sr6_25_locations[1:]:
+                                file1data[9] |= 1 << sr6_25_locations[1:].index(location_name)
+                            elif location_name[:-7] in index_course:
+                                file1data[index_course[location_name[:-7]]] |= 1 << int(location_name[-1]) - 1
+                            elif location_name in self.items:
+                                file1data[11] |= 1 << self.items.index(location_name) + 1
+                        
+                        writes.append((filesPtr[self.current_file], bytearray(file1data), "RDRAM"))
 
             file2data = list(read[1])
             file2flag = False
@@ -424,9 +741,16 @@ class SM64HackClient(BizHawkClient):
                                             location_name = courseIndex[8] + " Cannon"
                                         else:
                                             location_name = courseIndex[i - 1] + " Cannon"
-                                    writes.append((filesPtr[0] + i, bytearray([self.file1Stars[i] & 0b01111111]), "RDRAM")) #reset cannon flag so you can detect both troll stars and cannons
+                                    writes.append((filesPtr[self.current_file] + i, bytearray([self.file1Stars[i] & 0b01111111]), "RDRAM")) #reset cannon flag so you can detect both troll stars and cannons
                                 if(self.location_name_to_id[location_name] in ctx.server_locations):
                                     locs.append(self.location_name_to_id[location_name])
+                            if ctx.slot_data.get("decadeslater"):
+                                dlbit = self.file1Stars[i+56] >> j & 0b00000001
+                                if(dlbit == 1):
+                                    location_name = f"{courseIndex[i]} Blue Star {j + 1}"
+                                    if(self.location_name_to_id[location_name] in ctx.server_locations):
+                                        locs.append(self.location_name_to_id[location_name])
+
                     elif i == 37:
                         if(self.file1Stars[i] >> 7 & 0x1 and ctx.slot_data["Cannons"]):
                             location_name = courseIndex[36] + " Cannon"
@@ -443,7 +767,9 @@ class SM64HackClient(BizHawkClient):
                                 locs.append(self.location_name_to_id["Black Switch"])
                             elif(ctx.slot_data["sr6.25"]):
                                 locs.append(self.location_name_to_id["Yellow Switch"])
-                            elif(ctx.slot_data.get("moat")):
+                            elif ctx.slot_data.get("decadeslater"):
+                                locs.append(self.location_name_to_id["Gray Switch"])
+                            else:
                                 locs.append(self.location_name_to_id["Castle Moat"])
                     elif i == 11:
                         for j in range(1,6):
@@ -468,13 +794,25 @@ class SM64HackClient(BizHawkClient):
                 self.receive_items = False
                 stars = 0
                 starcount = 0
+                bluestars = 0
                 keyCounter = 0
                 badgeCounter = 0
+                jumps = 0
+                discounts = 0
+                captimerbuffs = 0
+                wallkickframes = 0
+
                 for index, item in enumerate(ctx.items_received):
-                    item_name = sm64hack_items[item.item - self.base_id]
+                    item_name = self.sm64hack_items[item.item - self.base_id]
                     match item_name:
                         case "Power Star":
                             stars += 1
+                        case "Star Bundle":
+                            stars += 2
+                        case "Blue Star":
+                            bluestars += 1
+                        case "Blue Star Bundle":
+                            bluestars += 2
                         case "Progressive Key":
                             reversed = ctx.slot_data["ProgressiveKeys"] == 2
                             if keyCounter == 1:
@@ -509,6 +847,8 @@ class SM64HackClient(BizHawkClient):
                             self.moat = 1
                         case "Black Switch":
                             self.moat = 1
+                        case "Gray Switch":
+                            self.moat = 1
                         case "Castle Moat":
                             self.moat = 1
                         case "Overworld Cannon Star":
@@ -517,6 +857,14 @@ class SM64HackClient(BizHawkClient):
                         case "Bowser 2 Cannon Star":
                             starcount += 1
                             self.cannons[29] = True
+                        case "5% 100-coin star discount":
+                            discounts += 1
+                        case "Cap Timer Extension":
+                            captimerbuffs += 1
+                        case "+1 Wallkick Frame":
+                            wallkickframes += 1
+                        case s if s.endswith("Ticket"):
+                            self.tickets.add(item_name)
                         case _:
                             if("Cannon" in item_name):
                                 course = item_name[:-7]
@@ -525,10 +873,30 @@ class SM64HackClient(BizHawkClient):
                                     self.cannons[12] = True
                                 else:
                                     self.cannons[course_num + 1] = True
+                            elif item_name in moves:
+                                if item_name == "Progressive Jump":
+                                    item_name = jump_names[jumps]
+                                    jumps += 1
+                                if item_name in self.moves:
+                                    continue
+                                else:
+                                    self.moves.add(item_name)
+                                    writes.extend(self.get_move_writes(item_name))
+                                    move_num = 0
+                                    move_num += 1 if "Jump" in self.moves else 0
+                                    move_num += 2 if "Double Jump" in self.moves else 0
+                                    move_num += 4 if "Triple Jump" in self.moves else 0
+                                    move_num += 8 if "Long Jump" in self.moves else 0
+                                    move_num += 16 if "Backflip" in self.moves else 0
+                                    move_num += 32 if "Sideflip" in self.moves else 0
+                                    writes.append((self.movesPtr, move_num.to_bytes(4), "RDRAM"))
                             else:
-                                write = await self.receive_junk_item(ctx, index, item_name, int.from_bytes(read[18]))
+                                num = read[18] if item_name == "Coin" else read[22]
+                                write = await self.receive_junk_item(ctx, index, item_name, int.from_bytes(num))
                                 if write:
                                     writes.append(write)
+
+                
 
                 starcount += stars
                 cannons = ctx.slot_data["Cannons"]
@@ -577,7 +945,35 @@ class SM64HackClient(BizHawkClient):
                                 file2data[i] = ((2 ** stars) - 1)
                                 stars = 0
 
-                writes.append((starsCountPtr, bytearray([starcount]), "RDRAM"))
+                if(ctx.slot_data.get("decadeslater")):
+                    if bluestars > 7:
+                        file2data[8+56] = 127
+                        bluestars -= 7
+                    else:
+                        file2data[8+56] = ((2 ** bluestars) - 1)
+                        bluestars = 0
+                    for i in range(12, 37):
+                        if(bluestars > 7):
+                            bluestars -= 7
+                            file2data[i + 56] = 127
+                        else:
+                            file2data[i + 56] = ((2 ** bluestars) - 1)
+                            bluestars = 0
+                else: #decades later seems to update the visual star count on its own :) 
+                    writes.append((starsCountPtr, bytearray([starcount]), "RDRAM"))
+
+                if discounts > self.coin_discounts:
+                    self.coin_discounts = discounts
+                    coins_required = int(self.basecoincount * (0.95 ** discounts))
+                    writes.extend(self.get_coin_star_writes(coins_required))
+
+                if captimerbuffs > self.cap_timer_buffs:
+                    self.cap_timer_buffs = captimerbuffs
+                    writes.extend(self.get_cap_timer_writes())
+
+                if wallkickframes > self.additional_wallkick_frames:
+                    self.additional_wallkick_frames = wallkickframes
+                    writes.extend(self.get_wallkick_frame_writes())
 
                 file2data = self.set_file_2_flags(self.file1Stars, file2data, ctx)
                 file2flag = True
@@ -608,28 +1004,41 @@ class SM64HackClient(BizHawkClient):
                                     (hpPtr, bytes.fromhex("0000"), "RDRAM")))
             
             #heaveho
-            if read[15].hex().upper().startswith('80'): #sm64 animations are broken if you load an object in after you enter the level due to behaviorscript shit. this is a janky solution but it works
-                addr = int.from_bytes(read[15]) & 0x7FFFFFFF
-                heaveho_reads = (
-                    (addr + 0x74, 0x4, "RDRAM"), #0, active flag
-                    (addr + 0x20c, 0x4, "RDRAM"), #1, beh data
-                    (addr + 0x3c, 0x4, "RDRAM") #2, anim
-                )
-                heave_read = await bizhawk.read(ctx.bizhawk_ctx, heaveho_reads)
-                active = int.from_bytes(heave_read[0])
-                behavior = heave_read[1]
-                
-                if active == 0 or int.from_bytes(behavior) != self.get_segmented_behavior(0x1548, read[16]):
-                    writes.append((self.heaveHoPtr, bytes.fromhex("00000000"), "RDRAM"))
-                elif heave_read[2].hex().upper() != "80735118":
-                    writes.append((addr + 0x3c, bytes.fromhex("80735118"), "RDRAM"))
+            heave_write = await self.get_heave_write(ctx, read[15], read[16])
+            if heave_write:
+                writes.append(heave_write)
 
             #choir
-            if self.choir_active == 2 and (time() - self.choir_timer) > self.choirs * 300:
-                self.choir_active = 0
-                self.choirs = 0
-                writes.append((self.choirFlagPtr, bytes.fromhex("00000000"), "RDRAM"))
+            choir_write = self.get_choir_write()
+            if choir_write:
+                writes.append(choir_write)
+ 
 
+            #tempo
+            if (time() - self.tempo_timer) > self.tempos * 300 and self.tempos != 0:
+                self.tempos = 0
+                self.targettempo = 0
+            elif self.tempos != 0:
+                tempo = int.from_bytes(read[21])
+                if self.targettempo == 0 or abs(tempo - self.targettempo) < 0x50:
+                    self.targettempo = (1 / random.random()) * 0x600
+                    self.targettempo = 0x5000 if self.targettempo > 0x5000 else self.targettempo
+                if tempo < self.targettempo:
+                    tempo *= 1.02
+                elif tempo > self.targettempo:
+                    tempo *= 0.98
+                tempo = int(tempo)
+                writes.append((tempoPtr, tempo.to_bytes(2), "RDRAM"))
+
+            #spin
+            if self.spin:
+                if (time() - self.spin_timer) > 30:
+                    self.spin = False
+                    writes.append((self.spinFlagPtr, bytes.fromhex("00000000"), "RDRAM"))
+                    writes.append((rollPtr, bytes.fromhex("0000"), "RDRAM"))
+
+
+            locs = []
             # badges/choir
             if int.from_bytes(read[4]) != 0 and (int.from_bytes(read[11]) != self.level or int.from_bytes(read[13]) != self.area):
                 self.level = int.from_bytes(read[11])
@@ -709,87 +1118,36 @@ class SM64HackClient(BizHawkClient):
                             case 0x1A:
                                 b = await self.get_level_badges((0x342A08,), level, ctx)
                                 badges_to_send = [x for x in ["Ultra Badge"] if x not in b]
-                locs = []
                 for badge in badges_to_send:
                     locs.append(self.location_name_to_id[badge])
 
-                if locs != []:
-                    await ctx.send_msgs([{"cmd": "LocationChecks", "locations": locs}])
+                
             
-            
+            # signs
+            action = read[5].hex()
+            if action == "00001308" and not self.old_version:
+                level = int.from_bytes(read[11])
+                level_name = courseIndex[level_index[level]]
+                loc = self.location_name_to_id[f"{level_name} Sign"]
+                locs.append(loc)
+            # tickets
+            if ctx.slot_data.get("tickets") and read[2].hex() != "0000":
+                level = int.from_bytes(read[11])
+                level_name = courseIndex[level_index[level]]
+                if f"{level_name} Ticket" not in self.tickets and level_name not in ctx.slot_data["NoTicketCourses"]:
+                    logger.info(f"You cannot enter this level without the correct ticket")
+                    writes.append((hpPtr, bytes.fromhex("0000"), "RDRAM"))
 
             # deathlink
-            if read[2][0] != 0x00:
-                self.death_flag = True
-            if(ctx.slot_data.get("DeathLink") and self.death_flag and time() - self.death_time > 5):
-                if "DeathLink" not in ctx.tags:
-                    await ctx.update_death_link(True)
-                
-                if(self.last_death_link != ctx.last_death_link and self.last_death_link is not None):
-                    self.death_flag = False
-                    self.last_death_link = ctx.last_death_link
-                    writes.append((hpPtr, bytes.fromhex("0000"), "RDRAM"))
-                    self.death_time = time()
-                elif self.last_death_link is None:
-                    self.last_death_link = ctx.last_death_link
-                else: #if you die naturally and get a deathlink on the same frame or whatever the deathlink takes priority to avoid loops
-                    death = 0
-                    death = await self.check_death(read,ctx)
-                    if(death != 0):
-                        self.death_time = time()
-                        cs = causeStrings[death].replace("slot", ctx.player_names[ctx.slot])
-                        self.death_flag = False
-                        await ctx.send_death(cs)
-                        self.last_death_link = ctx.last_death_link
+            deathlink_writes = await self.handle_deathlink(read, ctx)
+            if deathlink_writes:
+                writes.extend(deathlink_writes)
             
             # ringlink
             if ctx.slot_data.get("RingLink", 0) != 0:
-                if "RingLink" not in ctx.tags:
-                    await self.update_ring_link(ctx, ctx.slot_data.get("RingLink"))
-
-                # Read current coins
-                current = int.from_bytes(read[18])
-
-                if self.receiving_ring:
-                    self.receiving_ring = False
-
-                    coins = self.receiving_ring_amount + current
-                    self.receiving_ring_amount = 0
-
-                    # Safety
-                    coins = min(coins, 999)
-                    coins = max(coins, 0)
-                    self.supposed_ring_count = coins
-
-                    # Write back
-                    if coins != current:
-                        writes.append((coinPtr, coins.to_bytes(2), "RDRAM"))
-                        writes.append((coinVisualPtr, coins.to_bytes(2), "RDRAM"))
-
-                    print(f"[RingLink] New coin total: {coins}")
-                
-                else:
-                    if self.supposed_ring_count != current:
-                        # Calc rings to send
-                        link_type = "RingLink"
-                        rings_to_send = current - self.supposed_ring_count
-
-                        # Negative packets are only sent via hard ringlink
-                        # You can still send -1 coins with normal ringlink to compensate for the coin drain section in UCMH
-                        if rings_to_send < -1:
-                            link_type = "HardRingLink"
-                        
-                        # If you don't have the HardRingLink tag then this gets skipped
-                        if link_type in ctx.tags:
-                            self.supposed_ring_count = current
-                            await ctx.send_msgs([{
-                                "cmd": "Bounce", "tags": [link_type],
-                                "data": {
-                                    "time": time(),
-                                    "source": abs(int(hash(get_unique_identifier())/10000000000)), # the shit that makes sonic adventure not crash
-                                    "amount": rings_to_send
-                                }
-                            }])
+                ringlink_writes = await self.handle_ringlink(ctx, read)
+                if ringlink_writes:
+                    writes.extend(ringlink_writes)
 
 
             
@@ -806,10 +1164,15 @@ class SM64HackClient(BizHawkClient):
                         "want_reply": False,
                         "operations": [{"operation": "or", "value": 1}],
                     }])
-                    writes.append(self.get_junk_item_write(trap[1]))
+                    write = self.get_junk_item_write(trap[1])
+                    if write:
+                        writes.append(write)
 
             #print(list(read[10])[0])
-            await bizhawk.write(ctx.bizhawk_ctx, writes)
+            for i in range(0, len(writes), 10):
+                await bizhawk.write(ctx.bizhawk_ctx, writes[i:i + 10])
+            if locs != []:
+                    await ctx.send_msgs([{"cmd": "LocationChecks", "locations": locs}])
             
         except bizhawk.RequestFailedError:
             pass
