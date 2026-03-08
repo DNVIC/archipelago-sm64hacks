@@ -278,7 +278,7 @@ class Data:
             filetext = infile.read()
             self.maxstarcount = max(int(i) for i in re.findall(r"\|Stars:(\d+)\|", filetext))
             self.locations = json.loads(filetext)
-            if(self.locations["Other"]["Settings"]["Entrances"]):
+            if self.locations["Other"]["Settings"].get("Entrances"):
                 self.progression_courses = set() 
                 for entrance in self.locations["Other"]["Entrances"]:
                     self.progression_courses |= set((entrance[0], entrance[2]))
