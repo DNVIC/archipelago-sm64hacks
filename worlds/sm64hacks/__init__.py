@@ -67,8 +67,8 @@ class SM64HackWorld(World):
             except TypeError:
                 raise ValueError("JSON is too old and does not have a default for progressive keys")
         
-        self.options.level_tickets.value &= self.data.locations["Other"]["Settings"].get("Entrances") #only add tickets if the json supports it
-        self.options.move_randomization.value &= (self.data.locations["Other"]["Settings"].get("Moves") or self.options.force_move_randomization) #only add moves if the json supports it or if you are reckless
+        self.options.level_tickets.value &= self.data.locations["Other"]["Settings"].get("Entrances") != None #only add tickets if the json supports it
+        self.options.move_randomization.value &= (self.data.locations["Other"]["Settings"].get("Moves") != None or self.options.force_move_randomization) #only add moves if the json supports it or if you are reckless
         if self.options.move_randomization:
             match self.options.starting_jump:
                 case 0:
