@@ -186,7 +186,7 @@ def check_requirement_string(state: CollectionState,
                     else:
                         boolean_array.append(True)
                 case _:
-                    if item in sm64hack_items[73:84] and not options.move_randomization:
+                    if item in sm64hack_items[73:85] and not options.move_randomization:
                         boolean_array.append(True)
                     else:
                         boolean_array.append(state.has(item, player))
