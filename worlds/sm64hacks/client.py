@@ -444,7 +444,6 @@ class SM64HackClient(BizHawkClient):
             if amount == 0:
                 return
 
-            print(f"[RingLink] Received {amount} coins")
 
             self.receiving_ring = True
             self.receiving_ring_amount = amount
@@ -463,9 +462,13 @@ class SM64HackClient(BizHawkClient):
             self.receiving_ring_amount = 0
 
             coin_star_coins = int(self.basecoincount * (0.95 ** self.coin_discounts))
+            print(current, coins, coin_star_coins)
             if current < coin_star_coins:
-                coins = min(coins, coin_star_coins) #doesn't give you more coins than you need for the 100c star if you havent gotten the star yet
+                coins = min(coins, coin_star_coins - 1) #doesn't give you more coins than you need for the 100c star if you havent gotten the star yet
+            
+            
             # Safety
+            
             coins = min(coins, 999)
             coins = max(coins, 0)
             self.supposed_ring_count = coins

@@ -33,9 +33,7 @@ class TrollStars(Choice):
     
     Off - Troll stars are not randomized
     
-    On - Troll stars are randomized
-    
-    On (no traps) - Troll stars are randomized and traps are not added into the pool. Instead singular coins will be added"""
+    On - Troll stars are randomized"""
     option_off = 0
     option_on = 1
     display_name = "Troll Stars"
@@ -79,6 +77,9 @@ class FillerTrapWeight(Range):
     range_start = 0
     default = 30
     range_end = 100
+
+class NoSpinTrap(Toggle):
+    """The spin trap causes the camera to spin around which might make some people nauseous, if you want you can enable this setting to remove it from the pool."""
 
 class SignRandomization(Toggle):
     """There is 1 check per level (not per sign) for reading a sign inside it. If you are generating a solo game and it fails, the logic might be too restrictive; enabling this will ease up the logic a bit since there is usually a sign right next to the start"""
@@ -192,7 +193,8 @@ option_groups = [
         StarBundles,
         FillerUsefulWeight,
         FillerJunkWeight,
-        FillerTrapWeight
+        FillerTrapWeight,
+        NoSpinTrap
     ]),
     OptionGroup("Logic Options", [
         LogicDifficulty,
@@ -222,6 +224,7 @@ class SM64HackOptions(PerGameCommonOptions):
     filler_trap_weight: FillerTrapWeight
     filler_junk_weight: FillerJunkWeight
     filler_useful_weight: FillerUsefulWeight
+    no_spin_trap: NoSpinTrap
     logic_difficulty: LogicDifficulty
     glitches_in_logic: LogicGlitches
     major_skips: MajorSkips
