@@ -48,7 +48,7 @@ class SM64HackWorld(World):
         self.no_ticket_courses = set()
         super().__init__(multiworld, player)
         self.data = Data()
-        
+
     @classmethod
     def stage_assert_generate(cls, multiworld): # this is supposed to be used for rom files but its the only bit of code that i could find that runs before everything and only once before generation so im using it
         create_json_folders(get_settings()["sm64hacks_options"]["auto_update"] and not hasattr(multiworld, "generation_is_fake"))
@@ -254,7 +254,7 @@ class SM64HackWorld(World):
 
         if(self.options.move_randomization):
             progressive_jumps = 3
-            if "Triple Badge" in self.location_names_that_exist_to_id:
+            if "Triple Jump Badge" in self.location_names_that_exist_to_id:
                 progressive_jumps -= 1
             if self.starting_jump == "Progressive Jump":
                 progressive_jumps -= 1
