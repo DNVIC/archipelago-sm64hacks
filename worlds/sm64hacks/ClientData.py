@@ -273,6 +273,13 @@ jump_special_addresses = {
     0x266814: ("10000008", "13000008"), #act_hold_walking
     0x2672F4: ("10000008", "11A00008"), #act_hold_decelerating
     0x260B7C: ("10000008", "11200008"), #check_common_hold_idle_cancels
+}
+
+jump_sr7_special_addresses = {
+    0x2643A4: ("45000015", "4500000A")
+}
+
+jump_nonsr7_special_addresses = {
     0x264360: ("10000023", "1000001B")  #set_triple_jump_action (thank kaze for making MOP objects put you in the double jump state so i need to do this because otherwise you would never be able to get in this function without a jump)
 }
 
