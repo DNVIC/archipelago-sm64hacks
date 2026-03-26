@@ -9,6 +9,7 @@ from time import time
 from struct import unpack
 from NetUtils import ClientStatus
 from Utils import get_unique_identifier
+from asyncio import sleep
 
 class SM64HackClient(BizHawkClient):
 #Despite the fact this is a "BizHawkClient", this is not meant to use BizHawk
@@ -97,6 +98,7 @@ class SM64HackClient(BizHawkClient):
         self.receiving_ring = False
         self.receiving_ring_amount = 0
         self.supposed_ring_count = 0
+        self.file_locked = False
     
     def __init__(self) -> None:
         super().__init__()
@@ -575,8 +577,15 @@ class SM64HackClient(BizHawkClient):
                 return
 
             if int.from_bytes(read[19]) - 1 != self.current_file: #allow files C and D
-                self.current_file = int.from_bytes(read[19]) - 1
-                return #wrong file was read so we need to restart
+                if not self.file_locked or (read[3].hex() != "24180002" and int.from_bytes(read[4]) == 0): #second is checking if you reset the game, by checking both for if mario doesnt exist and the resettest hex value is not set
+                    self.current_file = int.from_bytes(read[19]) - 1
+                    self.file_locked = False
+                    return #wrong file was read so we need to restart
+                else:
+                    logger.warning("It appears you have switched files after opening the game. To avoid accidentally sending locations, you will have to wait 10 seconds for the client to continue, and if you did not intentionally change files you can reset your game and nothing will happen.")
+                    await sleep(10)
+                    self.file_locked = False
+                    return
             
             
             if read[20].hex() == "150f000f" or read[20].hex() == "1000000f":
@@ -709,7 +718,7 @@ class SM64HackClient(BizHawkClient):
                 return
             
             self.loops += 1
-
+            self.file_locked = True
             
             file1data = list(read[0])
             if self.file1Stars is not None:
