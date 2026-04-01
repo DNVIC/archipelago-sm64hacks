@@ -618,6 +618,7 @@ class SM64HackClient(BizHawkClient):
                     tree_hook_1 = pkgutil.get_data(__name__, "asm/tree_patch_1")
                     tree_hook_2 = pkgutil.get_data(__name__, "asm/tree_patch_2")
                     punch_hook = pkgutil.get_data(__name__, "asm/punch_patch")
+                    moving_punch_hook = pkgutil.get_data(__name__, "asm/move_punch_patch")
                     shell_hook = pkgutil.get_data(__name__, "asm/shell_patch")
                     wallkick_hook_1 = pkgutil.get_data(__name__, "asm/wallkick_patch_1")
                     wallkick_hook_2 = pkgutil.get_data(__name__, "asm/wallkick_patch_2")
@@ -630,6 +631,7 @@ class SM64HackClient(BizHawkClient):
                         (treeHookPtr1, tree_hook_1, "RDRAM"),
                         (treeHookPtr2, tree_hook_2, "RDRAM"),
                         (punchHookPtr, punch_hook, "RDRAM"),
+                        (movingPunchHookPtr, moving_punch_hook, "RDRAM"),
                         (shellHookPtr, shell_hook, "RDRAM"),
                         (wallkickHookPtr1, wallkick_hook_1, "RDRAM"),
                         (wallkickHookPtr2, wallkick_hook_2, "RDRAM")
