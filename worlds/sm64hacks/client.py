@@ -11,6 +11,8 @@ from NetUtils import ClientStatus
 from Utils import get_unique_identifier
 from asyncio import sleep
 
+victory = False
+
 class SM64HackClient(BizHawkClient):
 #Despite the fact this is a "BizHawkClient", this is not meant to use BizHawk
 #Use Luna's Project64 with connector_pj64_generic.js
@@ -104,18 +106,6 @@ class SM64HackClient(BizHawkClient):
         super().__init__()
         self.reset_data()
 
-    def check_patch_length(self, logger, trap_patch, choir_patch, star_patch, move_patch, move_patch_hook):
-        if len(trap_patch) > 452:
-            logger.warning(f"Trap Patch exceeded length: {len(trap_patch)}")
-        if len(choir_patch) > 244:
-            logger.warning(f"Choir Patch exceeded length: {len(choir_patch)}")
-        if len(star_patch) > 12:
-            logger.warning(f"Star Patch exceeded length: {len(star_patch)}")
-        if len(move_patch) > 188:
-            logger.warning(f"Move Patch exceeded length: {len(move_patch)}")
-        if len(move_patch_hook) > 8:
-            logger.warning(f"Move Patch Hook exceeded length: {len(move_patch_hook)}")
-
     
     async def validate_rom(self, ctx: "BizHawkClientContext") -> bool:
         try:
@@ -130,6 +120,7 @@ class SM64HackClient(BizHawkClient):
         ctx.game = self.game
         ctx.items_handling = 0b111
         ctx.want_slot_data = True
+        ctx.command_processor.commands["victory"] = cmd_victory
         ctx.watcher_timeout = 0.5
         return True
     
@@ -252,61 +243,6 @@ class SM64HackClient(BizHawkClient):
 
 
         return level_badges
-    
-    def get_move_writes(self, move_name):
-        addresses = {}
-        special_addresses = {}
-
-        writes = []
-        match move_name:
-            case "Long Jump":
-                addresses.update(long_jump_addresses)
-            case "Slidekick":
-                addresses.update(slidekick_addresses)
-            case "Sideflip":
-                addresses.update(sideflip_addresses)
-            case "Backflip":
-                addresses.update(backflip_addresses)
-            case "Punch":
-                addresses.update(punch_kick_addresses)
-                addresses.update(punch_addresses)
-            case "Kick":
-                addresses.update(punch_kick_addresses)
-                if "Punch" not in self.moves:
-                    addresses.update(kick_no_punch_addresses)
-                special_addresses.update(kick_special_addresses)
-            case "Dive":
-                addresses.update(dive_addresses)
-                special_addresses.update(dive_special_addresses)
-            case "Ground Pound":
-                addresses.update(ground_pound_addresses)
-                special_addresses.update(ground_pound_special_addresses)
-            case "Shell":
-                special_addresses.update(shell_special_addresses)
-            case "Jump":
-                addresses.update(jump_addresses)
-                special_addresses.update(jump_special_addresses)
-                if self.eeprom.startswith("STAR REVENGE 7"):
-                    special_addresses.update(jump_sr7_special_addresses)
-                else:
-                    special_addresses.update(jump_nonsr7_special_addresses)
-                if(self.slope_fix):
-                    special_addresses.update(slope_fix)
-                else:
-                    special_addresses.update(no_slope_fix)
-            case "Double Jump":
-                special_addresses.update(double_jump_special_addresses)
-            case "Triple Jump":
-                special_addresses.update(triple_jump_special_addresses)
-            case "Wallkick":
-                special_addresses.update(wall_kick_special_addresses)
-        
-        for key, value in addresses.items():
-            writes.append((key, bytes.fromhex(value), "RDRAM"))
-        for key, value in special_addresses.items():
-            writes.append((key, bytes.fromhex(value[1]), "RDRAM"))
-
-        return writes
 
     def get_coin_star_writes(self, coins:int):
         return [(hundredCoinStarPtr1, coins.to_bytes(2), "RDRAM"), (hundredCoinStarPtr2, coins.to_bytes(2), "RDRAM")]
@@ -345,6 +281,23 @@ class SM64HackClient(BizHawkClient):
             elif heave_read[2].hex().upper() != "80735118":
                 return (addr + 0x3c, bytes.fromhex("80735118"), "RDRAM")
 
+
+    def get_move_num_write(self):
+        move_num = 0
+        move_num += 1 if "Jump" in self.moves else 0
+        move_num += 2 if "Double Jump" in self.moves else 0
+        move_num += 4 if "Triple Jump" in self.moves else 0
+        move_num += 8 if "Long Jump" in self.moves else 0
+        move_num += 16 if "Backflip" in self.moves else 0
+        move_num += 32 if "Sideflip" in self.moves else 0
+        move_num += 64 if "Wallkick" in self.moves else 0
+        move_num += 128 if "Slidekick" in self.moves else 0
+        move_num += 256 if "Dive" in self.moves else 0
+        move_num += 512 if "Punch" in self.moves else 0
+        move_num += 1024 if "Ground Pound" in self.moves else 0
+        move_num += 2048 if "Kick" in self.moves else 0
+        move_num += 4096 if "Shell" in self.moves else 0
+        return (self.movesPtr, move_num.to_bytes(4), "RDRAM")
 
     async def receive_junk_item(self, ctx, index, name, number=None):
         #flag for if unimportant items have been received can't be stored in savedata both because it'd fuck with the async traps 
@@ -557,7 +510,7 @@ class SM64HackClient(BizHawkClient):
                 (self.starIdPtr, 0x4, "RDRAM"),       #17
                 (coinPtr, 0x2, "RDRAM"),              #18
                 (currFilePtr, 0x2, "RDRAM"),          #19
-                (next(iter(slope_fix)), 0x4, "RDRAM"),#20
+                (slope_fix_ptr, 0x4, "RDRAM"),       #20
                 (tempoPtr, 0x2, "RDRAM"),             #21
                 (livesPtr, 0x2, "RDRAM"),             #22
                 (hundredCoinStarPtr1, 0x2, "RDRAM"),  #23
@@ -588,7 +541,7 @@ class SM64HackClient(BizHawkClient):
                     return
             
             
-            if read[20].hex() == "150f000f" or read[20].hex() == "1000000f":
+            if read[20].hex() == "150f000f":
                 self.slope_fix = True
             else:
                 self.slope_fix = False
@@ -608,10 +561,7 @@ class SM64HackClient(BizHawkClient):
                 trap_patch = pkgutil.get_data(__name__, "asm/trap_patch") #patches are external files for ease of editing them
                 choir_patch = pkgutil.get_data(__name__, "asm/choir_patch")
                 star_patch = pkgutil.get_data(__name__, "asm/star_patch")
-                move_patch = pkgutil.get_data(__name__, "asm/move_patch")
-                move_patch_hook = pkgutil.get_data(__name__, "asm/move_patch_hook")
                 decades_later_patch = pkgutil.get_data(__name__, "asm/decades_later_patch")
-                self.check_patch_length(logger, trap_patch, choir_patch, star_patch, move_patch, move_patch_hook)
                 if ctx.slot_data.get("decadeslater") != 0: #decadeslater overhauls save system so need to do a bunch of code to mitigate that
                     writes.extend([
                         (starCountDLPtr1, bytes.fromhex("30900100"), "RDRAM"),
@@ -661,37 +611,40 @@ class SM64HackClient(BizHawkClient):
                     (stevePtr, "HE IS WATCHING".encode("ascii"), "RDRAM")
                 ])
                 if ctx.slot_data.get("moves"):
+                    move_patch = pkgutil.get_data(__name__, "asm/move_patch")
+                    move_patch_hook = pkgutil.get_data(__name__, "asm/move_patch_hook")
+
+                    burning_hook = pkgutil.get_data(__name__, "asm/burning_patch")
+                    tree_hook_1 = pkgutil.get_data(__name__, "asm/tree_patch_1")
+                    tree_hook_2 = pkgutil.get_data(__name__, "asm/tree_patch_2")
+                    punch_hook = pkgutil.get_data(__name__, "asm/punch_patch")
+                    shell_hook = pkgutil.get_data(__name__, "asm/shell_patch")
+                    wallkick_hook_1 = pkgutil.get_data(__name__, "asm/wallkick_patch_1")
+                    wallkick_hook_2 = pkgutil.get_data(__name__, "asm/wallkick_patch_2")
+
                     self.moves = set()
                     writes.extend([
                         (movePatchPtr, move_patch, "RDRAM"),
-                        (moveHookPtr, move_patch_hook, "RDRAM")
+                        (moveHookPtr, move_patch_hook, "RDRAM"),
+                        (burningHookPtr, burning_hook, "RDRAM"),
+                        (treeHookPtr1, tree_hook_1, "RDRAM"),
+                        (treeHookPtr2, tree_hook_2, "RDRAM"),
+                        (punchHookPtr, punch_hook, "RDRAM"),
+                        (shellHookPtr, shell_hook, "RDRAM"),
+                        (wallkickHookPtr1, wallkick_hook_1, "RDRAM"),
+                        (wallkickHookPtr2, wallkick_hook_2, "RDRAM")
                     ])
-                    base_move_patches = []
-                    for move in normal_addresses:
-                        for key, value in move.items():
-                            base_move_patches.append((key, bytes.fromhex("00000000"), "RDRAM"))
-                    for move in special_addresses:
-                        for key, value in move.items():
-                            base_move_patches.append((key, bytes.fromhex(value[0]), "RDRAM"))
+                    for address, asm in move_rando_asm.items():
+                        writes.append((address, bytes.fromhex(asm), "RDRAM"))
                     if self.slope_fix:
-                        for key, value in slope_fix.items():
-                            base_move_patches.append((key, bytes.fromhex(value[0]), "RDRAM"))
+                        slope_fix_patch = pkgutil.get_data(__name__, "asm/slope_fix_patch")
+                        writes.append((slopeFixHookPtr, slope_fix_patch, "RDRAM"))
                     else:
-                        for key, value in no_slope_fix.items():
-                            base_move_patches.append((key, bytes.fromhex(value[0]), "RDRAM"))
+                        writes.append((0x267FF4, bytes.fromhex("1440001B"), "RDRAM"))
 
-                    print(read[12].decode("ascii"), read[12].decode("ascii").startswith("STAR REVENGE 7"))
-                    if not read[12].decode("ascii").startswith("STAR REVENGE 7"):
-                        for move in badge_special_addresses:
-                            for key, value in move.items():
-                                base_move_patches.append((key, bytes.fromhex(value[0]), "RDRAM"))
-                        for key, value in jump_nonsr7_special_addresses.items():
-                            base_move_patches.append((key, bytes.fromhex(value[0]), "RDRAM"))
-                    else:
-                        for key, value in jump_sr7_special_addresses.items():
-                            base_move_patches.append((key, bytes.fromhex(value[0]), "RDRAM"))
-                    writes.extend(base_move_patches)
-                    
+                    if read[12].decode("ascii").startswith("STAR REVENGE 7"):
+                        self.moves |= set(("Wallkick", "Triple Jump")) #sr7/7.5 has wallkick and triple jump since the badges replace those items
+                        writes.append(self.get_move_num_write())
 
 
 
@@ -705,16 +658,19 @@ class SM64HackClient(BizHawkClient):
                 return
             
             
-            if(list(read[10])[0] == 69 and not ctx.finished_game and self.loops > 4): #this and patch are before mario exists check because they should be active even if mario doesn't exist
-                ctx.finished_game = True                           #because victory is usually on stuff like end screen where mario doesn't exist
-                await ctx.send_msgs([{                             #and patch is on file select usually
+            if(list(read[10])[0] == 69 and not ctx.finished_game and self.loops > 4):
+                logger.info("Victory.js script is deprecated, use /victory instead")
+            
+            if victory:
+                self.finished_game = True
+                await ctx.send_msgs([{
                     "cmd": "StatusUpdate",
                     "status": ClientStatus.CLIENT_GOAL
                 }])
             
             if int.from_bytes(read[4]) == 0: #mario doesn't exist yet
-                for i in range(0, len(writes), 10):
-                    await bizhawk.write(ctx.bizhawk_ctx, writes[i:i + 10])
+                for i in range(0, len(writes), 5):
+                    await bizhawk.write(ctx.bizhawk_ctx, writes[i:i + 5])
                 return
             
             self.loops += 1
@@ -903,18 +859,12 @@ class SM64HackClient(BizHawkClient):
                                     continue
                                 else:
                                     self.moves.add(item_name)
-                                    writes.extend(self.get_move_writes(item_name))
-                                    move_num = 0
-                                    move_num += 1 if "Jump" in self.moves else 0
-                                    move_num += 2 if "Double Jump" in self.moves else 0
-                                    move_num += 4 if "Triple Jump" in self.moves else 0
-                                    move_num += 8 if "Long Jump" in self.moves else 0
-                                    move_num += 16 if "Backflip" in self.moves else 0
-                                    move_num += 32 if "Sideflip" in self.moves else 0
-                                    writes.append((self.movesPtr, move_num.to_bytes(4), "RDRAM"))
+                                    writes.append(self.get_move_num_write())
                             else:
+                                print("542")
                                 num = read[18] if item_name == "Coin" else read[22]
                                 write = await self.receive_junk_item(ctx, index, item_name, int.from_bytes(num))
+                                print(write)
                                 if write:
                                     writes.append(write)
 
@@ -1198,3 +1148,7 @@ class SM64HackClient(BizHawkClient):
             
         except bizhawk.RequestFailedError:
             pass
+
+def cmd_victory(self):
+    global victory
+    victory = True

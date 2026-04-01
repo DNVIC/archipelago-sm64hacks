@@ -36,8 +36,18 @@ trapPatchPtr = 0x29D4B8
 choirPatchPtr = 0x27FF00
 choirHookPtr = 0x3191E0
 starPatchPtr = 0x279C88
-moveHookPtr = 0x2530B8
-movePatchPtr = 0x29AD80
+moveHookPtr = 0x252CFC
+movePatchPtr = 0x1F1100
+
+burningHookPtr = 0x24EC1C
+treeHookPtr1 = 0x25E64C
+treeHookPtr2 = 0x25E2BC
+punchHookPtr = 0x275398
+movingPunchHookPtr = 0x2665FC
+shellHookPtr = 0x24F6E0
+slopeFixHookPtr = 0x268010
+wallkickHookPtr1 = 0x26D34C
+wallkickHookPtr2 = 0x26D9D4
 
 bank13RamStartPtr = 0x33B400 + 4 * 0x13
 
@@ -158,163 +168,71 @@ legacy_location_name_to_id = {'Course 1 Star 1': 40693, 'Course 1 Star 2': 40694
 legacy_item_names = ['Key 1', 'Key 2', 'Wing Cap', 'Vanish Cap', 'Metal Cap', 'Power Star', 'Progressive Key', 'Course 1 Cannon', 'Course 2 Cannon', 'Course 3 Cannon', 'Course 4 Cannon', 'Course 5 Cannon', 'Course 6 Cannon', 'Course 7 Cannon', 'Course 8 Cannon', 'Course 9 Cannon', 'Course 10 Cannon', 'Course 11 Cannon', 'Course 12 Cannon', 'Course 13 Cannon', 'Course 14 Cannon', 'Course 15 Cannon', 'Bowser 1 Cannon', 'Bowser 2 Cannon', 'Bowser 3 Cannon', 'Slide Cannon', 'Secret 1 Cannon', 'Secret 2 Cannon', 'Secret 3 Cannon', 'Metal Cap Cannon', 'Wing Cap Cannon', 'Vanish Cap Cannon', 'Overworld Cannon', 'Progressive Stomp Badge', 'Wall Badge', 'Triple Jump Badge', 'Lava Badge', 'Overworld Cannon Star', 'Bowser 2 Cannon Star', 'Yellow Switch', 'Black Switch', 'Coin', 'Green Demon Trap', 'Mario Choir', 'Heave-Ho Trap', 'Squish Trap', 'Castle Moat']
 
 #in format ram address: asm code originally in place (to restore your moves when you get them back)
-long_jump_addresses = {
-    0x268208: "0C094C28"
+
+move_rando_asm = { #most of these are just changing B address after calls to set_mario_action to BNEZ V0, address
+    0x25315C: "00000000", # dont set return in set_jumping_action
+    0x261E18: "14400051", # backflip
+    0x2625C4: "1440001E",
+    0x2626E4: "1440001E",
+    0x268210: "14400045", # long jump
+    0x268260: "14400031", # slidekick
+    0x266B5C: "14400076", # sideflip
+    0x266DAC: "14400022",
+    0x268284: "14400028", # breakdance
+    0x261F34: "1440000A",
+    0x2655F8: "14400005", # move punching
+    0x266EE0: "14400034", 
+    0x260A54: "14400011", # stationary punching
+    0x261CB0: "1440000A",
+    0x262270: "14400016",
+    0x262D40: "14400005",
+    0x26A468: "14400005", # kicking/dive
+    0x266620: "1440003F",
+    0x2763BC: "14400027",
+    0x26F370: "144000A3", # dive; act_flying_triple_jump
+    0x26B874: "14400021", # act_triple_jump
+    0x26B9E4: "1440002F", #act_freefall
+    0x26BCF4: "14400031", #act_sideflip
+    0x26BE00: "14400019", #act_wall_kick_air
+    0x26C8B8: "1440004B", #act_steep_jump
+    0x26F87C: "14400061", #act_special_triple_jump - there is no world where this matters in literally any game unless someone is playing disaster quest pi or some casual talks to yoshi in vanilla for some fucking reason
+    0x2655DC: "1440000C", #check_ground_dive_or_punch
+    0x26F394: "1440009A", #ground pound; act_flying_triple_jump
+    0x26BE30: "1440000D", #act_wall_kick_air
+    0x26F8AC: "14400055", #act_special_triple_jump
+    0x26B6EC: "14400010", #act_jump
+    0x26B7BC: "14400011", #act_double_jump
+    0x26B8A4: "14400015", #act_triple_jump
+    0x26B940: "14400016", #act_backflip
+    0x26BA14: "14400023", #act_freefall
+    0x26BB64: "1440000F", #act_hold_jump
+    0x26BC84: "1440000A", #act_hold_freefall
+    0x26BD24: "14400025", #act_side_flip
+    0x26EC7C: "14400131", #act_flying
+    0x25F00C: "14400025", #act_start_hanging
+    0x25F14C: "14400021", #act_hanging
+    0x25F248: "1440004A", #act_hang_moving
+    0x253080: "00000000", #dont set return in set_jump_from_landing
+    0x262CCC: "14400022", #single jump, check_common_landing_cancels
+    0x2663E0: "1440006F", #act_walking -> set_jump_from_landing
+    0x26703C: "1440007B", #act_decelerating -> set_jump_from_landing
+    0x25324C: "14400028", #check_common_action_exits
+    0x253334: "14400027", #check_common_hold_action_exits
+    0x2677B8: "14400063", #act_crawling
+    0x2682B4: "1440001C", #act_crouch_slide
+    0x26095C: "1440004F", #check_common_idle_cancels
+    0x266830: "14400055", #act_hold_walking
+    0x2672F4: "14400077", #act_hold_decelerating
+    0x260B98: "14400042", #check_common_hold_idle_cancels
+    0x26437C: "1440001F", #set_triple_jump_action
+    0x264384: "14400019", #set_triple_jump_action
+    0x2643C0: "1440000E", #set_triple_jump_action
+    0x2643C8: "14400008", #set_triple_jump_action
 }
-slidekick_addresses = {
-    0x268258: "0C094B3D"
+slope_fix_ptr = 0x267FE0
+no_slope_fix_asm = { #aglabs slope fix modifies the code in the common_slide_action_with_jump function so i need to account for both slope fix and non-slope fix since its a popular patch (for good reason)
+    0x267FF4: "1440001B"
 }
-sideflip_addresses = {
-    0x266B54: "0C094C28",
-    0x266DA4: "0C094C28"
-}
-backflip_addresses = {
-    0x261E10: "0C094C28",
-    0x2625BC: "0C094C28",
-    0x2626DC: "0C094C28"
-}
-
-punch_kick_addresses = { #also used for kick since even though you dont visually see mario punch theres less than a frame of him punching. 
-    0x26827C: "0C094B3D", #breakdance
-    0x261F2C: "0C094B3D", #breakdance
-    0x2655F0: "0C094B3D", #move punching (check_ground_dive_or_punch)
-    0x266ED8: "0C094B3D",
-    0x260A4C: "0C094B3D", #stationary punching
-    0x261CA8: "0C094B3D",
-    0x262268: "0C094B3D",
-    0x262D38: "0C094B3D"
-}
-
-dive_addresses = {
-    0x26F368: "0C094B3D" #act_flying_triple_jump
-}
-ground_pound_addresses = {
-    0x26F38C: "0C094B3D" #act_flying_triple_jump
-}
-
-
-punch_addresses = {
-    0x27539C: "318D0080", #revert always kick patch if active
-    0x266600: "33190080"  #revert move punching
-}
-
-kick_no_punch_addresses = {
-    0x27539C: "240D0001", #always kick in the punch action even when not holding A
-    0x266600: "24190001"  #move punching
-}
-
-jump_addresses = {
-    0x262CC4: "0C094B97" #check_common_landing_cancels
-}
-
-
-normal_addresses = [
-    long_jump_addresses,
-    slidekick_addresses,
-    sideflip_addresses,
-    backflip_addresses,
-    punch_kick_addresses,
-    dive_addresses,
-    ground_pound_addresses,
-    jump_addresses
-]
-
-#in format ram address: (new code, asm code originally in place)
-
-
-dive_special_addresses = {
-    0x26A448: ("10000007", "10000003"), #check_kick_or_dive_in_air
-    0x26B858: ("10000008", "13200008"), #act_triple_jump
-    0x26B9C8: ("10000008", "13000008"), #act_freefall
-    0x26BCD8: ("10000008", "13000008"), #act_sideflip
-    0x26BDE4: ("10000008", "13000008"), #act_wall_kick_air
-    0x26C89C: ("10000008", "13000008"), #act_steep_jump
-    0x26F860: ("10000008", "13000008"), #act_special_triple_jump - there is no world where this matters in literally any game unless someone is playing disaster quest pi or some casual talks to yoshi in vanilla for some fucking reason
-    0x265578: ("1000001A", "8FB90020"), #check_ground_dive_or_punch
-}
-
-ground_pound_special_addresses = {
-    0x26BE14: ("10000008", "11200008"), #act_wall_kick_air
-    0x26F890: ("10000008", "11200008"), #act_special_triple_jump
-    0x26B6D0: ("10000008", "13000008"), #act_jump
-    0x26B7A0: ("10000008", "11200008"), #act_double_jump
-    0x26B888: ("10000008", "11400008"), #act_triple_jump
-    0x26B924: ("10000008", "13000008"), #act_backflip
-    0x26B9F8: ("10000008", "11200008"), #act_freefall
-    0x26BB48: ("10000008", "13000008"), #act_hold_jump
-    0x26BC68: ("10000008", "11400008"), #act_hold_freefall
-    0x26BD08: ("10000008", "11200008"), #act_side_flip
-    0x26EC28: ("10000016", "11000016"), #act_flying
-    0x25EFF0: ("10000008", "11C00008"), #act_start_hanging
-    0x25F130: ("10000008", "11A00008"), #act_hanging
-    0x25F22C: ("10000008", "11200008")  #act_hang_moving
-}
-
-kick_special_addresses = {
-    0x26A450: ("10000005", "3C100180"),
-    0x266604: ("10000008", "13200008"),
-    0x2753A0: ("10000008", "11A00008")
-}
-
-
-shell_special_addresses = {
-    0x24F6E8: ("10000023", "1321000A")
-}
-
-jump_special_addresses = {
-    0x2663D0: ("10000005", "11600005"), #act_walking -> set_jump_from_landing
-    0x26702C: ("10000005", "11200005"), #act_decelerating -> set_jump_from_landing
-    0x262CCC: ("1000001F", "10000022"), #check_common_landing_cancels -> set_jump_from_landing
-    0x253230: ("10000008", "13000008"), #check_common_action_exits
-    0x253318: ("10000008", "13000008"), #check_common_hold_action_exits
-    0x26779C: ("10000008", "11200008"), #act_crawling
-    0x268298: ("10000008", "11800008"), #act_crouch_slide
-    0x260940: ("10000008", "11600008"), #check_common_idle_cancels
-    0x266814: ("10000008", "13000008"), #act_hold_walking
-    0x2672F4: ("10000008", "11A00008"), #act_hold_decelerating
-    0x260B7C: ("10000008", "11200008"), #check_common_hold_idle_cancels
-}
-
-jump_sr7_special_addresses = {
-    0x2643A4: ("45000015", "4500000A")
-}
-
-jump_nonsr7_special_addresses = {
-    0x264360: ("10000023", "1000001B")  #set_triple_jump_action (thank kaze for making MOP objects put you in the double jump state so i need to do this because otherwise you would never be able to get in this function without a jump)
-}
-
-double_jump_special_addresses = {
-    0x252EFC: ("10000004", "11000004")  #set_jump_from_landing   
-}
-
-
-special_addresses = [
-    dive_special_addresses,
-    ground_pound_special_addresses,
-    kick_special_addresses,
-    shell_special_addresses,
-    jump_special_addresses,
-    double_jump_special_addresses
-]
-
-slope_fix = {
-    0x267FE0: ("1000000F", "150F000F")  #below code doesnt work with slope fix (or it might but i dont wanna risk it given slope fix rewrites the whole function)
-}
-no_slope_fix = {
-    0x267FDC: ("10000007", "11000007")  #common_slide_action_with_jump
-}
-
-triple_jump_special_addresses = {
-    0x252FDC: ("10000017", "11A00008"), #set_jump_from_landing
-    0x264360: ("10000023", "1300000A")  #set_triple_jump_action
-}
-
-wall_kick_special_addresses = {
-    0x26D354: ("10000014", "13000014"),
-    0x26D9DC: ("10000011", "11A00011")
-}
-
-badge_special_addresses = [triple_jump_special_addresses, wall_kick_special_addresses] #seperate since they are disabled in sr7/sr7.5 as those hacks have badges which "do the same thing" (except they are worse but ssh)
 
 #decades later
 starCountDLPtr1 = 0x279BE0

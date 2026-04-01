@@ -6,7 +6,7 @@ from typing import Union, Tuple, List, Dict, Set, ClassVar, Mapping, Any
 from .Options import SM64HackOptions
 from .Items import SM64HackItem, item_is_important
 from .Locations import SM64HackLocation, location_names, location_names_that_exist
-from .Data import sm64hack_items, star_like, traps, junk, useful, moves, badges, sr6_25_locations, create_json_folders, Data
+from .Data import sm64hack_items, star_like, traps, junk, useful, moves, badges, sr6_25_locations, create_json_folders, Data, cannons, fullmoves, tickets, badge_items
 from .Requirements import check_requirement_string
 from .WebWorld import SM64HackWebWorld
 from .client import SM64HackClient
@@ -40,6 +40,42 @@ class SM64HackWorld(World):
 
     location_name_to_id = {name: id for
                        id, name in enumerate(location_names(), base_id)}
+    
+    item_name_groups = {
+        "Tickets": tickets,
+        "Cannons": cannons,
+        "Moves": fullmoves,
+        "Badges": badge_items
+    }
+
+    location_name_groups = {
+        "Course 1": set(i for i in location_names() if i.startswith("Course 1")),
+        "Course 2": set(i for i in location_names() if i.startswith("Course 2")),
+        "Course 3": set(i for i in location_names() if i.startswith("Course 3")),
+        "Course 4": set(i for i in location_names() if i.startswith("Course 4")),
+        "Course 5": set(i for i in location_names() if i.startswith("Course 5")),
+        "Course 6": set(i for i in location_names() if i.startswith("Course 6")),
+        "Course 7": set(i for i in location_names() if i.startswith("Course 7")),
+        "Course 8": set(i for i in location_names() if i.startswith("Course 8")),
+        "Course 9": set(i for i in location_names() if i.startswith("Course 9")),
+        "Course 10": set(i for i in location_names() if i.startswith("Course 10")),
+        "Course 11": set(i for i in location_names() if i.startswith("Course 11")),
+        "Course 12": set(i for i in location_names() if i.startswith("Course 12")),
+        "Course 13": set(i for i in location_names() if i.startswith("Course 13")),
+        "Course 14": set(i for i in location_names() if i.startswith("Course 14")),
+        "Course 15": set(i for i in location_names() if i.startswith("Course 15")),
+        "Bowser 1": set(i for i in location_names() if i.startswith("Bowser 1")),
+        "Bowser 2": set(i for i in location_names() if i.startswith("Bowser 2")),
+        "Bowser 3": set(i for i in location_names() if i.startswith("Bowser 3")),
+        "Secret 1": set(i for i in location_names() if i.startswith("Secret 1")),
+        "Secret 2": set(i for i in location_names() if i.startswith("Secret 2")),
+        "Secret 3": set(i for i in location_names() if i.startswith("Secret 3")),
+        "Slide": set(i for i in location_names() if i.startswith("Slide")),
+        "Metal Cap": set(i for i in location_names() if i.startswith("Metal Cap ")),
+        "Wing Cap": set(i for i in location_names() if i.startswith("Wing Cap ")),
+        "Vanish Cap": set(i for i in location_names() if i.startswith("Vanish Cap ")),
+        "Overworld": set(i for i in location_names() if i.startswith("Overworld")),
+    }
     
     required_client_version: Tuple[int, int, int] = (0, 6, 0)
 

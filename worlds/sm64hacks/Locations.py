@@ -1,3 +1,4 @@
+from functools import lru_cache
 from BaseClasses import Location
 from typing import List
 from .Options import SM64HackOptions
@@ -12,7 +13,7 @@ class SM64HackLocation(Location):
         super(SM64HackLocation, self).__init__(player, name, code, parent)
         self.event = code is None
 
-
+@lru_cache(maxsize=None)
 def location_names(data = Data()) -> List[str]:
     output: List[str] = []
     for course, info in data.locations.items():

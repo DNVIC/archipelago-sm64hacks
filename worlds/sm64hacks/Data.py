@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List, Tuple, Set
 from pathlib import Path
 from importlib import resources
 from importlib.resources.abc import Traversable
@@ -110,6 +110,82 @@ sm64hack_items: Tuple[str, ...] = (
     "+1 Wallkick Frame",
     "Steve"
 )
+tickets: Set[str] = {
+    "Course 1 Cannon",
+    "Course 2 Cannon",
+    "Course 3 Cannon",
+    "Course 4 Cannon",
+    "Course 5 Cannon",
+    "Course 6 Cannon",
+    "Course 7 Cannon",
+    "Course 8 Cannon",
+    "Course 9 Cannon",
+    "Course 10 Cannon",
+    "Course 11 Cannon",
+    "Course 12 Cannon",
+    "Course 13 Cannon",
+    "Course 14 Cannon",
+    "Course 15 Cannon",
+    "Bowser 1 Cannon",
+    "Bowser 2 Cannon",
+    "Bowser 3 Cannon",
+    "Slide Cannon",
+    "Secret 1 Cannon",
+    "Secret 2 Cannon",
+    "Secret 3 Cannon",
+    "Metal Cap Cannon",
+    "Wing Cap Cannon",
+    "Vanish Cap Cannon",
+    "Overworld Cannon"
+}
+fullmoves: Set[str] = {
+    "Progressive Jump",
+    "Backflip",
+    "Sideflip",
+    "Wallkick",
+    "Long Jump",
+    "Dive",
+    "Ground Pound",
+    "Kick",
+    "Punch",
+    "Slidekick",
+    "Shell"
+}
+cannons: Set[str] = {
+    "Course 1 Cannon",
+    "Course 2 Cannon",
+    "Course 3 Cannon",
+    "Course 4 Cannon",
+    "Course 5 Cannon",
+    "Course 6 Cannon",
+    "Course 7 Cannon",
+    "Course 8 Cannon",
+    "Course 9 Cannon",
+    "Course 10 Cannon",
+    "Course 11 Cannon",
+    "Course 12 Cannon",
+    "Course 13 Cannon",
+    "Course 14 Cannon",
+    "Course 15 Cannon",
+    "Bowser 1 Cannon",
+    "Bowser 2 Cannon",
+    "Bowser 3 Cannon",
+    "Slide Cannon",
+    "Secret 1 Cannon",
+    "Secret 2 Cannon",
+    "Secret 3 Cannon",
+    "Metal Cap Cannon",
+    "Wing Cap Cannon",
+    "Vanish Cap Cannon",
+    "Overworld Cannon",
+}
+badge_items: Set[str] = {
+    "Progressive Stomp Badge",
+    "Wall Badge",
+    "Triple Jump Badge",
+    "Lava Badge"
+}
+
 
 moves: Tuple[str, ...] = (
     "Backflip",
