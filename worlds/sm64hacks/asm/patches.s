@@ -254,10 +254,10 @@ _move_punch_extension:
     LA T0, _jumps_allowed
     LW T0, 0(T0)
     ORI T1, T0, 0x0A00 ;check if both punch and kick, go back to function if so
-    BEQ T1, T0, _punch_end
+    BEQ T1, T0, _move_punch_end
     NOP
     ANDI T1, T0, 0x0200
-    BNEZ T1, _punch_end
+    BNEZ T1, _move_punch_end
     ORI T9, R0, 0x0000
     ORI T9, R0, 0x0001
 _move_punch_end:
