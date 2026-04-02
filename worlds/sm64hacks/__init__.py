@@ -103,8 +103,8 @@ class SM64HackWorld(World):
             except TypeError:
                 raise ValueError("JSON is too old and does not have a default for progressive keys")
         
-        self.options.level_tickets.value &= self.data.locations["Other"]["Settings"].get("Entrances") != None #only add tickets if the json supports it
-        self.options.move_randomization.value &= (self.data.locations["Other"]["Settings"].get("Moves") != None or self.options.force_move_randomization) #only add moves if the json supports it or if you are reckless
+        self.options.level_tickets.value &= self.data.locations["Other"]["Settings"].get("Entrances") not in {None, False} #only add tickets if the json supports it
+        self.options.move_randomization.value &= (self.data.locations["Other"]["Settings"].get("Moves") not in {None, False} or self.options.force_move_randomization) #only add moves if the json supports it or if you are reckless
         if self.options.move_randomization:
             match self.options.starting_jump:
                 case 0:
@@ -560,6 +560,7 @@ class SM64HackWorld(World):
             decadeslater = 1
             if "StartWithBlueStars" in self.options.hack_specific_options:
                 decadeslater = 2
+        logger.info(str(self.options.move_randomization.value))
         return {
             "Cannons": self.data.locations["Other"]["Settings"]["cannons"],
             "ProgressiveKeys": self.progressive_keys,
