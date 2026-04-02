@@ -251,7 +251,6 @@ class SM64HackClient(BizHawkClient):
         times = []
         for time in self.base_cap_times:
             times.append(time + 60) #2 seconds
-        print(times)
         return [(vanishCapTimerPtr, times[0].to_bytes(2), "RDRAM"), (metalCapTimerPtr, times[1].to_bytes(2), "RDRAM"), (wingCapTimerPtr, times[2].to_bytes(2), "RDRAM")]
 
     def get_wallkick_frame_writes(self):
@@ -421,7 +420,6 @@ class SM64HackClient(BizHawkClient):
             self.receiving_ring_amount = 0
 
             coin_star_coins = int(self.basecoincount * (0.95 ** self.coin_discounts))
-            print(current, coins, coin_star_coins)
             if current < coin_star_coins:
                 coins = min(coins, coin_star_coins - 1) #doesn't give you more coins than you need for the 100c star if you havent gotten the star yet
             
@@ -863,10 +861,8 @@ class SM64HackClient(BizHawkClient):
                                     self.moves.add(item_name)
                                     writes.append(self.get_move_num_write())
                             else:
-                                print("542")
                                 num = read[18] if item_name == "Coin" else read[22]
                                 write = await self.receive_junk_item(ctx, index, item_name, int.from_bytes(num))
-                                print(write)
                                 if write:
                                     writes.append(write)
 

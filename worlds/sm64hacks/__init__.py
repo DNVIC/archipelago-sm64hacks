@@ -71,9 +71,9 @@ class SM64HackWorld(World):
         "Secret 2": set(i for i in location_names() if i.startswith("Secret 2")),
         "Secret 3": set(i for i in location_names() if i.startswith("Secret 3")),
         "Slide": set(i for i in location_names() if i.startswith("Slide")),
-        "Metal Cap": set(i for i in location_names() if i.startswith("Metal Cap ")),
-        "Wing Cap": set(i for i in location_names() if i.startswith("Wing Cap ")),
-        "Vanish Cap": set(i for i in location_names() if i.startswith("Vanish Cap ")),
+        "Metal Cap Level": set(i for i in location_names() if i.startswith("Metal Cap ")),
+        "Wing Cap Level": set(i for i in location_names() if i.startswith("Wing Cap ")),
+        "Vanish Cap Level": set(i for i in location_names() if i.startswith("Vanish Cap ")),
         "Overworld": set(i for i in location_names() if i.startswith("Overworld")),
     }
     
