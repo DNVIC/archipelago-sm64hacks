@@ -18,7 +18,7 @@ def evaluate_nested_macros(input: str, macro_dict: dict[str, str]) -> str:
 def parse_requirement_string_to_postfix(string: str, macros: dict[str, str]) -> tuple[list[str], list[str]] | None:
     if string is None:
         return None
-    if string == "":
+    if string == "" or string == []:
         return None
     
     string = evaluate_nested_macros(string, macros)
@@ -26,9 +26,10 @@ def parse_requirement_string_to_postfix(string: str, macros: dict[str, str]) -> 
     for index, requirement in enumerate(requirements):
         string = string.replace(requirement, str(index), 1) #easier to keep track of numbers during later calculations
     
-    
     string = re.sub(r" and ", "&", string, flags=re.IGNORECASE)
     string = re.sub(r" or ", "|", string, flags=re.IGNORECASE)
+    string = string.replace("\n", "")
+    string = string.replace(" ", "")
 
     stack = []
     result = []
