@@ -467,7 +467,7 @@ class SM64HackClient(BizHawkClient):
         try:
             if ctx.server is None or ctx.server.socket.closed or ctx.slot_data is None:
                 return
-            if ctx.slot_data.get("version") == "v0.5":
+            if ctx.slot_data.get("version") == "v0.5" or ctx.slot_data.get("version") == "v0.6":
                 self.sm64hack_items = sm64hack_items
                 self.old_version = False
             else:
