@@ -185,8 +185,8 @@ class SM64HackWorld(World):
         trap_percent = self.options.filler_trap_weight.value / total_weight
 
 
-        itemtype = self.random.randrange(0, 100)
-        if itemtype < 1/10000:
+        itemtype = self.random.uniform(0, 100)
+        if itemtype < 1/100:
             return "Steve" #steve
         if itemtype < useful_percent * 100:
             return self.random.choice(useful)
