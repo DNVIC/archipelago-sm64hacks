@@ -1170,8 +1170,8 @@ class SM64HackClient(BizHawkClient):
                         writes.append(write)
 
             #print(list(read[10])[0])
-            for i in range(0, len(writes), 10):
-                await bizhawk.write(ctx.bizhawk_ctx, writes[i:i + 10])
+            for i in range(0, len(writes), 5):
+                await bizhawk.write(ctx.bizhawk_ctx, writes[i:i + 5])
             if locs != []:
                     await ctx.send_msgs([{"cmd": "LocationChecks", "locations": locs}])
             
