@@ -282,10 +282,10 @@ class SM64HackWorld(World):
         elif("decadeslater" in self.data.locations["Other"]["Settings"]):
             self.multiworld.itempool += [self.create_item("Gray Switch", False)]
             num_locations -= 1
-        elif(self.options.randomize_moat):
-            if "Castle Moat" in self.location_names_that_exist_to_id:
+        elif("Castle Moat" in self.location_names_that_exist_to_id):
+            if self.options.randomize_moat:
                 self.multiworld.itempool += [self.create_item("Castle Moat", False)]
-                num_locations -= 1
+            num_locations -= 1
 
         if(self.options.move_randomization):
             progressive_jumps = 3
