@@ -57,6 +57,9 @@ coinVisualPtr = 0x33B262
 livesPtr = 0x33B21C
 stevePtr = 0x1F1000
 
+lastImpactPtr1 = 0x2C6D24
+lastImpactPtr2 = 0x2B3028
+
 level_index = { #sm64's internal level ids are different than the ones used in save data
     16:8, #overworld
     6:8,

@@ -101,6 +101,7 @@ class SM64HackClient(BizHawkClient):
         self.receiving_ring_amount = 0
         self.supposed_ring_count = 0
         self.file_locked = False
+        self.li = False
     
     def __init__(self) -> None:
         super().__init__()
@@ -546,8 +547,9 @@ class SM64HackClient(BizHawkClient):
 
             writes = []
             resettest = read[3]
-            if(resettest.hex() != "24180002"):
-                logger.info("Reminder: Save and load a savestate so that traps, move rando, or some other things can take effect")
+            if(resettest.hex() != "24180002" or self.loops == 0):
+                if resettest.hex() != "24180002":
+                    logger.info("Reminder: Save and load a savestate so that traps, move rando, or some other things can take effect")
                 self.receive_items = True
                 self.basecoincount = int.from_bytes(read[23])
                 self.base_cap_times = [int.from_bytes(read[24]),int.from_bytes(read[25]),int.from_bytes(read[26])]
@@ -608,6 +610,14 @@ class SM64HackClient(BizHawkClient):
                     (choirHookPtr, bytes.fromhex("0C09FFC0"), "RDRAM"),
                     (stevePtr, "HE IS WATCHING".encode("ascii"), "RDRAM")
                 ])
+
+                if(read[12].decode("ascii").startswith("SM64 LAST IMPACT")):
+                    writes.extend([
+                        (lastImpactPtr1, bytes.fromhex("24040002"), "RDRAM"),
+                        (lastImpactPtr2, bytes.fromhex("24040002"), "RDRAM")
+                    ])
+                    self.li = True
+
                 if ctx.slot_data.get("moves"):
                     move_patch = pkgutil.get_data(__name__, "asm/move_patch")
                     move_patch_hook = pkgutil.get_data(__name__, "asm/move_patch_hook")
@@ -719,6 +729,10 @@ class SM64HackClient(BizHawkClient):
                                             location_name = courseIndex[8] + " Cannon"
                                         else:
                                             location_name = courseIndex[i - 1] + " Cannon"
+                                    if self.li and (i == 27 or i == 28):
+                                        logger.info(f"test: {i} {self.file1Stars[i]}")
+                                        location_name = f"Key {i - 26}" #last impact is weird and stores keys in c15 and b1 cannons
+
                                     writes.append((filesPtr[self.current_file] + i, bytearray([self.file1Stars[i] & 0b01111111]), "RDRAM")) #reset cannon flag so you can detect both troll stars and cannons
                                 if(self.location_name_to_id[location_name] in ctx.server_locations):
                                     locs.append(self.location_name_to_id[location_name])
@@ -793,16 +807,32 @@ class SM64HackClient(BizHawkClient):
                             bluestars += 2
                         case "Progressive Key":
                             reversed = ctx.slot_data["ProgressiveKeys"] == 2
-                            if keyCounter == 1:
-                                self.flags[0 ^ reversed] = True
-                                keyCounter = 2
+                            if not self.li:
+                                if keyCounter == 1:
+                                    self.flags[0 ^ reversed] = True
+                                    keyCounter = 2
+                                else:
+                                    self.flags[1 ^ reversed] = True
+                                    keyCounter = 1
                             else:
-                                self.flags[1 ^ reversed] = True
-                                keyCounter = 1
+                                if keyCounter == 1:
+                                    cannon = 27 if reversed else 28 
+                                    self.cannons[cannon] = True
+                                    keyCounter = 2
+                                else:
+                                    cannon = 28 if reversed else 27 
+                                    self.cannons[cannon] = True
+                                    keyCounter = 1
                         case "Key 1":
-                            self.flags[1] = True
+                            if not self.li:
+                                self.flags[1] = True
+                            else:
+                                self.cannons[27] = True
                         case "Key 2":
-                            self.flags[0] = True
+                            if not self.li:
+                                self.flags[0] = True
+                            else:
+                                self.cannons[28] = True
                         case "Metal Cap":
                             self.flags[3] = True
                         case "Vanish Cap":
@@ -1103,10 +1133,11 @@ class SM64HackClient(BizHawkClient):
             # tickets
             if ctx.slot_data.get("tickets") and read[2].hex() != "0000":
                 level = int.from_bytes(read[11])
-                level_name = courseIndex[level_index[level]]
-                if f"{level_name} Ticket" not in self.tickets and level_name not in ctx.slot_data["NoTicketCourses"]:
-                    logger.info(f"You cannot enter this level without the correct ticket")
-                    writes.append((hpPtr, bytes.fromhex("0000"), "RDRAM"))
+                if level != 35:
+                    level_name = courseIndex[level_index[level]]
+                    if f"{level_name} Ticket" not in self.tickets and level_name not in ctx.slot_data["NoTicketCourses"]:
+                        logger.info(f"You cannot enter this level without the correct ticket")
+                        writes.append((hpPtr, bytes.fromhex("0000"), "RDRAM"))
 
             # deathlink
             deathlink_writes = await self.handle_deathlink(read, ctx)
