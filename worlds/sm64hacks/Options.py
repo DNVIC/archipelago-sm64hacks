@@ -78,6 +78,9 @@ class FillerTrapWeight(Range):
     default = 30
     range_end = 100
 
+class TurnOffTraps(OptionSet):
+    """Turns off specific traps from generating. Has no effect if filler_trap_weight is set to 0."""
+    valid_keys = ["Green Demon Trap", "Heave-ho Trap", "Mario Choir", "Squish Trap", "Spin Trap", "Tempo Trap"]
 class NoSpinTrap(Toggle):
     """The spin trap causes the camera to spin around which might make some people nauseous, if you want you can enable this setting to remove it from the pool."""
 
@@ -194,7 +197,7 @@ option_groups = [
         FillerUsefulWeight,
         FillerJunkWeight,
         FillerTrapWeight,
-        NoSpinTrap
+        TurnOffTraps
     ]),
     OptionGroup("Logic Options", [
         LogicDifficulty,
@@ -224,7 +227,7 @@ class SM64HackOptions(PerGameCommonOptions):
     filler_trap_weight: FillerTrapWeight
     filler_junk_weight: FillerJunkWeight
     filler_useful_weight: FillerUsefulWeight
-    no_spin_trap: NoSpinTrap
+    turn_off_traps: TurnOffTraps
     logic_difficulty: LogicDifficulty
     glitches_in_logic: LogicGlitches
     major_skips: MajorSkips
