@@ -81,9 +81,6 @@ class FillerTrapWeight(Range):
 class TurnOffTraps(OptionSet):
     """Turns off specific traps from generating. Has no effect if filler_trap_weight is set to 0."""
     valid_keys = ["Green Demon Trap", "Heave-ho Trap", "Mario Choir", "Squish Trap", "Spin Trap", "Tempo Trap"]
-class NoSpinTrap(Toggle):
-    """The spin trap causes the camera to spin around which might make some people nauseous, if you want you can enable this setting to remove it from the pool."""
-
 class SignRandomization(Toggle):
     """There is 1 check per level (not per sign) for reading a sign inside it. If you are generating a solo game and it fails, the logic might be too restrictive; enabling this will ease up the logic a bit since there is usually a sign right next to the start"""
 
