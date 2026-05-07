@@ -170,8 +170,6 @@ def check_if_location_exists(requirement_string: str, options: SM64HackOptions, 
                 boolean_array.append(True)
             else:
                 boolean_array.append(requirement[1:-1])
-    if requirement_string == "((|@LongishJump| and (|!obscure| or |@MidJumps|)) or (|!obscure| and |Sideflip| and (|Dive| or (|Wall Badge| and |!hard|)) or (|Backflip| and |Wall Badge| and |!hard|))) and (|Key 1| or (|@BombClip| and |!hard|))":
-        print(result)
     return simplify_postfix_requirements(result, boolean_array, data)
 
 def has_star_count(state: CollectionState, player: int, star_count: int) -> bool:
