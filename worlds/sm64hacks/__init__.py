@@ -6,7 +6,7 @@ from typing import Union, Tuple, List, Dict, Set, ClassVar, Mapping, Any
 from .Options import SM64HackOptions
 from .Items import SM64HackItem, item_is_important
 from .Locations import SM64HackLocation, location_names, location_names_that_exist
-from .Data import sm64hack_items, star_like, traps, junk, useful, moves, badges, sr6_25_locations, create_json_folders, Data, cannons, fullmoves, tickets, badge_items
+from .Data import *
 from .Requirements import check_requirement_string, check_if_location_exists
 from .WebWorld import SM64HackWebWorld
 from .client import SM64HackClient
@@ -45,7 +45,9 @@ class SM64HackWorld(World):
         "Tickets": tickets,
         "Cannons": cannons,
         "Moves": fullmoves,
-        "Badges": badge_items
+        "Badges": badge_items,
+        "Keys": keys,
+        "Caps": caps
     }
 
     location_name_groups = {
@@ -75,6 +77,9 @@ class SM64HackWorld(World):
         "Wing Cap Level": set(i for i in location_names() if i.startswith("Wing Cap ")),
         "Vanish Cap Level": set(i for i in location_names() if i.startswith("Vanish Cap ")),
         "Overworld": set(i for i in location_names() if i.startswith("Overworld")),
+        "Badge Locations": badges,
+        "Cap Locations": set(i for i in location_names() if (i.endswith("Cap") or i.endswith("Switch"))),
+        "Key Locations": set(i for i in location_names() if i.startswith("Key"))
     }
     
     required_client_version: Tuple[int, int, int] = (0, 6, 0)
@@ -130,13 +135,17 @@ class SM64HackWorld(World):
                     
         existing_location_names = location_names_that_exist(self.data, self.options)
         self.location_names_that_exist_to_id = dict(filter(lambda location: location[0] in existing_location_names, self.location_name_to_id.items()))
-        if self.data.locations["Other"]["Settings"].get("Entrances"):
+        if self.data.locations["Other"]["Settings"].get("Entrances"): #adding requirements not directly linked to locations
             for entrance in self.data.locations["Other"]["Entrances"]:
                 check_if_location_exists(entrance[4], self.options, self.data.locations["Other"]["Macros"], self.data)
         else:
             for course, data in self.data.locations.items():
                 if course != "Other":
                     check_if_location_exists(data.get("Requirements"), self.options, self.data.locations["Other"]["Macros"], self.data)
+        
+        #an item which is only required for victory should still be progression
+        check_if_location_exists(self.data.locations["Other"]["Stars"][6].get("Requirements"), self.options, self.data.locations["Other"]["Macros"], self.data)
+
 
     def create_item(self, item: str, item_link = True) -> SM64HackItem:
         if item_link and item not in traps and item not in junk and item not in useful: #item link is dumb and i need to make all potentially progressive item_link items some sort of progression

@@ -110,6 +110,19 @@ sm64hack_items: Tuple[str, ...] = (
     "+1 Wallkick Frame",
     "Steve"
 )
+keys: Set[str] = {
+    "Key 1",
+    "Key 2"
+}
+caps: Set[str] = {
+    "Wing Cap",
+    "Metal Cap",
+    "Vanish Cap",
+    "Yellow Switch",
+    "Black Switch",
+    "Gray Switch"
+}
+
 tickets: Set[str] = {
     "Course 1 Cannon",
     "Course 2 Cannon",
