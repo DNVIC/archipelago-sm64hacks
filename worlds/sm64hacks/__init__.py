@@ -424,6 +424,8 @@ class SM64HackWorld(World):
                                     elif "decadeslater" in self.data.locations["Other"]["Settings"]:
                                         location_name = "Gray Switch"
                             elif index == 6:
+                                if stardata.get("Level") is None:
+                                    raise AssertionError("Victory has no assigned level")
                                 seen_regions[stardata["Level"], zone].add_locations(
                                     {"Victory Location": None},
                                     SM64HackLocation
@@ -434,6 +436,8 @@ class SM64HackWorld(World):
 
                             if stardata.get("Level") is not None:
                                 self.add_location_if_exists_to_region(location_name, seen_regions, stardata["Level"], zone)
+                            elif location_name in self.location_names_that_exist_to_id: #if location doesnt exist makes sense for it to not have an assigned level
+                                raise AssertionError(f"{location_name} has no assigned level")
                     case "Extra":
                         for index, stardata in enumerate(data["Stars"]):
                             zone = stardata.get("Area")
