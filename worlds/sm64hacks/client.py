@@ -1204,7 +1204,8 @@ class SM64HackClient(BizHawkClient):
                 if random.random() < (2/1731): #approx 1 every 5 minutes
                     trap = random.choice(self.async_traps)
                     self.async_traps.remove(trap)
-                    logger.info(f"A trap has appeared!")
+                    if trap != "1-Up Mushroom":
+                        logger.info(f"A trap has appeared!")
                     await ctx.send_msgs([{
                         "cmd": "Set",
                         "key": f"sm64hack_junk_{ctx.team}_{ctx.slot}_{trap[0]}",
