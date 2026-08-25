@@ -821,7 +821,7 @@ class SM64HackClient(BizHawkClient):
                 else:
                     bwkf, *bct, bcc = unpack(">HHHHI", read[29])
                     if bcc != 0:
-                        self.base_wallkick_frames, *self.base_cap_times, self.basecoincount = bwkf, bct, bcc
+                        self.base_wallkick_frames, self.base_cap_times, self.basecoincount = bwkf, bct, bcc
                 self.receive_items = True
                 self.coin_discounts = 0
                 self.cap_timer_buffs = 0
