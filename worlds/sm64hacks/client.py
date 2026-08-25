@@ -809,7 +809,6 @@ class SM64HackClient(BizHawkClient):
                     self.basecoincount = int.from_bytes(read[23])
                     self.base_cap_times = [int.from_bytes(read[24]),int.from_bytes(read[25]),int.from_bytes(read[26])]
                     self.base_wallkick_frames = int.from_bytes(read[27])
-                    logger.info(f"{self.basecoincount, self.base_cap_times, self.base_wallkick_frames, pack(">HHHHI", self.base_wallkick_frames, *self.base_cap_times, self.basecoincount)}")
                     writes.append((self.storedCountsPtr, pack(">HHHHI", self.base_wallkick_frames, *self.base_cap_times, self.basecoincount), "RDRAM"))
                 else:
                     self.base_wallkick_frames, *self.base_cap_times, self.basecoincount = unpack(">HHHHI", read[29])
@@ -1022,7 +1021,6 @@ class SM64HackClient(BizHawkClient):
                                         else:
                                             location_name = courseIndex[i - 1] + " Cannon"
                                     if self.li and (i == 27 or i == 28):
-                                        logger.info(f"test: {i} {self.file1Stars[i]}")
                                         location_name = f"Key {i - 26}" #last impact is weird and stores keys in c15 and b1 cannons
 
                                     writes.append((filesPtr[self.current_file] + i, bytearray([self.file1Stars[i] & 0b01111111]), "RDRAM")) #reset cannon flag so you can detect both troll stars and cannons

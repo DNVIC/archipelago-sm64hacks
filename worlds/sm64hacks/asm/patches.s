@@ -415,7 +415,7 @@ _wctimer:
 _100coins:
     .word 100 ; will be overridden immediately
 _health:
-    .word 0x280
+    .word 0x880
 _frames:
     .word 1
 .endarea
