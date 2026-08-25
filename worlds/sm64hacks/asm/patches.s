@@ -592,8 +592,6 @@ _most_significant_bit:
 .endarea
 .close
 
-
-
 ; set_mario_action deets:
 ; A0: mariostate
 ; A1: action id 

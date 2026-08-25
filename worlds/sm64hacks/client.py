@@ -95,9 +95,9 @@ class SM64HackClient(BizHawkClient):
         self.coin_discounts = 0
         self.cap_timer_buffs = 0
         self.additional_wallkick_frames = 0
-        self.basecoincount = 100
-        self.base_cap_times = [600, 600, 1800]
-        self.base_wallkick_frames = 5
+        self.basecoincount = None
+        self.base_cap_times = None
+        self.base_wallkick_frames = None
         self.receiving_ring = False
         self.receiving_ring_amount = 0
         self.supposed_ring_count = 0
@@ -256,6 +256,7 @@ class SM64HackClient(BizHawkClient):
                 
     def get_cap_timer_writes(self):
         times = []
+        assert self.base_cap_times is not None
         for time in self.base_cap_times:
             times.append(time + 60 * self.cap_timer_buffs) #2 seconds
         data = pack(">HHH", *[t for t in times])
@@ -435,6 +436,8 @@ class SM64HackClient(BizHawkClient):
 
             coins = self.receiving_ring_amount + current
             self.receiving_ring_amount = 0
+
+            assert self.basecoincount is not None
 
             coin_star_coins = int(self.basecoincount * (0.95 ** self.coin_discounts))
             if current < coin_star_coins:
@@ -692,16 +695,16 @@ class SM64HackClient(BizHawkClient):
             writes.append((starsCountPtr, bytearray([starcount]), "RDRAM"))
 
         if not fileselect: #these things only matter when mario exists
-            if discounts > self.coin_discounts:
+            if discounts > self.coin_discounts and self.basecoincount is not None:
                 self.coin_discounts = discounts
                 coins_required = int(self.basecoincount * (0.95 ** discounts))
                 writes.extend(self.get_coin_star_writes(coins_required))
 
-            if captimerbuffs > self.cap_timer_buffs:
+            if captimerbuffs > self.cap_timer_buffs and self.base_cap_times is not None:
                 self.cap_timer_buffs = captimerbuffs
                 writes.extend(self.get_cap_timer_writes())
 
-            if wallkickframes > self.additional_wallkick_frames:
+            if wallkickframes > self.additional_wallkick_frames and self.base_wallkick_frames is not None:
                 self.additional_wallkick_frames = wallkickframes
                 writes.extend(self.get_wallkick_frame_writes())
 
@@ -809,9 +812,16 @@ class SM64HackClient(BizHawkClient):
                     self.basecoincount = int.from_bytes(read[23])
                     self.base_cap_times = [int.from_bytes(read[24]),int.from_bytes(read[25]),int.from_bytes(read[26])]
                     self.base_wallkick_frames = int.from_bytes(read[27])
+                    powerpoint_patch = pkgutil.get_data(__name__, "asm/powerpoint_patch")
+                    writes.append((powerpointPatchPtr, powerpoint_patch, "RDRAM")) #need to do this before applying the base amounts since it will override them otherwise
                     writes.append((self.storedCountsPtr, pack(">HHHHI", self.base_wallkick_frames, *self.base_cap_times, self.basecoincount), "RDRAM"))
+                    writes.extend(self.get_coin_star_writes(int(self.basecoincount * (0.95 ** self.coin_discounts))))
+                    writes.extend(self.get_cap_timer_writes())
+                    writes.extend(self.get_wallkick_frame_writes())
                 else:
-                    self.base_wallkick_frames, *self.base_cap_times, self.basecoincount = unpack(">HHHHI", read[29])
+                    bwkf, *bct, bcc = unpack(">HHHHI", read[29])
+                    if bcc != 0:
+                        self.base_wallkick_frames, *self.base_cap_times, self.basecoincount = bwkf, bct, bcc
                 self.receive_items = True
                 self.coin_discounts = 0
                 self.cap_timer_buffs = 0
@@ -821,7 +831,6 @@ class SM64HackClient(BizHawkClient):
                 choir_patch = pkgutil.get_data(__name__, "asm/choir_patch")
                 star_patch = pkgutil.get_data(__name__, "asm/star_patch")
                 decades_later_patch = pkgutil.get_data(__name__, "asm/decades_later_patch")
-                powerpoint_patch = pkgutil.get_data(__name__, "asm/powerpoint_patch")
                 powerpoint_hook = pkgutil.get_data(__name__, "asm/powerpoint_hook")
                 health_hook = pkgutil.get_data(__name__, "asm/health_hook")
                 coincount_patch = pkgutil.get_data(__name__, "asm/100c_patch")
@@ -874,7 +883,6 @@ class SM64HackClient(BizHawkClient):
                     (moatAPPtr, bytes.fromhex("10000005"), "RDRAM"),
                     (trapPatchPtr, trap_patch, "RDRAM"),
                     (choirPatchPtr, choir_patch, "RDRAM"),
-                    (powerpointPatchPtr, powerpoint_patch, "RDRAM"),
                     (powerpointHookPtr, powerpoint_hook, "RDRAM"),
                     (healthHookPtr, health_hook, "RDRAM"),
                     (choirHookPtr, bytes.fromhex("0C09FFC0"), "RDRAM"),
@@ -887,19 +895,21 @@ class SM64HackClient(BizHawkClient):
                     (wallkickFramePatchPtr2, wallkick_frame_patch, "RDRAM")
                 ])
 
-                if(read[12].decode("ascii").startswith("SM64 LAST IMPACT")):
-                    writes.extend([
-                        (lastImpactPtr1, bytes.fromhex("24040002"), "RDRAM"),
-                        (lastImpactPtr2, bytes.fromhex("24040002"), "RDRAM")
-                    ])
-                    self.li = True
-                elif read[12].decode("ascii").startswith("Star Revenge 0"):
-                    writes.append((0x75D6D,bytes.fromhex("161B0B0E0A1C1D9E160E1D1B18191815121CFF"), "RDRAM"))
+                match read[12].decode("ascii"):
+                    case "SM64 LAST IMPACT    ":
+                        writes.extend([
+                            (lastImpactPtr1, bytes.fromhex("24040002"), "RDRAM"),
+                            (lastImpactPtr2, bytes.fromhex("24040002"), "RDRAM")
+                        ])
+                        self.li = True
+                    case "Star Revenge 0      ":
+                        writes.append((0x75D6D,bytes.fromhex("161B0B0E0A1C1D9E160E1D1B18191815121CFF"), "RDRAM"))
+                    case "SM64 ZTAR ATTACK R  ":
+                        writes.extend([(0x40B084, bytes.fromhex("24190002"), "RDRAM"), (0x40B284, bytes.fromhex("24190002"), "RDRAM")]) #key blockers
 
                 if ctx.slot_data.get("moves"):
                     move_patch = pkgutil.get_data(__name__, "asm/move_patch")
                     move_patch_hook = pkgutil.get_data(__name__, "asm/move_patch_hook")
-
                     burning_hook = pkgutil.get_data(__name__, "asm/burning_patch")
                     tree_hook_1 = pkgutil.get_data(__name__, "asm/tree_patch_1")
                     tree_hook_2 = pkgutil.get_data(__name__, "asm/tree_patch_2")
