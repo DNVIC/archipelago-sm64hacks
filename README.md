@@ -7,19 +7,7 @@ Special support for Star Revenges 3.5, 6.25, 7, 7.5, and 8 as well!
 
 This guide assumes you have a working archipelago install, if you do not, follow the first part of this guide: https://archipelago.gg/tutorial/Archipelago/setup_en
 
-Have a quick look through [this repo](https://github.com/DNVIC/sm64hack-archipelago-jsons) first, there's a good chance there's a json file for a hack you want to play in there, especially if it's a major and/or popular hack. If it's in there, the logic for the hack will be automatically downloaded when you generate your game (you do NOT need to download it), and therefore you can head straight to [generation](#Generation), though make sure to note down the name of the json file.
-
-### JSON Creation (outdated, check the guide on the generator website)
-
-First, create a json file using [this website](http://dnvic.com/ArchipelagoGenerator/index.html), using a .jsml file. You can get a .jsml file for a hack by loading up a hack in PJ64/Mupen64/Retroarch, opening [stardisplay](https://github.com/aglab2/SM64StarDisplay), and finding the layout folder in the same folder the exe file is in.
-
-Then, get the .jsml file from the layout folder located where the stardisplay .exe is.
-
-Input the jsml file into the website, and fill out the requirements for everything in the hack, by clicking on the stars, cannons, caps/keys, troll stars, or course names. Most hacks only really have star and key requirements, and maybe per-star cap requirements, but some hacks have more complicated requirements. If a cannon exists, select it, hit the exists checkbox, add requirements, and hit save. Same with keys/caps/troll stars. Conditional requirements are a bit more confusing, but are necessary if for example you can get to a level with either the vanish cap or key 2. You'd create one conditional requirement for the vanish cap, and one for key 2, and that'll make it so only one is required.
-
-Click on the victory text at the bottom, and put whatever is required to achieve "Victory" in the hack. As it is, this will not be automatically be achieved in the rando when you get it, since its impossible to know what constitutes victory for an arbitrary hack, but its still important since the rando makes sure that victory is possible. If you want to, you can say when you get victory by running the "Victory.js" script when playing the game. It's the honor system, but the best I can do.
-
-Export the .json file, and put it in the sm64hack_jsons folder (specifically inside the custom_jsons folder in there) inside the archipelago root directory (if it does not exist, try generating a sample game with something like superMario64.json and it should work afterwards)
+Have a quick look through [this repo](https://github.com/DNVIC/sm64hack-archipelago-jsons) first, there's a good chance there's a json file for a hack you want to play in there, especially if it's a major and/or popular hack. If it's in there, the logic for the hack will be automatically downloaded when you generate your game (you do NOT need to download it), and therefore you can head straight to [generation](#Generation), though make sure to note down the name of the json file. If not, if you're willing to learn there's a json creator over at https://dnvic.com/ArchipelagoGenerator/
 
 ### Generation
 
