@@ -723,7 +723,7 @@ class SM64HackClient(BizHawkClient):
                     capmoatdata |= 0x00000004
                 case "Vanish Cap":
                     capmoatdata |= 0x00000008
-                case "Castle Moat":
+                case "Yellow Switch" | "Black Switch" | "Gray Switch" | "Castle Moat":
                     capmoatdata |= 0x00000200
         return (self.capmoatPtr, capmoatdata.to_bytes(4), "RDRAM")
 
