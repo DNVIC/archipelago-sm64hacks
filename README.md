@@ -7,7 +7,7 @@ Special support for Star Revenges 3.5, 6.25, 7, 7.5, and 8 as well!
 
 This guide assumes you have a working archipelago install, if you do not, follow the first part of this guide: https://archipelago.gg/tutorial/Archipelago/setup_en
 
-Have a quick look through [this repo](https://github.com/DNVIC/sm64hack-archipelago-jsons) first, there's a good chance there's a json file for a hack you want to play in there, especially if it's a major and/or popular hack. If it's in there, the logic for the hack will be automatically downloaded when you generate your game (you do NOT need to download it), and therefore you can head straight to [generation](#Generation), though make sure to note down the name of the json file. If not, if you're willing to learn there's a json creator over at https://dnvic.com/ArchipelagoGenerator/
+Have a quick look through [this repo](https://github.com/DNVIC/sm64hack-archipelago-jsons) first, there's a good chance there's a json file for a hack you want to play in there, especially if it's a major and/or popular hack. If it's in there, the logic for the hack will be automatically downloaded when the host generates the game (you do NOT need to download it under any circumstances unless you plan on modifying the logic yourself), and therefore you can head straight to [generation](#Generation), though make sure to note down the name of the json file. If there is not a json, if you're willing to learn there's a json creator over at https://dnvic.com/ArchipelagoGenerator/ and documentation linked there on how it works
 
 ### Generation
 
